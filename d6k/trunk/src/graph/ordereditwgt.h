@@ -17,10 +17,21 @@ public:
 	~COrderEditWgt();
 	//初始化  变量tab内容
 	void InitVarTabInfo();
+	
 	//初始化  窗口 tab内容
 	void InitWindowTabInfo();
+	//组装window数据
+	void CreateScreenData();
+	//组装变量数据
+	void CreateVarData();
 
-	QTableWidget *GetCurrentTableWidget();
+	CBaseDyncEventItem *GetEventItem()
+	{
+		return m_pEventItem;
+	}
+
+	//填充数据
+	void EditEditItem(CBaseDyncEventItem* pEventItem);
 
 public slots:
     //绑定

@@ -56,16 +56,7 @@ public:
 		DYNC_SCRIPT_OP,   //!< 脚本类操作
 		DYNC_USER_OP,     //!< 用户操作
 	};
-	// 动作类型
-	enum ACTION_TYPE
-	{
-		ACTION_CLICK = 0, //!< 单击
-		ACTION_PRESSED,   //!< 按下
-		ACTION_RELEASE,   //!< 释放
-		ACTION_FOCUSED,   //!< 激活
-		ACTION_UNFOCUSED,
-		MAX_ACTION_NUM
-	};
+
 public:
 // 	virtual void SaveXml(JWXml::CXmlNodePtr  pDyncPtr)const;
 // 	virtual bool LoadXml(JWXml::CXmlNodePtr  pDyncPtr);
@@ -73,19 +64,14 @@ public:
 	virtual void DoAction(CEventIntent &intent);
 	virtual std::string GetEventDescript()const;
 
-	EVENT_TYPE GetEventType();
-	// 设置动作类型
-	void SetActionType(const std::string & szTxt);
-	std::string GetActionTypeTxt();
+	int GetEventType();
+	void SetEventType(EVENT_TYPE eType);
+
 public:
 	bool m_bEnable;
-	//! 动作
- 	static std::array<std::string, MAX_ACTION_NUM> m_arrActionTypeTxt;
-protected:
+public:
 	//! 命令
 	EVENT_TYPE  m_OpEventType;
-	//! 鼠标动作类型
-	ACTION_TYPE   m_ActionType;
 };
 
 

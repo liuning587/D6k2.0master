@@ -46,7 +46,15 @@ public:
 	void SendWriteActionRequest(FILE_ATTR_INFO &writeAction);
 	//发送文件激活请求
 	void SendReadActionRequest(FILE_ATTR_INFO &ReadAction);
+	//连接
+	void SendConnectRequest();
+	//断连
+	void SendDisConnectRequest();
 signals:
+	//连接
+	void Signal_ConnectSocket();
+	//断连
+	void Signal_DisConnectSocket();
 	//socket创建成功
 	void Signal_SocketConnectSuccess();
 	//socket错误

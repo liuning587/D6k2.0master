@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fes Description="fes0" DescriptionOccNo="1" TagName="fes0" version="1.0" ID="0" Extention="test" GroupName="" OccNo="1">
+    <scale>
+        <linear Count="1">
+            <l OccNo="1" TagName="transform0" ID="0" Description="transform0" DescriptionOccNo="2" ScaleType="0" MaxRaw="1.000000" MinRaw="1.000000" MaxScale="1.000000" MinScale="1.000000" Inverse="0" EnaleFactor="1" Gain="0" Offset="0" GroupName=""/>
+        </linear>
+        <nonlinear Count="1">
+            <nl OccNo="1" TagName="nontransform1" ID="1" Description="nontransform1" DescriptionOccNo="3" ScaleType="1" Count="5" GroupName="">
+                <p RawValue="1" ScaleValue="1"/>
+                <p RawValue="2" ScaleValue="2"/>
+                <p RawValue="3" ScaleValue="3"/>
+                <p RawValue="4" ScaleValue="4"/>
+                <p RawValue="5" ScaleValue="5"/>
+            </nl>
+        </nonlinear>
+    </scale>
+    <alarm>
+        <ain_alarm Count="1">
+            <ain_alarm_node OccNo="1" TagName="analogalarm0" ID="0" Description="analogalarm0" DescriptionOccNo="4" AlarmType="0" Enable="1" OnQualityGood="1" DeadType="1" DeadArea="2.000000" DelayAlarm="0" GroupName="" Count="1">
+                <aa OccNo="1" BlockNo="1" TagName="analogalarmofflimit0" ID="1" Description="analogalarmofflimitdesc0" DescriptionOccNo="5" Condition="1" Category="2" Value="0" LowValue="0" DelayAlarm="0" Priority="0" SupportAck="0" SupportDelete="1" AckType="1" SoundFile="" PlaySoundTimes="2" SpeechAlarmText="" Beep="1" PushGraph="" BlinkGraph="1" Log="1" BackColor="0" TextColor="0" BlinkBackColor="0" BlinkTextColor="0" LightBoard="1" DispGuide="" Commands=""/>
+            </ain_alarm_node>
+        </ain_alarm>
+        <din_alarm Count="1">
+            <din_alarm_node OccNo="1" TagName="digitalalarm0" ID="0" Description="digitalalarm0" DescriptionOccNo="6" AlarmType="1" DelayAlarm="0" Enable="1" OnQualityGood="1" GroupName="" Count="1">
+                <da OccNo="1" BlockNo="1" TagName="digtalalarmlimit0" ID="1" Description="digtalalarmlimit0" DescriptionOccNo="7" Condition="0" Category="2" DelayAlarm="0" Priority="0" SupportAck="0" SupportDelete="1" AckType="1" SoundFile="" PlaySoundTimes="0" SpeechAlarmText="" Beep="0" PushGraph="" BlinkGraph="0" Log="0" BackColor="0" TextColor="0" BlinkBackColor="0" BlinkTextColor="0" DispGuide="" Commands=""/>
+            </din_alarm_node>
+        </din_alarm>
+    </alarm>
+    <channel Count="1">
+        <c OccNo="1" TagName="channel0" ID="0" Description="channel0" DescriptionOccNo="8" DriverName="simu_iodrv" DriverPara="modbus" Medium="-842150451" ChannelPara="" Extention="test" GroupName="">
+            <device Count="1">
+                <d OccNo="1" TagName="device0" ID="0" Description="device0" DescriptionOccNo="9" DeviceModelID="0" Type="1" DeviceAddr="127.0.0.1:2404" Priority="0" ExtentionParam="">
+                    <data>
+                        <AIN Count="5">
+                            <ai OccNo="1" TagName="AnalogInput0" ID="1" BlockOccNo="1" Description="AnalogInput0" DescriptionOccNo="10" InitialQua="0" Address="1" PinLabel="" InitValue="0" Format="" Unit="" Enable="1" MaxRaw="10000" MinRaw="0" MaxConvert="10000" MinConvert="0" ScaleTagName="transform0" ScaleOccNo="1" ScaleType="0" ScaleDesc="transform0" RangeL="0" RangeH="10000" HighQua="1.2" LowQua="-1.2" SaveDisk="0" SaveDiskPeriod="0" SaveDB="0" SaveDBPeriod="0" Sensitivity="0.5" SensitivityType="0" AlarmTagName="analogalarm0" AlarmType="0" AlarmOccNo="1" AlarmDesc="analogalarm0" ChannelOccNo="1" DeviceOccNo="1" ReferenceCount="0" DataSource="0" Express="test"/>
+                            <ai OccNo="2" TagName="AnalogInput1" ID="2" BlockOccNo="2" Description="AnalogInput1" DescriptionOccNo="11" InitialQua="0" Address="2" PinLabel="" InitValue="0" Format="" Unit="" Enable="1" MaxRaw="10000" MinRaw="0" MaxConvert="10000" MinConvert="0" ScaleTagName="nontransform1" ScaleOccNo="1" ScaleType="1" ScaleDesc="nontransform1" RangeL="0" RangeH="10000" HighQua="1.2" LowQua="-1.2" SaveDisk="0" SaveDiskPeriod="0" SaveDB="0" SaveDBPeriod="0" Sensitivity="0.5" SensitivityType="0" AlarmTagName="analogalarm0" AlarmType="0" AlarmOccNo="1" AlarmDesc="analogalarm0" ChannelOccNo="1" DeviceOccNo="1" ReferenceCount="0" DataSource="0" Express=""/>
+                            <ai OccNo="3" TagName="AnalogInput2" ID="3" BlockOccNo="3" Description="AnalogInput2" DescriptionOccNo="12" InitialQua="0" Address="3" PinLabel="" InitValue="0" Format="" Unit="" Enable="1" MaxRaw="10000" MinRaw="0" MaxConvert="10000" MinConvert="0" ScaleTagName="nontransform1" ScaleOccNo="1" ScaleType="1" ScaleDesc="nontransform1" RangeL="0" RangeH="10000" HighQua="1.2" LowQua="-1.2" SaveDisk="0" SaveDiskPeriod="0" SaveDB="0" SaveDBPeriod="0" Sensitivity="0.5" SensitivityType="0" AlarmTagName="analogalarm0" AlarmType="0" AlarmOccNo="1" AlarmDesc="analogalarm0" ChannelOccNo="1" DeviceOccNo="1" ReferenceCount="0" DataSource="0" Express=""/>
+                            <ai OccNo="4" TagName="AnalogInput3" ID="4" BlockOccNo="4" Description="AnalogInput3" DescriptionOccNo="13" InitialQua="0" Address="4" PinLabel="" InitValue="0" Format="" Unit="" Enable="1" MaxRaw="10000" MinRaw="0" MaxConvert="10000" MinConvert="0" ScaleTagName="transform0" ScaleOccNo="1" ScaleType="0" ScaleDesc="transform0" RangeL="0" RangeH="10000" HighQua="1.2" LowQua="-1.2" SaveDisk="0" SaveDiskPeriod="0" SaveDB="0" SaveDBPeriod="0" Sensitivity="0.5" SensitivityType="0" AlarmTagName="analogalarm0" AlarmType="0" AlarmOccNo="1" AlarmDesc="analogalarm0" ChannelOccNo="1" DeviceOccNo="1" ReferenceCount="0" DataSource="0" Express=""/>
+                            <ai OccNo="5" TagName="AnalogInput4" ID="5" BlockOccNo="5" Description="AnalogInput4" DescriptionOccNo="14" InitialQua="0" Address="5" PinLabel="" InitValue="0" Format="" Unit="" Enable="1" MaxRaw="10000" MinRaw="0" MaxConvert="10000" MinConvert="0" ScaleTagName="transform0" ScaleOccNo="1" ScaleType="0" ScaleDesc="transform0" RangeL="0" RangeH="10000" HighQua="1.2" LowQua="-1.2" SaveDisk="0" SaveDiskPeriod="0" SaveDB="0" SaveDBPeriod="0" Sensitivity="0.5" SensitivityType="0" AlarmTagName="analogalarm0" AlarmType="0" AlarmOccNo="1" AlarmDesc="analogalarm0" ChannelOccNo="1" DeviceOccNo="1" ReferenceCount="0" DataSource="0" Express=""/>
+                        </AIN>
+                        <DIN Count="1">
+                            <di OccNo="1" TagName="DigitalInput0" DoubleDI="" ID="1" BlockOccNo="1" Description="DigitalInput0" DescriptionOccNo="15" InitValue="0" InitialQua="0" Address="1" PinLabel="" SignalType="0" SOE="0" BitOpenString="" BitCloseString="" AlarmTagName="digitalalarm0" AlarmType="1" AlarmOccNo="1" AlarmDesc="digitalalarm0" SaveDisk="0" SaveDiskPeriod="0" SaveDB="0" SaveDBPeriod="0" ReferenceCount="0" DataSource="0" ChannelOccNo="1" DeviceOccNo="1" Express=""/>
+                        </DIN>
+                        <AOUT Count="1">
+                            <ao OccNo="1" TagName="AnalogOutput0" ID="1" BlockOccNo="1" DataType="11" Description="AnalogOutput0" DescriptionOccNo="16" InitialQua="0" Address="1" PinLabel="" InitValue="100" Format="" Unit="" Enable="1" MaxRaw="10000" MinRaw="0" MaxConvert="0" MinConvert="10000" ScaleOccNo="1" ScaleType="0" ScaleDesc="transform0" ScaleTagName="transform0" RangeL="0" RangeH="10000" HighQua="1.2" LowQua="-1.2" ReferenceCount="0" ChannelOccNo="1" DeviceOccNo="1"/>
+                        </AOUT>
+                        <DOUT Count="1">
+                            <do OccNo="1" TagName="DigitalOutput0" ID="1" BlockOccNo="1" DataType="1" Description="DigitalOutput0" DescriptionOccNo="17" InitValue="0" InitialQua="0" Address="1" PinLabel="" IsSBO="205" TelCtlWaitTime="0" TelCtlSendTime="0" TelCtlExecTime="0" AssociatedDI="DigitalInput0" AssociatedDIValType="0" BlockingSignalTag="" BlockingProgram="" StartProgram="" ReferenceCount="0" ChannelOccNo="1" DeviceOccNo="1"/>
+                        </DOUT>
+                    </data>
+                </d>
+            </device>
+        </c>
+    </channel>
+    <forwardingchannel Count="0"/>
+    <variable>
+        <user>
+            <group name="root" count="0">
+                <u OccNo="1" TagName="uservariable1" ID="1" Description="uservariable1" DescriptionOccNo="18" DataType="11" InitValue="0" InitialQua="0" Address="" PinLabel="" SourceTagName="" ScaleOccNo="0" ScaleType="0" ScaleTagName="" AlarmOccNo="0" AlarmType="0" AlarmTagName=""/>
+            </group>
+        </user>
+        <system Count="3">
+            <s OccNo="1" TagName="$YEAR" ID="1" Description="system-year" DescriptionOccNo="19" DataType="5"/>
+            <s OccNo="2" TagName="$MONTH" ID="2" Description="system-month" DescriptionOccNo="20" DataType="5"/>
+            <s OccNo="3" TagName="$DAY" ID="3" Description="system-day" DescriptionOccNo="21" DataType="5"/>
+        </system>
+    </variable>
+</fes>

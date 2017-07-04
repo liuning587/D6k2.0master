@@ -251,7 +251,7 @@ enum
 
 enum
 {
-	TIMER_INTERVAL_T1=15000, //发送方在发送一个I报文或U报文后 必须在t1时间内得到接收方的认可 否则认为TCP连接出现问题并重新建立连接 
+	TIMER_INTERVAL_T1=5000, //发送方在发送一个I报文或U报文后 必须在t1时间内得到接收方的认可 否则认为TCP连接出现问题并重新建立连接 
 	TIMER_INTERVAL_T2=10000,//接收方在接收到I格式报文后 
 	TIMER_INTERVAL_T3=20000,//长期空闲t3>t1状态下发送测试帧的超时
 	TIMER_INTERVAL_TG=600000 //十分钟定时发送一次总召和时间对时

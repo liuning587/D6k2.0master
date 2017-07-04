@@ -236,6 +236,7 @@
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="graphmodel.cpp" />
     <ClCompile Include="hissave.cpp" />
+    <ClCompile Include="log\log2file.cpp" />
     <ClCompile Include="uimodule\imainwindow.cpp" />
     <ClCompile Include="uimodule\leftdock.cpp" />
     <ClCompile Include="main.cpp" />
@@ -1282,6 +1283,7 @@ C:\Qt\Qt5.8.0\5.8\msvc2015_64\bin\moc.exe  -DUNICODE -DWIN32 -DWIN64 -D_WINDOWS 
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GeneratedFiles\release\moc_leftdock.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="logdefine.h" />
+    <ClInclude Include="log\log2file.h" />
     <ClInclude Include="modulemgr.h" />
     <CustomBuild Include="nodefesgroupmodel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nodefesgroupmodel.h;GeneratedFiles\debug\moc_predefs.h;C:\Qt\Qt5.8.0\5.8\msvc2015_64\bin\moc.exe;%(AdditionalInputs)</AdditionalInputs>

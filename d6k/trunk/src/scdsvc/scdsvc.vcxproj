@@ -165,6 +165,7 @@
     <ClCompile Include="meta_object_property.cpp" />
     <ClCompile Include="nb_svc.cpp" />
     <ClCompile Include="node_mem.cpp" />
+    <ClCompile Include="node_scd_mem.cpp" />
     <ClCompile Include="object_model.cpp" />
     <ClCompile Include="sapp.cpp" />
     <ClCompile Include="scada_db.cpp" />

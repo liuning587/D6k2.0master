@@ -2,10 +2,11 @@
 #include "fesdb.h"
 #include "fes_db.h"
 #include "data_def.h"
+#include "../../scdsvc/data_def.h"
 #include "sharemem.h"
 #include <vector>
 #include <memory>
-
+struct NODE_MEM;
 class CViewMemDB
 {
 public:

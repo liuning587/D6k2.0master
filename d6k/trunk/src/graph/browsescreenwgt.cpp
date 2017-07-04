@@ -14,6 +14,8 @@ CBrowseScreenWgt::CBrowseScreenWgt(QWidget *parent)
 {
 	ui.setupUi(this);
 	setWindowTitle(tr("WindowBrowse"));
+	connect(ui.pushButton,SIGNAL(clicked()),this,SLOT(Slot_Conform()));
+	connect(ui.pushButton_2, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 CBrowseScreenWgt::~CBrowseScreenWgt()
@@ -75,6 +77,7 @@ void CBrowseScreenWgt::AnalyseAllNode(std::shared_ptr<QXmlStreamReader> xmlReade
 				QString strFilename = xmlReader->attributes().value("name").toString();
 				fileItem->setText(0, strFilename);
 				fileItem->setData(0, Qt::UserRole + 1, strFilename);
+				fileItem->setData(0, Qt::UserRole + 2, E_FILENAME);
 
 				ui.treeWidget->addTopLevelItem(fileItem);
 
@@ -88,6 +91,7 @@ void CBrowseScreenWgt::AnalyseAllNode(std::shared_ptr<QXmlStreamReader> xmlReade
 
 				groupItem->setText(0, strGroupname);
 				groupItem->setData(0, Qt::UserRole + 1, strGroupname);
+				groupItem->setData(0, Qt::UserRole + 2, E_CATALOG);
 
 				ui.treeWidget->addTopLevelItem(groupItem);
 
@@ -132,6 +136,7 @@ void CBrowseScreenWgt::AnalyseGroupNode(std::shared_ptr<QXmlStreamReader> xmlRea
 
 				fileItem->setText(0, xmlReader->attributes().value("name").toString());
 				fileItem->setData(0, Qt::UserRole + 1, strFilename);
+				fileItem->setData(0, Qt::UserRole + 2, E_FILENAME);
 				
 				pFather->addChild(fileItem);
 
@@ -146,6 +151,7 @@ void CBrowseScreenWgt::AnalyseGroupNode(std::shared_ptr<QXmlStreamReader> xmlRea
 				groupItem->setText(0, xmlReader->attributes().value("name").toString());
 
 				groupItem->setData(0, Qt::UserRole + 1, strGroupname);
+				groupItem->setData(0, Qt::UserRole + 2, E_CATALOG);
 
 				pFather->addChild(groupItem);
 
@@ -163,4 +169,21 @@ void CBrowseScreenWgt::AnalyseGroupNode(std::shared_ptr<QXmlStreamReader> xmlRea
 		}
 	}
 
+}
+
+void CBrowseScreenWgt::Slot_Conform()
+{
+	m_strFilename.clear();
+
+	QTreeWidgetItem *pCurrentItem = ui.treeWidget->currentItem();
+
+	if (pCurrentItem != nullptr)
+	{
+		if (pCurrentItem->data(0,Qt::UserRole+2) == E_FILENAME)
+		{
+			//нд╪Ч
+			m_strFilename = pCurrentItem->data(0, Qt::UserRole + 1).toString();
+			accept();
+		}
+	}
 }

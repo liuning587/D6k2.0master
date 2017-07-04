@@ -41,6 +41,7 @@ CClientDB::CClientDB( )
 {
 	m_bStopFlag = false;
 	m_nEstimateSize = 0;
+	InitFuncArrary();
 }
 
 CClientDB::~CClientDB(void)
@@ -150,11 +151,71 @@ size_t CClientDB::LoadMem(unsigned char * pAddr)
 
 bool CClientDB::GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT &RetData)
 {
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	bool bRet = false;
+	switch (nIddType)
+	{
+	case IDD_SYSVAR:
+	{
+		Q_ASSERT(m_arrGetSysVarRTDataFuncs[nFiledID]);
+		if (m_arrGetSysVarRTDataFuncs[nFiledID])
+		{
+			m_arrGetSysVarRTDataFuncs[nFiledID](nOccNo, RetData);
+		}
+		break;
+	}
+	case IDD_USERVAR:
+	{
+		Q_ASSERT(m_arrGetUserVarRTDataFuncs[nFiledID]);
+		if (m_arrGetUserVarRTDataFuncs[nFiledID])
+		{
+			m_arrGetUserVarRTDataFuncs[nFiledID](nOccNo, RetData);
+		}
+		break;
+	}
+	default:
+		Q_ASSERT(false);
+		bRet = false;
+		break;
+	}
 	return true;
 }
 
 bool CClientDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
 {
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	bool bRet = false;
+	switch (nIddType)
+	{
+	case IDD_SYSVAR:
+	{
+		Q_ASSERT(m_arrSysVarSetFunctions[nFiledID]);
+		if (m_arrSysVarSetFunctions[nFiledID])
+		{
+			m_arrSysVarSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+		}
+		break;
+	}
+	case IDD_USERVAR:
+	{
+		Q_ASSERT(m_arrUserVarSetFunctions[nFiledID]);
+		if (m_arrUserVarSetFunctions[nFiledID])
+		{
+			m_arrUserVarSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+		}
+		break;
+	}
+	default:
+		Q_ASSERT(false);
+		bRet = false;
+		break;
+	}
 	return true;
 }
 
@@ -373,4 +434,618 @@ size_t CClientDB::CreateUserVariable(unsigned char* pAddr)
 	}
 	return m_nUserVariableCount* sizeof VARDATA;
 }
+
+void CClientDB::InitFuncArrary()
+{
+	m_arrGetUserVarRTDataFuncs[ATT_IN_OUT] = std::bind(&CClientDB::GetUserVarScanEnable, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_QUA] = std::bind(&CClientDB::GetUserVarQua, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_STATE] = std::bind(&CClientDB::GetUserVaState, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_VALUE] = std::bind(&CClientDB::GetUserVaValEx, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_RAW_VALUE] = std::bind(&CClientDB::GetUserValRawValEx, this, std::placeholders::_1, std::placeholders::_2);
+
+	m_arrGetUserVarRTDataFuncs[ATT_OLD_VALUE] = std::bind(&CClientDB::GetUserNegVal, this, std::placeholders::_1, std::placeholders::_2);
+
+	m_arrGetUserVarRTDataFuncs[ATT_MAXRANGE] = std::bind(&CClientDB::GetUserVarMaxRange, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_MINRANGE] = std::bind(&CClientDB::GetUserVarMinRange, this, std::placeholders::_1, std::placeholders::_2);
+
+	m_arrGetUserVarRTDataFuncs[ATT_MANSET] = std::bind(&CClientDB::GetUserVaManSet, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_MINOUTPUT] = std::bind(&CClientDB::GetUserVaLowOutPut, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_MAXOUTPUT] = std::bind(&CClientDB::GetUserVaHighOutPut, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_HIQUA] = std::bind(&CClientDB::GetUserVaHighQua, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_LOQUA] = std::bind(&CClientDB::GetUserVaLowQua, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_DESCRIPTION] = std::bind(&CClientDB::GetUserVaDesc0, this, std::placeholders::_1, std::placeholders::_2);
+
+
+	m_arrGetSysVarRTDataFuncs[ATT_IN_OUT] = std::bind(&CClientDB::GetSysVarScanEnable, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_QUA] = std::bind(&CClientDB::GetSysVarQua, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_STATE] = std::bind(&CClientDB::GetSysVaState, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_VALUE] = std::bind(&CClientDB::GetSysVaValEx, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_RAW_VALUE] = std::bind(&CClientDB::GetSysValRawValEx, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_OLD_VALUE] = std::bind(&CClientDB::GetSysNegVal, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_MAXRANGE] = std::bind(&CClientDB::GetSysVarMaxRange, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_MINRANGE] = std::bind(&CClientDB::GetSysVarMinRange, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_MANSET] = std::bind(&CClientDB::GetSysVaManSet, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_MINOUTPUT] = std::bind(&CClientDB::GetSysVaLowOutPut, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_MAXOUTPUT] = std::bind(&CClientDB::GetSysVaHighOutPut, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_HIQUA] = std::bind(&CClientDB::GetSysVaHighQua, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_LOQUA] = std::bind(&CClientDB::GetSysVaLowQua, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_DESCRIPTION] = std::bind(&CClientDB::GetSysVaDesc0, this, std::placeholders::_1, std::placeholders::_2);
+
+	m_arrUserVarSetFunctions[ATT_SETRELAYVALUE] = std::bind(&CClientDB::SetUserVarValue, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+	m_arrSysVarSetFunctions[ATT_SETRELAYVALUE] = std::bind(&CClientDB::SetSysVarValue, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+}
+
+bool CClientDB::GetUserVarScanEnable(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_BOOL(&RetData, &pFB->ScanEnable);
+
+	return true;
+}
+
+bool CClientDB::GetUserVarQua(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_BYTE(&RetData, &pFB->Quality);
+
+	return true;
+}
+
+bool CClientDB::GetUserNegVal(int32u nOccNO, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNO != INVALID_OCCNO && nOccNO <= MAX_OCCNO);
+	if (nOccNO == INVALID_OCCNO || nOccNO > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNO <= m_nUserVariableCount);
+	if (nOccNO > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNO - 1];
+
+	S_CHAR(&RetData, &pFB->NegValue);
+
+	return true;
+}
+
+bool CClientDB::GetUserVarMaxRange(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->RangeH);
+
+	return true;
+
+}
+
+bool CClientDB::GetUserVarMinRange(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->RangeL);
+
+	return true;
+}
+
+bool CClientDB::GetUserVaState(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_INT(&RetData, &pFB->State);
+
+	return true;
+
+}
+
+bool CClientDB::GetUserVaValEx(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	RetData = pFB->Value;
+
+	return true;
+}
+
+bool CClientDB::GetUserValRawValEx(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	RetData = pFB->RawValue;
+
+	return true;
+}
+
+bool CClientDB::GetUserVaManSet(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_BYTE(&RetData, &pFB->ManSet);
+
+	return true;
+}
+
+bool CClientDB::GetUserVaLowOutPut(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->MinRaw);
+
+	return true;
+}
+
+bool CClientDB::GetUserVaHighOutPut(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->MaxRaw);
+
+	return true;
+}
+
+bool CClientDB::GetUserVaHighQua(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->HighQua);
+
+	return true;
+}
+
+bool CClientDB::GetUserVaLowQua(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->LowQua);
+
+	return true;
+}
+
+bool CClientDB::GetUserVaDesc0(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	S_INT(&RetData, &pFB->Desc0OccNo);
+
+	return true;
+}
+
+bool CClientDB::GetSysVarScanEnable(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_BOOL(&RetData, &pFB->ScanEnable);
+
+	return true;
+}
+
+bool CClientDB::GetSysVarQua(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_BYTE(&RetData, &pFB->Quality);
+
+	return true;
+}
+
+bool CClientDB::GetSysVaState(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_INT(&RetData, &pFB->State);
+
+	return true;
+}
+
+bool CClientDB::GetSysVaValEx(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	RetData = pFB->Value;
+
+	return true;
+}
+
+bool CClientDB::GetSysValRawValEx(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	RetData = pFB->RawValue;
+
+	return true;
+}
+
+bool CClientDB::GetSysVaManSet(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_BYTE(&RetData, &pFB->ManSet);
+
+	return true;
+}
+
+bool CClientDB::GetSysVaLowOutPut(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->MinRaw);
+
+	return true;
+}
+
+bool CClientDB::GetSysVaHighOutPut(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->MaxRaw);
+
+	return true;
+}
+
+bool CClientDB::GetSysVaHighQua(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->HighQua);
+
+	return true;
+}
+
+bool CClientDB::GetSysVaLowQua(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->LowQua);
+
+	return true;
+}
+
+bool CClientDB::GetSysVaDesc0(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_INT(&RetData, &pFB->Desc0OccNo);
+
+	return true;
+}
+
+bool CClientDB::GetSysNegVal(int32u nOccNo, IO_VARIANT& RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_BYTE(&RetData, &pFB->NegValue);
+
+
+	return true;
+}
+
+bool CClientDB::GetSysVarMaxRange(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->RangeH);
+
+	return true;
+}
+
+bool CClientDB::GetSysVarMinRange(int32u nOccNo, IO_VARIANT &RetData) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	S_FLOAT(&RetData, &pFB->RangeL);
+
+	return true;
+}
+
+bool CClientDB::SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
+
+	pFB->Value = *pData;
+
+	return true;
+}
+
+bool CClientDB::SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+
+	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
+
+	pFB->Value = *pData;
+
+	return true;
+}
+
 /** @}*/

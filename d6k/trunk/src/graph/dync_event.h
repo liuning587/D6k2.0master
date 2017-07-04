@@ -59,9 +59,22 @@ class CDyncEventData :public CBaseDyncData
 {
 public:
 	CDyncEventData();
+
 	const CDyncEventData& operator=(const CDyncEventData& src);
 	bool operator==(const CDyncEventData& src) const;
 	virtual ~CDyncEventData();
+
+	// 动作类型
+	enum ACTION_TYPE
+	{
+		ACTION_CLICK = 0, //!< 单击
+		ACTION_PRESSED,   //!< 按下
+		ACTION_RELEASE,   //!< 释放
+		ACTION_FOCUSED,   //!< 激活
+		ACTION_UNFOCUSED,
+		MAX_ACTION_NUM
+	};
+
 public:
 	virtual void SaveXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter) const;
 	virtual bool LoadXml(std::shared_ptr<QXmlStreamReader>pXmlReader);
@@ -87,10 +100,28 @@ public:
 
 	//创建事件
 	CBaseDyncEventItem* CreateEventItem(int nEventType);
+	//创建时间
+	CBaseDyncEventItem* CreateEventItem(CBaseDyncEventItem* pBaseEventItem);
+
+	// 设置动作类型
+	void SetActionType(ACTION_TYPE actionType);
+
+	int GetActionType();
+
+	const std::vector<CBaseDyncEventItem*> &getEvents()
+	{
+		return m_arrEvents;
+	}
+
 
 protected:
+	//flag
+	//bool m_bCheckFlag;
 	//! 每个网格可能存在多种动态连接
 	std::vector<CBaseDyncEventItem*> m_arrEvents; 
+	//! 鼠标动作类型
+	ACTION_TYPE   m_ActionType;
+
 
 };
 #endif // BASE_DYNC_EVENT_H

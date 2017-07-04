@@ -1,0 +1,1139 @@
+
+<style>
+    body {
+        font-family: "Microsoft YaHei";
+        color: #000000;
+    }
+
+    .margin-four {
+        margin-bottom: 1px;
+    }
+
+    .panel-heading {
+        padding: 0px 8px;
+        border-bottom: 0px transparent;
+    }
+
+    .widget-state {
+        border-radius: 5px;
+        padding: 1px 1px;
+        margin-bottom: 10px;
+        margin-top: 0px;
+    }
+
+    .red-bg {
+        background-color: #ed5565;
+        color: #ffffff;
+    }
+
+    .green-bg{
+        background-color: green;
+        color: #ffffff;
+    }
+    .mean-blue-bg {
+        background-color: rgba(70,167,229,0.25);
+        border-left:10px #46a7e5 solid;
+    }
+    .mean-green-bg {
+        background-color: rgba(92,184,92,0.26);
+        border-left:10px #5cb85c solid;
+    }
+    .mean-orange-bg {
+        background-color: rgba(220,145,40,0.55);
+        border-left:10px #dc9128  solid;
+    }
+    .mean-red-bg {
+        background-color: rgba(119,119,119,0.45);
+        border-left:10px #777  solid;
+    }
+
+    .count_red_set {
+        color:#ed1e12;
+        font-size:14px;
+    }
+
+    .count_green_set {
+        color: #1ec722;
+        font-size:14px;
+    }
+
+    .count_set {
+        color: #281ef0;
+        font-size:14px;
+    }
+</style>
+
+<p style="background:#ffffff">
+
+
+
+<div class="content" style="padding-top:1%;">
+    <!--<div ng-repeat="stationInfo in stationInfoList">-->
+        <!--<span>{{stationInfo.strName}}</span>-->
+    <!--</div>-->
+    <span style="line-height:2em; margin-left:1%">场站选择：</span>
+    <span style="width:20%">
+         <select class="c12" name="station" id="station" id="filterKind2" style="width:95%" ng-model="ftKind2">
+             <option value="{{stationInfo.nStationID}}" ng-repeat="stationInfo in stationInfoList">{{stationInfo.strName}}</option>
+         </select>
+    </span>
+
+    <span class="build_z" ng-click="this.blur();loadInverterInfo()" style="margin-left:5%">加载</span>
+
+    <span style="line-height:2em; margin-left:5%">在线数：</span>
+    <span style="line-height:2em;" class="measurement count_green_set" data-name="ThisMonthKwh" data-measurementID="1-56-3-0400" data-measurementType="3">50</span>
+    <span style="line-height:2em;">个</span>
+
+    <span style="line-height:2em; margin-left:1%">离线数：</span>
+    <span style="line-height:2em;" class="measurement count_red_set" data-name="ThisMonthKwh" data-measurementID="1-56-3-0400" data-measurementType="3">50</span>
+    <span style="line-height:2em;">个</span>
+
+    <span style="line-height:2em; margin-left:1%">总数：</span>
+    <span style="line-height:2em;" class="measurement count_set" data-name="ThisMonthKwh" data-measurementID="1-56-3-0400" data-measurementType="3">100</span>
+    <span style="line-height:2em;">个</span>
+
+    <div class="clear"></div>
+</div>
+
+<div style="padding-top: 1%"></div>
+
+<div id="inverterID">
+</div>
+
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                    <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<!--<div class="col-md-3 margin-four" style="background-color: rgba(158,122,199,0.23)">-->
+    <!--<div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">-->
+        <!--<div>-->
+            <!--临港1期-香樟园-5#逆变器-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="panel-body">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-12">-->
+                <!--<ul class="list-group clear-list">-->
+                    <!--<div class="list-group-item mean-green-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisDayKwh" data-templateindex="6" data-psrid="51" data-measurementid="1-51-6-0200" data-measurementtype="2" data-magic="">1251.9</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--当日发电量-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-red-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="ThisMonthKwh" data-templateindex="1" data-psrid="51" data-measurementid="1-51-2-0400" data-measurementtype="3" data-magic="">40547124</span>-->
+                            <!--<span> s</span>-->
+                        <!--</span>-->
+                        <!--总发电时间-->
+                    <!--</div>-->
+                    <!--<div class="list-group-item mean-orange-bg" style="margin-bottom:10px;">-->
+                        <!--<span class="pull-right">-->
+                            <!--<span class="measurement" data-calculate="" data-name="TotalKwh" data-templateindex="0" data-psrid="51" data-measurementid="1-51-1-0400" data-measurementtype="3" data-magic="">894030.38</span>-->
+                            <!--<span> kWh</span>-->
+                        <!--</span>-->
+                        <!--总发电量-->
+                    <!--</div>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div style="clear:both;float:left;" class="col-md-12">-->
+                <!--<div class="widget-state style1 measurement red-bg" data-psrid="51" data-templateindex="33" data-measurementid="1-51-33-0100" data-measurementtype="1" data-magic="">-->
+                    <!--<div class="text-center">-->
+                        <!--<h5 class="font-bold YX">逆变器状态</h5>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->

@@ -966,7 +966,7 @@ void CDbSvc::ReadAoutInfo(CDevicePtr pDev, CChannelPtr pChannel)
 				pAout->MinScale = m_XmlReader.attributes().value("MinConvert").toDouble();
 				pAout->NodeOccNo = m_nMyNodeOccNo;
 				//pAout->ScanEnable = SCAN_IN;
-				//pAout->Init = INITED;
+				pAout->Init = INITED;
 
 				pAout->NodeOccNo = m_nMyNodeOccNo;
 				pAout->ScanEnable = SCAN_IN;
@@ -1229,7 +1229,7 @@ void CDbSvc::ReadNonLinearInfo()
 					qMin(size_t(MAX_NAME_LENGTH ), (size_t)m_XmlReader.attributes().value("TagName").length()));
 
 				
-				pTransFormNonLinear->DataCount = m_XmlReader.attributes().value("DataCount").toInt();
+				pTransFormNonLinear->DataCount = m_XmlReader.attributes().value("Count").toInt();
 
 				ReadNonLinearVal(pTransFormNonLinear);
 

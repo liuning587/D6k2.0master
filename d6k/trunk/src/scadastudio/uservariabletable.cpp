@@ -51,6 +51,11 @@ CUserVariableTable::~CUserVariableTable()
 
 }
 
+void CUserVariableTable::RefrushModel()
+{
+	m_pModel->RefrushModel();
+}
+
 /*! \fn void CUserVariableTable::DoubleClicked(const QModelIndex & index)
 ********************************************************************************************************* 
 ** \brief CUserVariableTable::DoubleClicked 

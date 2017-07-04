@@ -79,6 +79,13 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
     item5->setText(gzData.m_BinaryTime.Dump());
     ui.tableWidget->setItem(nRow, 5, item5);
 
+	QTableWidgetItem *item6 = new QTableWidgetItem;
+	item6->setText(QString::number(gzData.m_AnaloyNum));
+	ui.tableWidget->setItem(nRow, 6, item6);
+
+	QTableWidgetItem *item7 = new QTableWidgetItem;
+	item7->setText(QString::number(gzData.m_AnalogType));
+	ui.tableWidget->setItem(nRow, 7, item7);
 
 	QString strData;
 	QStringList lstTitle;
@@ -89,9 +96,9 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
 	}
 
 
-    QTableWidgetItem *item6 = new QTableWidgetItem;
-    item6->setText(strData);
-    ui.tableWidget->setItem(nRow, 6, item6);
+    QTableWidgetItem *item8 = new QTableWidgetItem;
+    item8->setText(strData);
+    ui.tableWidget->setItem(nRow, 8, item8);
 
     ui.tableWidget->scrollToBottom();
 }

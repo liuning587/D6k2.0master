@@ -172,12 +172,22 @@ public:
 		return m_nDoutCount;
 	}
 
+	size_t GetUserVarCount() const
+	{
+		return m_nUserVariableCount;
+	}
+
+	size_t GetSysVarCount() const
+	{
+		return m_nSystemVariableCount;
+	}
 	// 通过序号获取模拟量指针，nIdx 从0开始
 	AIN*GetAinByIndex(int32u nIdx);
 	DIN*GetDinByIndex(int32u nIdx);
 	AOUT*GetAoutByIndex(int32u nIdx);
 	DOUT*GetDoutByIndex(int32u nIdx);
-
+	VARDATA * GetUserVarByIndex(int32u nIdx);
+	VARDATA * GetSysVarByIndex(int32u nIdx);
 	std::string GetTagName(int32u nOccNo, int32u nDataType) const;
 
 	size_t GetIoChannelNames(std::vector<std::string>& arrTagNames)const;

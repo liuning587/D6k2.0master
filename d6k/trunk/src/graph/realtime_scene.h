@@ -37,14 +37,14 @@ public:
 	{
 		return m_pGraphFile;
 	} 
+	void SetGrapFile(CGraphFile* pFile)
+	{
+		m_pGraphFile = pFile;
+	}
 	//保存图形文件
 	bool SaveFile(const QString &szFileName);
 	//加载图形文件
 	bool LoadFile(const QString &szFileName);
-
-public:
-	void timerEvent(QTimerEvent *event);
-	int m_nTimerID;
 private:
 	CGraphFile* m_pGraphFile;
 };

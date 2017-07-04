@@ -45,20 +45,26 @@ public:
 	virtual void Run();
 	virtual void Shutdown();
 public:
+
 	// 应用层 获取模拟量
 	virtual bool GetAinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
 	virtual bool GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
+	virtual bool GetUserVarValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
+	virtual bool GetSysValValue(int32u nOccNo, CVariant & val, int8u &nQuality)const; 
 
 	//网络总线服务调用，更新测值
 	virtual bool UpdateAinValue(int32u nOccNo, const CVariant & val, int8u nQuality);
 	virtual bool UpdateDinValue(int32u nOccNo, const CVariant & val, int8u nQuality);
-	
+	virtual bool UpdateUserVal(int32u nOccNo,const CVariant& val,int8u nQuality);
+	virtual bool UpdateSysVal(int32u nOccNo,const CVariant& val, int8u nQuality);
+
 	bool GetAinAlarmByOccNo(int32u nOccNo,AIN_ALARM** pAinAlarm);
 	bool GetAinAlarmLimitByOcNo(int32u nOccNo,AIN_ALARM_LIMIT** pAinAlarmLimit);
 	bool GetDinAlarmByOccNo(int32u nOccNo,DIN_ALARM** pDinAlarm);
 	bool GetDinAlarmLimitByOccNo(int32u nOccNo,DIN_ALARM_LIMIT** pDinAlarmLimit);
 
-
+	bool GetUserVarByOccNo(int32u nOccNo,VARDATA ** pData);
+	bool GetSysVarByOccNo(int32u nOccNo,VARDATA ** pData);
 	//预估内存大小
 	size_t EstimateMemSize();
 	size_t BuildDB(char* pAddr);

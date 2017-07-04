@@ -159,17 +159,28 @@ size_t  CMemDB::EstimateMemSize()
 ********************************************************************************************************/
 bool CMemDB::GetAinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const
 {
-	Q_ASSERT(false);
-
+	Q_ASSERT(false);   
 	return true;
 }
 
 bool CMemDB::GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const
 {
 	Q_ASSERT(false);
-
 	return true;
 }
+
+bool CMemDB::GetUserVarValue(int32u nOccNo, CVariant & val, int8u &nQuality) const
+{
+	Q_ASSERT(false);
+	return true;
+}
+
+bool CMemDB::GetSysValValue(int32u nOccNo, CVariant & val, int8u &nQuality) const
+{
+	Q_ASSERT(false);
+	return true;
+}
+
 /*! \fn bool  CMemDB::UpdateAinValue(int32u nOccNo, CVariantEx & val, int8u nQuality)
 ********************************************************************************************************* 
 ** \brief CMemDB::UpdateAinValue 
@@ -184,13 +195,21 @@ bool CMemDB::GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const
 ********************************************************************************************************/
 bool  CMemDB::UpdateAinValue(int32u nOccNo, const CVariant & val, int8u nQuality)
 {
-
 	return true;
 }
 
 bool  CMemDB::UpdateDinValue(int32u nOccNo, const CVariant & val, int8u nQuality)
 {
+	return true;
+}
 
+bool CMemDB::UpdateUserVal(int32u nOccNo, const CVariant& val, int8u nQuality)
+{
+	return true;
+}
+
+bool CMemDB::UpdateSysVal(int32u nOccNo, const CVariant& val, int8u nQuality)
+{
 	return true;
 }
 

@@ -26,6 +26,7 @@
 #include "fesapi/fes_magicmem.h"
 #include <vector>
 #include <memory>
+#include <array>
 #include <unordered_map>
 #include <QXmlStreamReader>
 
@@ -106,6 +107,53 @@ private:
 	VARDATA*  m_pUserVariable;
 	unsigned int m_nUserVariableCount;
 	std::vector<VARDATA* >m_arrUserVariables;
+private:
+	void  InitFuncArrary();
+	//获取
+	std::array< std::function<bool(int32u, IO_VARIANT&)  >, ATT_MAX> m_arrGetUserVarRTDataFuncs;
+	std::array< std::function<bool(int32u, IO_VARIANT&)  >, ATT_MAX> m_arrGetSysVarRTDataFuncs;
+	//设置属性
+	std::array< std::function<bool(int32u, IO_VARIANT*, void*, void*)   >, ATT_MAX> m_arrUserVarSetFunctions;
+	std::array< std::function<bool(int32u, IO_VARIANT*, void*, void*)   >, ATT_MAX> m_arrSysVarSetFunctions;
+
+private:
+	//uservar
+	bool GetUserVarScanEnable(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVarQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserNegVal(int32u nOccNO, IO_VARIANT& RetData) const;
+	bool GetUserVarMaxRange(int32u nOccNo, IO_VARIANT &RetData)const;
+	bool GetUserVarMinRange(int32u nOccNo, IO_VARIANT &RetData)const;
+
+	bool GetUserVaState(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserValRawValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+
+	bool GetUserVaManSet(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaLowOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaHighOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaHighQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaLowQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaDesc0(int32u nOccNo, IO_VARIANT &RetData) const;
+
+	//sysvar
+	bool GetSysVarScanEnable(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVarQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaState(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysValRawValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaManSet(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaLowOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaHighOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaHighQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaLowQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaDesc0(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysNegVal(int32u nOccNo, IO_VARIANT& RetData) const;
+	bool GetSysVarMaxRange(int32u nOccNo, IO_VARIANT &RetData)const;
+	bool GetSysVarMinRange(int32u nOccNo, IO_VARIANT &RetData)const;
+
+	bool SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
+	bool SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
+
 
 };
 

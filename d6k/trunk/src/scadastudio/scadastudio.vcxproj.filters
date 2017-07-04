@@ -1900,6 +1900,9 @@
     <ClCompile Include="feschannel_forwardingchannel_data.cpp">
       <Filter>module\config</Filter>
     </ClCompile>
+    <ClCompile Include="log\log2file.cpp">
+      <Filter>module\log</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="channel.h">
@@ -2505,6 +2508,8 @@
     <CustomBuild Include="fes_do_blockingsignaletan_select_fesuservaraible_model.h">
       <Filter>module\config\fes config\data\do\form</Filter>
     </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\debug\moc_predefs.h.cbt" />
+    <CustomBuild Include="GeneratedFiles\release\moc_predefs.h.cbt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="scadastudio.rc" />
@@ -2659,6 +2664,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_uservariableselectalarmdialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="log\log2file.h">
+      <Filter>module\log</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -40,7 +40,7 @@ public:
 
 
 public:
-	void AddView(std::shared_ptr<CGraphFile>pGraphFile);
+	void AddView(CGraphFile * pGraphFile);
 	void SetProjPath(const QString& szProjPath)
 	{
 		m_szProjPath = szProjPath;
@@ -65,8 +65,11 @@ private:
 	QDockWidget * m_pDockWidget;
 private:
 	QString m_szProjPath;
+	
 	//µ±Ç°Ò³Ãæ
-	std::shared_ptr< CGraphFile > m_pGraphFile;
+	 CGraphFile * m_pGraphFile;
+	 CGraphScene *  m_pCurScene;
+	 CRealTimeView * m_pCurView;
 	std::vector < SIM_GRAPH_DEF > m_arrFiles;
 
 	std::vector<CRealTimeTask*> m_arrTasks;

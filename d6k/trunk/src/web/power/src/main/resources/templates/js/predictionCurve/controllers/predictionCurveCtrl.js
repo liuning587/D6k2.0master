@@ -1,5 +1,5 @@
 /**
- * Created by reed on 2017/1/10.
+ * Created by zyj on 2017/6/14.
  */
 
 DaQOCloud.controller('predictionCurveCtrl',['$scope','$stateParams','$state',function ($scope, $stateParams, $state) {

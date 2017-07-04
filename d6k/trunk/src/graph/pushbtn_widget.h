@@ -33,6 +33,28 @@ public:
 		GREEN_LED,               //绿LED
 		RED_LED,                //红LED
 	};
+
+	enum BTN_OPERATOR
+	{
+		ACTION_CLICK = 0, //!< 单击
+		ACTION_PRESSED,   //!< 按下
+		ACTION_RELEASE,   //!< 释放
+		ACTION_FOCUSED,   //!< 激活
+		ACTION_UNFOCUSED,
+		MAX_ACTION_NUM
+
+	};
+
+	//命令执行类型
+	enum BTN_EXEC_TYPE
+	{
+		//执行命令
+		BTN_EXEC_ORDER = 0,
+		//on-off
+		BTN_ON_OFF,
+		//脉冲
+		BTN_PLUS,
+	};
 public:
 
 	CPushBtnWidget(QRectF rcPos, CPushBtnWidget::BTN_TYPE shape);
@@ -89,13 +111,52 @@ public:
 	void SetFontLayout(QTextOption &txtOpt);
 
 	//获取命令信息
-	CDyncEventData* GetEventIntent()
+	const std::vector<CDyncEventData*>&  GetEventIntent()
 	{
-		return m_pEventIntent;
+		return m_arrEventIntent;
+	}
+
+	//获取命令
+	CDyncEventData* GetEventActionData(BTN_OPERATOR eBtnOper);
+public: 
+	virtual bool SaveXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter);
+	//保存按钮执行属性
+	void SaveBtnExecXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter);
+	//保存order
+	void SaveOrderXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter, CDyncEventData* pOrder);
+	//加载数据
+
+	virtual bool LoadXml(std::shared_ptr<QXmlStreamReader> pXmlReader);
+	//创建单个事件
+	void LoadOrderInfo(std::shared_ptr<QXmlStreamReader> pXmlReader, CDyncEventData* pOrder);
+
+
+	void SetBtnBindData(const QString &strValue)
+	{
+		m_strBtnBindValue = strValue;
+	}
+
+	const QString &GetBtnBindData()
+	{
+		return m_strBtnBindValue;
+	}
+
+	int GeteExecType()
+	{
+		return m_eExecType;
+	}
+
+	void SetExecType(BTN_EXEC_TYPE nType)
+	{
+		m_eExecType = nType;
 	}
 
 private:
 	BTN_TYPE m_Shape;
+	//命令状态变量
+	QString m_strBtnBindValue;
+	//命令类型
+	BTN_EXEC_TYPE m_eExecType;
 	//命令
-	CDyncEventData* m_pEventIntent;
+	std::vector<CDyncEventData*> m_arrEventIntent;
 };

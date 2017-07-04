@@ -6,6 +6,10 @@
 #include "fesapi/fesdatadef.h"
 #include "fesdb.h"
 #include "memdb.h"
+#include "aoutoperdialog.h"
+#include "doutoperdialog.h"
+#include "scadaapi/scdsvcapi.h"
+#include "mail/mail.h"
 #include <QDebug>
 #include <QLabel>
 #include <QTableView>
@@ -15,7 +19,6 @@
 #include <QStatusBar>
 #include <QStandardItemModel>
 
-#include "scadaapi/scdsvcapi.h"
 static CScdMainView*  s_ptrModule = nullptr;
 
 CScdMainView::CScdMainView()
@@ -27,13 +30,22 @@ CScdMainView::CScdMainView()
 	QObject::connect(m_pTimer, SIGNAL(timeout()),this,SLOT(slot_onTimer()));
 	m_bInitalize = false;
 	m_bUnInitalize = false;
-	m_pCurrentView = nullptr;
+	m_pCurrentView = nullptr;   
 	m_pLabel = new QLabel();
+
+	bool bRet = OpenPostOffice("SCADA");
+	Q_ASSERT(bRet);
+
+	int nID;
+	bRet = OpenMailBox("SCADA", "SCD_DBG_SVC",&nID);
+	Q_ASSERT(bRet);
+
 }
 
 CScdMainView::~CScdMainView()
-{
+{	
 	CloseAllTabs();
+	DisconnectScada(m_szDeviceName.toStdString().c_str(), "scd_view");
 }
 
 void CScdMainView::Init(IMainModule *pCore)
@@ -104,12 +116,14 @@ void CScdMainView::SetLoadDeviceName(const QString &strDeviceName)
 		{
 			LoadDBMem();
 		}
-	}	
+	}
+
+	bool bRet = ConnectScada(m_szDeviceName.toStdString().c_str(), "scd_view");
+	
+	Q_ASSERT(bRet);
+
 	//定时器的作用就是一直刷新界面 以及一直判断scd 实时库到底是否存活
 	m_pTimer->start(1000);
-
-//	int32u nId;
-//	GetOccNoByTagName(strDeviceName.toStdString().c_str(),&nId, &nId, &nId, &nId);
 }
 
 void CScdMainView::InitTreeView()
@@ -297,15 +311,39 @@ void CScdMainView::slot_TabViewAdd(const int& nType, const int32u& nNodeOccNo, c
 	{
 		return;
 	}
+
+	
 	QString szName;
 	FormatNameString(nType, nNodeOccNo, nChannelOccNo, nDevOccNo, szName);
 
 	bool bRet = IsFileAdded(szName);
+
 	if (bRet)
 	{
+		for (int i = 0; i < m_pCore->GetMainWindow()->GetTabWidget()->count();++i)
+		{
+			QString szName1 = m_pCore->GetMainWindow()->GetTabWidget()->tabText(i);
+			if (szName1==szName)
+			{
+				m_pCore->GetMainWindow()->GetTabWidget()->setCurrentIndex(i);
+			}
+		}
 		return;
 	}
 	QTableView* pView = new QTableView;
+
+	switch (nType)
+	{
+	case E_DOUT:
+		QObject::connect(pView,&QTableView::doubleClicked,this, &CScdMainView::slot_on_DoutTabClieked);
+		break;
+	case E_AOUT:
+		QObject::connect(pView, &QTableView::doubleClicked, this, &CScdMainView::slot_On_AoutTabClicked);
+		break;
+	default:
+		break;
+	}
+
 	
 	CScdDataModel* pModel = new CScdDataModel(m_pMem, pView);
 	pModel->Initalize(nType, nNodeOccNo, nChannelOccNo, nDevOccNo);
@@ -833,6 +871,56 @@ void CScdMainView::slot_TabChanged(int nIndex)
 	}
 }
 
+
+void CScdMainView::slot_on_DoutTabClieked(const QModelIndex& index)
+{
+	Q_ASSERT(index.isValid());
+	if (!index.isValid())
+	{
+		return;
+	}
+	QTableView* pView = reinterpret_cast<QTableView*>(m_pCore->GetMainWindow()->GetTabWidget()->currentWidget());
+
+	QModelIndex nIndex = pView->model()->index(index.row(), 0);
+
+	QVariant nOccNoData = pView->model()->data(nIndex);
+
+
+	QModelIndex nNodeOccIndex= pView->model()->index(index.row(), 13);
+
+	QVariant nNodeOccNo= pView->model()->data(nNodeOccIndex);
+
+	CDoutOperDialog * pdialog = new CDoutOperDialog(nullptr, nNodeOccNo.toUInt(), nOccNoData.toUInt(), m_pMem);
+
+	pdialog->exec();
+
+	pdialog->deleteLater();
+
+}
+
+void CScdMainView::slot_On_AoutTabClicked(const QModelIndex& index)
+{
+	Q_ASSERT(index.isValid());
+	if (!index.isValid())
+	{
+		return;
+	}
+	QTableView* pView = reinterpret_cast<QTableView*>(m_pCore->GetMainWindow()->GetTabWidget()->currentWidget());
+
+	QModelIndex nIndex = pView->model()->index(index.row(), 0);
+
+	QVariant nOccNoData = pView->model()->data(nIndex);
+
+	QModelIndex nNodeOccIndex = pView->model()->index(index.row(), 11);
+
+	QVariant nNodeOccNo = pView->model()->data(nNodeOccIndex);
+
+	CAoutOperDialog * pdialog = new CAoutOperDialog(nullptr, nNodeOccNo.toUInt(), nOccNoData.toUInt(), m_pMem);
+
+	pdialog->exec();
+
+	pdialog->deleteLater();
+}
 
 extern SCDVIEW_EXPORT IPluginModule* CreateModule()
 {

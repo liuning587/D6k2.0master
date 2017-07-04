@@ -30,28 +30,69 @@
 #else
 #include "graph_module.h"
 #endif
-
+#include <memory>
+#include <array>
+#include <QObject>
+#include <QActionGroup>
 #include "../scdpub/variant_data.h"
  
 
 
 std::array<QString, CDyncFileOpEventItem::MAX_FILE_OP_NUM> CDyncFileOpEventItem::m_arrFileOpTypeTxt =
 {
-	("打开一个新文件，并关闭当前"),
-	("关闭当前"),
-	("以模式对话框打开一个新文件"),
-	("以MDI方式打开一个新文件"),
-	("打开下一个文件"),
-	("打开上一个文件")
+	QObject::tr("Open Normal (scree change)"),
+	QObject::tr("Open Modal (pop-up screen)"),
+	QObject::tr("Open Frame (multi-monitor)"),
+	QObject::tr("Open in other process (Safe Mode)"),
+	QObject::tr("Print"),
+	QObject::tr("Close and Return Back"),
+	QObject::tr("Execute Synapses"),
+	QObject::tr("Open Next"),
+	QObject::tr("Open Prev"),
+	QObject::tr("Capture and Print"),
+	QObject::tr("Capture and Save")
 };
 
 CDyncFileOpEventItem::CDyncFileOpEventItem() :CBaseDyncEventItem()
 {
 	m_FileOpType = FILE_OPEN_NORMAL;
-	m_ActionType = ACTION_CLICK;
 
-	m_nXPos = 0;
-	m_nYPos = 0;
+	m_nXPos = 100;
+	m_nYPos = 100;
+
+	//监视器
+	m_nMontor = 0;
+
+	//宽度
+	m_nWidth = 0;
+	//高度
+	m_nHeight = 0;
+	//标题
+	m_bTitle = true;
+	//边框
+	m_bFrame = true;
+	//可变边框
+	m_bChangeableFrame = false;
+	//系统菜单
+	m_bSystemMenu = false;
+	//最大化图标
+	m_bMaxIcon = false;
+	//最小化图标
+	m_bMinIcon = false;
+	//保持比例打印
+	m_bScalePrint = false;
+	//打印页宽
+	m_nPrintWidth = -1;
+	//打印页高
+	m_nPrintHeight = -1;
+	//顶边界
+	m_nTopMargin = -1;
+	//底边界
+	m_nBottomMargin = -1;
+	//左边界
+	m_nLeftMargin = -1;
+	//右边界
+	m_nRightMaring = -1;
 }
 
 CDyncFileOpEventItem::CDyncFileOpEventItem(const CDyncFileOpEventItem *pSrc) :CBaseDyncEventItem()
@@ -62,7 +103,6 @@ CDyncFileOpEventItem::CDyncFileOpEventItem(const CDyncFileOpEventItem *pSrc) :CB
 	{
 		Q_ASSERT(pSrc->m_OpEventType == DYNC_FILE_OP);
 		m_bEnable = pSrc->m_bEnable;
-		m_ActionType = pSrc->m_ActionType;
 		m_OpEventType = pSrc->m_OpEventType;
 		m_FileOpType = pSrc->m_FileOpType;
 		m_szGraphFileName = pSrc->m_szGraphFileName;
@@ -83,20 +123,56 @@ CDyncFileOpEventItem& CDyncFileOpEventItem::operator=(const CDyncFileOpEventItem
 		Q_ASSERT(src.m_OpEventType == DYNC_FILE_OP);
 
 		this->m_bEnable = src.m_bEnable;
-		this->m_ActionType = src.m_ActionType;
 		this->m_OpEventType = src.m_OpEventType;
-		this->m_FileOpType = src.m_FileOpType;
 
-		m_szGraphFileName = src.m_szGraphFileName;
-		m_nXPos = src.m_nXPos;
-		m_nYPos = src.m_nYPos;
+		//! 文件操作类型
+		m_FileOpType = src.m_FileOpType;;
+		//! 文件名，格式： 目录\文件 不包含后缀
+		m_szGraphFileName = src.m_szGraphFileName;;
+		//监视器
+		int m_nMontor = src.m_nMontor;;
+		//参数文件
+		QString m_szParaFile = src.m_szParaFile;;
+		//宽度
+		m_nWidth = src.m_nWidth;;
+		//高度
+		m_nHeight = src.m_nHeight;;
+		//标题
+		m_bTitle = src.m_bTitle;;
+		//边框
+		m_bFrame = src.m_bFrame;;
+		//可变边框
+		m_bChangeableFrame = src.m_bChangeableFrame;;
+		//系统菜单
+		m_bSystemMenu = src.m_bSystemMenu;;
+		//最大化图标
+		m_bMaxIcon = src.m_bMaxIcon;;
+		//最小化图标
+		m_bMinIcon = src.m_bMinIcon;;
+		//保持比例打印
+		m_bScalePrint = src.m_bScalePrint;;
+		//打印页宽
+		m_nPrintWidth = src.m_nPrintWidth;;
+		//打印页高
+		m_nPrintHeight = src.m_nPrintHeight;;
+		//顶边界
+		m_nTopMargin = src.m_nTopMargin;;
+		//底边界
+		m_nBottomMargin = src.m_nBottomMargin;;
+		//左边界
+		m_nLeftMargin = src.m_nLeftMargin;;
+		//右边界
+		m_nRightMaring = src.m_nRightMaring;;
+
+		m_nXPos = src.m_nXPos;;
+		m_nYPos = src.m_nYPos;;
 	}
+
 	return *this;
 }
 bool CDyncFileOpEventItem::operator==(const CDyncFileOpEventItem& src) const
 {
 	if (this->m_bEnable == src.m_bEnable &&
-		this->m_ActionType == src.m_ActionType &&
 		this->m_OpEventType == src.m_OpEventType &&
 		this->m_FileOpType == src.m_FileOpType &&
 		m_szGraphFileName == src.m_szGraphFileName &&
@@ -212,7 +288,7 @@ bool CDyncFileOpEventItem::LoadXml(JWXml::CXmlNodePtr  pDyncPtr)
 }
 #endif
 
-const std::string & CDyncFileOpEventItem::GetGraphFileName() const
+const QString & CDyncFileOpEventItem::GetGraphFileName() const
 {
 	return m_szGraphFileName;
 }
@@ -280,7 +356,7 @@ void CDyncFileOpEventItem::SetGraphYPos(const std::string & szY)
 	m_nYPos = static_cast<unsigned int>(nVal);
 }
 
-void CDyncFileOpEventItem::SetFileName(const std::string & szName)
+void CDyncFileOpEventItem::SetFileName(const QString & szName)
 {
 	//	ASSERT(!szName.IsEmpty());
 	m_szGraphFileName = szName;
@@ -291,7 +367,7 @@ void CDyncFileOpEventItem::DoAction(CEventIntent &intent)
 	switch (m_FileOpType)
 	{
 	case FILE_OPEN_NORMAL:
-		if (!m_szGraphFileName.empty())
+		if (!m_szGraphFileName.isEmpty())
 		{
 // 			if (intent.m_fnOpenNewGraph)
 // 			{

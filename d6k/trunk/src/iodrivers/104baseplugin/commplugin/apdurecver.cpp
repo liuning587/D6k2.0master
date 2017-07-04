@@ -911,10 +911,17 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 			//string
 			tDevData.strValue = QString::fromLocal8Bit(pBuff + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2,tDevData.nLength);
 		}
+		else if (tDevData.nTagType == 1)
+		{
+			//bool
+			bool *pp = (bool *)(pBuff + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+			tDevData.strValue = QString::number(*pp);
+
+		}
 
 		pDevData.m_lstData.append(tDevData);
 
-		nSetIndex += nPagLength + sizeof(INFOADDR3) + 2 + tDevData.nLength;
+		nSetIndex += sizeof(INFOADDR3) + 2 + tDevData.nLength;
 	}
 
 	//发送信号 
@@ -1973,6 +1980,7 @@ void CApduRecver::SendRequestAllMsg()
 		return;
 	}
 
+	/*
 	//召唤全电度
 	telectrl.m_nCtrlType = TELECTRL_REQUEST_SYNCTIME;
 	IsOK = m_pComm104Pln->OnCommand(&telectrl);
@@ -1988,6 +1996,7 @@ void CApduRecver::SendRequestAllMsg()
 	{
 		return;
 	}
+	*/
 }
 
 //收到召唤响应报文
@@ -2312,6 +2321,9 @@ void CApduRecver::OnRecvFileAnalyseInfo(char *pBuff, int nLength)
 	case FILE_WRITE_TRANSPORT_ACT:
 	{
 		// 写入传输确认
+		QByteArray byDestr = tr("Write Success!").toLocal8Bit();
+		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
+
 		break;
 	}
 	default:

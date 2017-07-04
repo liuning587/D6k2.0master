@@ -31,6 +31,8 @@ enum
 	INVALID_TYPE=0,
 	AIN_TYPE=1,
 	DIN_TYPE=2,
+	USERVAR_TYPE = 3,
+	SYSVAR_TYPE = 4,
 	MAX_DATA_TYPE=100,
 };
 
@@ -207,7 +209,7 @@ public:
 
 		if (m_pDBSvc->IsDBAlive(0))
 		{
-			int nCount = m_pDBSvc->GetDINCount();
+			size_t nCount = m_pDBSvc->GetDINCount();
 
 			if (nCount > 0)
 			{
@@ -247,7 +249,7 @@ public:
 
 		if (m_pDBSvc->IsDBAlive(0))
 		{
-			int nCount = m_pDBSvc->GetDINCount();
+			size_t nCount = m_pDBSvc->GetDINCount();
 
 			if (nCount>0)
 			{
@@ -277,6 +279,87 @@ public:
 		}		
 	}
 
+	void GetUserVarPackageNum(std::vector<std::pair<int32u, int32u > >& arrNums)
+	{
+		assert(m_pDBSvc);
+
+		if (m_pDBSvc == nullptr)
+			return;
+
+		size_t nEstimateCount = 0;
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			int nCount = m_pDBSvc->GetUserVarCount();
+
+			if (nCount > 0)
+			{
+				if ((nCount % MAX_AIN_COUNT))
+				{
+					nEstimateCount = nCount / MAX_AIN_COUNT + 1;
+				}
+				else
+				{
+					nEstimateCount = nCount / MAX_AIN_COUNT;
+				}
+
+				if (nEstimateCount == 1)
+				{
+					arrNums.push_back(std::make_pair(1, nCount));
+				}
+				else
+				{
+					for (int i = 0; i < nEstimateCount - 1; ++i)
+					{
+						arrNums.push_back(std::make_pair(1 + i*MAX_AIN_COUNT, MAX_AIN_COUNT));
+					}
+					//最后一帧
+					arrNums.push_back(std::make_pair(1 + (nEstimateCount - 1)*MAX_AIN_COUNT, nCount%MAX_AIN_COUNT));
+				}
+			}
+		}
+	}
+
+	void GetSysVarPackageNum(std::vector<std::pair<int32u, int32u > >& arrNums)
+	{
+		assert(m_pDBSvc);
+
+		if (m_pDBSvc == nullptr)
+			return;
+
+		size_t nEstimateCount = 0;
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			int nCount = m_pDBSvc->GetSysVarCount();
+
+			if (nCount > 0)
+			{
+				if ((nCount % MAX_AIN_COUNT))
+				{
+					nEstimateCount = nCount / MAX_AIN_COUNT + 1;
+				}
+				else
+				{
+					nEstimateCount = nCount / MAX_AIN_COUNT;
+				}
+
+				if (nEstimateCount == 1)
+				{
+					arrNums.push_back(std::make_pair(1, nCount));
+				}
+				else
+				{
+					for (int i = 0; i < nEstimateCount - 1; ++i)
+					{
+						arrNums.push_back(std::make_pair(1 + i*MAX_AIN_COUNT, MAX_AIN_COUNT));
+					}
+					//最后一帧
+					arrNums.push_back(std::make_pair(1 + (nEstimateCount - 1)*MAX_AIN_COUNT, nCount%MAX_AIN_COUNT));
+				}
+			}
+		}
+	}
 
 	size_t PackageAllDI(EMSG_BUF *pInBuff, std::pair<int32u, int32u> data, int32u& nSize)
 	{
@@ -424,6 +507,235 @@ public:
 		return 0;
 	}
 
+	size_t PackageAllUserVarInfo(EMSG_BUF *pInBuff, std::pair<int32u, int32u> data, int32u& nSize)
+	{
+		assert(m_pDBSvc);
+		if (m_pDBSvc == nullptr)
+		{
+			return 0;
+		}
+
+		Q_ASSERT(pInBuff);
+		if (pInBuff == nullptr)
+		{
+			return 0;
+		}
+
+		int32u nOccNo = data.first;
+		Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+
+		if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		{
+			return 0;
+		}
+
+		int32u nNumCount = data.second;
+		Q_ASSERT(nNumCount <= MAX_AIN_COUNT);
+		if (nNumCount > MAX_AIN_COUNT)
+		{
+			return 0;
+		}
+
+		int32u nNodeOccNO = m_pDBSvc->GetMyNodeOccNo();
+
+		Q_ASSERT(nNodeOccNO != INVALID_OCCNO && nNodeOccNO < MAX_NODE_OCCNO);
+
+		if (nNodeOccNO == INVALID_OCCNO || nNodeOccNO > MAX_NODE_OCCNO)
+		{
+			return 0;
+		}
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			pInBuff->MsgDataSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof FP64;
+			memset(pInBuff->BuffData, 0, sizeof DATA_BASE + nNumCount * sizeof FP64);
+
+			DATA_BASE dataBase;
+			dataBase.m_nCount = nNumCount;
+			dataBase.m_nNodeOccNo = nNodeOccNO;
+			dataBase.m_nStartOccNo = nOccNo;
+			dataBase.m_nTransReason = COT_NORMAL_ASYNC;
+			dataBase.m_nType = USERVAR_TYPE;
+			dataBase.m_nExtraLen = nNumCount * sizeof FP64;
+
+			memcpy(pInBuff->BuffData, &dataBase, sizeof DATA_BASE);
+
+			std::vector<fp64> arrValues;
+
+			for (int32u i = nOccNo; i < nOccNo + nNumCount; i++)
+			{
+				VARDATA* pFB = m_pDBSvc->GetUserVarByIndex(i - 1);
+				assert(pFB);
+
+				fp64 fVal = 0.0;
+				
+				if (!pFB)
+				{
+					continue;
+				}
+				switch (pFB->DataType)
+				{
+				case DT_BOOLEAN:
+				{
+					fVal=V_BOOL(pFB->Value);
+					break;
+				}
+				case DT_CHAR:
+				{
+					fVal = V_BOOL(pFB->Value);
+					break;
+				}
+				case DT_BYTE:
+				{
+					fVal = V_BYTE(pFB->Value);
+					break;
+				}
+				case DT_INT:
+				{
+					fVal = V_INT(pFB->Value);
+					break;
+				}
+				case DT_SHORT:
+				{
+					fVal = V_SHORT(pFB->Value);
+					break;
+				}
+				case DT_FLOAT:
+				{
+					fVal = V_FLOAT(pFB->Value);
+					break;
+				}
+				case DT_DOUBLE:
+				{
+					fVal = V_DOUBLE(pFB->Value);
+					break;
+				}
+				default:
+					break;
+				}
+				arrValues.push_back(fVal);
+			}
+			memcpy(&pInBuff->BuffData[sizeof DATA_BASE], arrValues.data(), sizeof fp64 * arrValues.size());
+			nSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof FP64;
+		}
+
+		return 0;
+	}
+
+	size_t PackageAllSysVarInfo(EMSG_BUF *pInBuff, std::pair<int32u, int32u> data, int32u& nSize)
+	{
+		assert(m_pDBSvc);
+		if (m_pDBSvc == nullptr)
+		{
+			return 0;
+		}
+
+		Q_ASSERT(pInBuff);
+		if (pInBuff == nullptr)
+		{
+			return 0;
+		}
+
+		int32u nOccNo = data.first;
+		Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+
+		if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		{
+			return 0;
+		}
+
+		int32u nNumCount = data.second;
+		Q_ASSERT(nNumCount <= MAX_AIN_COUNT);
+		if (nNumCount > MAX_AIN_COUNT)
+		{
+			return 0;
+		}
+
+		int32u nNodeOccNO = m_pDBSvc->GetMyNodeOccNo();
+
+		Q_ASSERT(nNodeOccNO != INVALID_OCCNO && nNodeOccNO < MAX_NODE_OCCNO);
+
+		if (nNodeOccNO == INVALID_OCCNO || nNodeOccNO > MAX_NODE_OCCNO)
+		{
+			return 0;
+		}
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			pInBuff->MsgDataSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof FP64;
+			memset(pInBuff->BuffData, 0, sizeof DATA_BASE + nNumCount * sizeof FP64);
+
+			DATA_BASE dataBase;
+			dataBase.m_nCount = nNumCount;
+			dataBase.m_nNodeOccNo = nNodeOccNO;
+			dataBase.m_nStartOccNo = nOccNo;
+			dataBase.m_nTransReason = COT_NORMAL_ASYNC;
+			dataBase.m_nType = SYSVAR_TYPE;
+			dataBase.m_nExtraLen = nNumCount * sizeof FP64;
+
+			memcpy(pInBuff->BuffData, &dataBase, sizeof DATA_BASE);
+
+			std::vector<fp64> arrValues;
+
+			for (int32u i = nOccNo; i < nOccNo + nNumCount; i++)
+			{
+				VARDATA* pFB = m_pDBSvc->GetSysVarByIndex(i - 1);
+				assert(pFB);
+
+				fp64 fVal = 0.0;
+
+				if (!pFB)
+				{
+					continue;
+				}
+				switch (pFB->DataType)
+				{
+				case DT_BOOLEAN:
+				{
+					fVal = V_BOOL(pFB->Value);
+					break;
+				}
+				case DT_CHAR:
+				{
+					fVal = V_BOOL(pFB->Value);
+					break;
+				}
+				case DT_BYTE:
+				{
+					fVal = V_BYTE(pFB->Value);
+					break;
+				}
+				case DT_INT:
+				{
+					fVal = V_INT(pFB->Value);
+					break;
+				}
+				case DT_SHORT:
+				{
+					fVal = V_SHORT(pFB->Value);
+					break;
+				}
+				case DT_FLOAT:
+				{
+					fVal = V_FLOAT(pFB->Value);
+					break;
+				}
+				case DT_DOUBLE:
+				{
+					fVal = V_DOUBLE(pFB->Value);
+					break;
+				}
+				default:
+					break;
+				}
+				arrValues.push_back(fVal);
+			}
+			memcpy(&pInBuff->BuffData[sizeof DATA_BASE], arrValues.data(), sizeof fp64 * arrValues.size());
+			nSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof FP64;
+		}
+
+		return 0;
+	}
 
 	size_t PackageAllAI(unsigned char *pInBuff, size_t nBuffLen)
 	{

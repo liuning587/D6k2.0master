@@ -102,6 +102,10 @@ public slots:
 	void Slot_SwitchFixArea();
 	//读取定值区号
 	void Slot_ReadFixArea();
+	//连接
+	void Slot_ConnectDevice();
+	//断连
+	void Slot_DisConnect();
 private:
 	//模块加载工具
 	IMainModule *m_pMainModule;

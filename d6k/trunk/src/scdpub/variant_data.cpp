@@ -332,6 +332,19 @@ CVariant::operator unsigned char() const
 }
 
 
+CVariant::operator float() const
+{
+	if (V_DT(*this) == DT_FLOAT)
+	{
+		return V_FLOAT(*this);
+	}
+
+	CVariant varDest;
+	varDest.ChangeType(DT_FLOAT, this);
+
+	return V_FLOAT(varDest);
+}
+
 IO_VARIANT& CVariant::GetVariant() throw()
 {
 	return *(IO_VARIANT*) this;

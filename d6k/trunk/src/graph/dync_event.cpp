@@ -66,8 +66,7 @@ const CDyncEventData& CDyncEventData::operator=(const CDyncEventData& src)
 		auto it_op = src.m_arrEvents.begin();
 		for (; it_op != src.m_arrEvents.end(); ++it_op)
 		{
-			CBaseDyncEventItem* pEvent =  new CBaseDyncEventItem(**it_op);
-			m_arrEvents.push_back(pEvent);
+			CreateEventItem(*it_op);
 		}
 	}
 	return *this;
@@ -287,6 +286,27 @@ bool  CDyncEventData::ProcessAction(CBaseWidget *pWidget, CEventIntent &intent)
 	return false;
 }
 
+void CDyncEventData::DeleteOpEvent(CBaseDyncEventItem *pEvent)
+{
+	Q_ASSERT(pEvent);
+	if (pEvent == nullptr)
+	{
+		return;
+	}
+		
+	auto iter = m_arrEvents.begin();
+	for (; iter != m_arrEvents.end(); ++iter)
+	{
+		if (*iter == pEvent)
+		{
+			delete *iter;
+			m_arrEvents.erase(iter);
+			
+			return;
+		}
+	}
+}
+
 // std::vector <std::shared_ptr <CDyncFileOpEventItem>> & CDyncEventData::GetFileOpEvents()
 // {
 // 	return m_arrEvents;
@@ -361,7 +381,7 @@ CBaseDyncEventItem * CDyncEventData::CreateEventItem(int nEventType)
 	case CBaseDyncEventItem::DYNC_VAR_OP:
 	{
 		//变量操作
-		newItem = new CDyncFileOpEventItem;
+		newItem = new CDyncVarOpEventItem;
 		break;
 	}
 	case CBaseDyncEventItem::DYNC_SYS_OP:
@@ -384,6 +404,12 @@ CBaseDyncEventItem * CDyncEventData::CreateEventItem(int nEventType)
 	default:
 		break;
 	}
+
+	Q_ASSERT(newItem);
+	if (newItem != nullptr)
+	{
+		m_arrEvents.push_back(newItem);
+	}
 	
 	return newItem;
 }
@@ -392,5 +418,54 @@ CBaseDyncEventItem * CDyncEventData::CreateEventItem(int nEventType)
 
 
  
+CBaseDyncEventItem* CDyncEventData::CreateEventItem(CBaseDyncEventItem* pBaseEventItem)
+{
+	Q_ASSERT(pBaseEventItem);
+	if (pBaseEventItem == nullptr)
+	{
+		return nullptr;
+	}
+
+	CBaseDyncEventItem *newItem = nullptr;
+
+	if (pBaseEventItem->GetEventType() == CBaseDyncEventItem::DYNC_FILE_OP)
+	{
+		//文件操作
+		newItem = new CDyncFileOpEventItem;
+		//转换
+		CDyncFileOpEventItem *pFileOpItem = dynamic_cast<CDyncFileOpEventItem*>(newItem);
+
+		CDyncFileOpEventItem *pOrigFileOpItem = dynamic_cast<CDyncFileOpEventItem*>(pBaseEventItem);
+
+		*pFileOpItem = *pOrigFileOpItem;
+	}
+	else if (pBaseEventItem->GetEventType() == CBaseDyncEventItem::DYNC_VAR_OP)
+	{
+		//变量操作
+		newItem = new CDyncVarOpEventItem;
+		//转换
+		CDyncVarOpEventItem *pVarOpItem = dynamic_cast<CDyncVarOpEventItem*>(newItem);
+
+		CDyncVarOpEventItem *pVarBaseOpItem = dynamic_cast<CDyncVarOpEventItem*>(pBaseEventItem);
+
+		*pVarOpItem = *pVarBaseOpItem;
+
+	}
+
+	m_arrEvents.push_back(newItem);
+
+	return newItem;
+
+}
+
+void CDyncEventData::SetActionType(ACTION_TYPE actionType)
+{
+	m_ActionType = actionType;
+}
+
+int CDyncEventData::GetActionType()
+{
+	return m_ActionType;
+}
 
 /** @}*/

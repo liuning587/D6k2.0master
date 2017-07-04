@@ -212,6 +212,9 @@ public:
 
 	void SetSelectWgt();
 
+	CGroupWidget *CopyGroupInfo(CGroupWidget* pGroupWgt);
+
+
 protected:
 	//! 当前图层的选中图元
 	std::vector <CBaseWidget *> m_arrSelection;

@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mydocument>
+<Project version="1.0">
+    <fes>
+        <file name="fes0"/>
+    </fes>
+    <node>
+        <n file="node.xml"/>
+    </node>
+    <system/>
+    <user/>
+    <scadavariable>
+        <group name="group0">
+            <file name="fsdfsdf"/>
+        </group>
+    </scadavariable>
+    <graph/>
+    <report/>
+</Project>

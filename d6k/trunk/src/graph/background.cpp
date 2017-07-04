@@ -55,6 +55,37 @@ QRectF &CBackground::GetBackgroundRect()
 	return m_rcBackground;
 }
 
+void CBackground::CopyBackground(const CBackground *pBackGround)
+{
+	Q_ASSERT(pBackGround);
+	if (pBackGround == nullptr)
+	{
+		return;
+	}
+
+	m_rcBackground = pBackGround->m_rcBackground;
+	m_bShowGrid = pBackGround->m_bShowGrid;
+	m_bShowSnapGridGap = pBackGround->m_bShowSnapGridGap;
+	m_nSnapGridGap = pBackGround->m_nSnapGridGap;
+
+	m_bShowCoord = pBackGround->m_bShowCoord;
+
+	m_arrSnapPoints = pBackGround->m_arrSnapPoints;
+	m_arrGridLines = pBackGround->m_arrGridLines;
+
+	m_clrBackground = pBackGround->m_clrBackground;
+	m_cloEndColor = pBackGround->m_cloEndColor;
+
+	m_nBrushStyle = pBackGround->m_nBrushStyle;
+	m_nGradiendMode = pBackGround->m_nGradiendMode;
+	m_strBackgroundImage = pBackGround->m_strBackgroundImage;
+	m_szImage = pBackGround->m_szImage;
+	m_pfImage = pBackGround->m_pfImage;
+	m_bTiling = pBackGround->m_bTiling;
+	m_bStretch = pBackGround->m_bStretch;
+
+}
+
 void CBackground::DrawBackground(QPainter *pPainter, const QRectF &rect)
 {
 	Q_ASSERT(pPainter);

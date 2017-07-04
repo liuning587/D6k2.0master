@@ -99,7 +99,15 @@ const CGraphicsLayer& CGraphicsLayer::operator=(const CGraphicsLayer &src)
 	m_pInsertObj = nullptr;
 	m_arrSelection.clear();
 
+	//幅值
+	//m_pScene = nullptr;
+	m_bIsVisible = src.m_bIsVisible;
+	m_nIdx = src.m_nIdx;
+	m_dblMaxZValue = src.m_dblMaxZValue;
 
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////
 	for each (CBaseWidget * pBaseWgt in src.m_arrWidgets)
 	{
 		CBaseWidget *pWidget = nullptr;
@@ -112,23 +120,34 @@ const CGraphicsLayer& CGraphicsLayer::operator=(const CGraphicsLayer &src)
 
 			if (pGroupWgt == nullptr)
 			{
-				return *this;
+				*this;
 			}
 			std::vector <CBaseWidget *> arrBaseWgt;
 
 			for (int i = 0; i < pGroupWgt->GetWidgetCount(); i++)
 			{
-				pWidget = CWidgetFactory::CreateWidget(pGroupWgt->GetWidget(i)->GetPosition(), pGroupWgt->GetWidget(i)->GetWidgetType());
 
-				Q_ASSERT(pWidget);
+				if (pGroupWgt->GetWidget(i)->GetWidgetType() == CShapeWidget::WIDGET_GROUP)
+				{
+					pWidget = CopyGroupInfo((CGroupWidget*)pGroupWgt->GetWidget(i));
+				}
+				else
+				{
+					pWidget = CWidgetFactory::CreateWidget(pGroupWgt->GetWidget(i)->GetPosition(), pGroupWgt->GetWidget(i)->GetWidgetType());
+
+					Q_ASSERT(pWidget);
+
+				}
+
 				if (pWidget)
 				{
-					*pWidget = *pGroupWgt->GetWidget(i);
+					//*pWidget = *pBaseWgt;
+
+					pWidget->CopyBaseProperty(pGroupWgt->GetWidget(i));
+					pWidget->CopyDynamicPro(pGroupWgt->GetWidget(i)->CreateDynamicPro());
 					//pWidget->SetRotateAngle(pGroupWgt->GetWidget(i)->GetRotateAngle());
 					arrBaseWgt.push_back(pWidget);
 				}
-
-
 			}
 
 			if (m_pScene != nullptr)
@@ -189,8 +208,30 @@ const CGraphicsLayer& CGraphicsLayer::operator=(const CGraphicsLayer &src)
 					pGroup->AddWidget(it2, rcRelation);
 				}
 
-				AddWidget(pGroup);
-			}
+
+					std::vector <CBaseWidget*>::iterator it_find = std::find(m_arrWidgets.begin(), m_arrWidgets.end(), pGroup);
+					if (it_find == m_arrWidgets.end())
+					{
+						pGroup->SetLayer(this);
+						//	pObj->setParentItem(this);
+						m_arrWidgets.push_back(pGroup);
+
+						if (pGroup->zValue() == 0.0f)
+						{
+							pGroup->setZValue(m_dblMaxZValue);
+							m_dblMaxZValue += 1.0f;
+						}
+					}
+					else
+					{
+						Q_ASSERT(false);
+					}
+
+				}
+			
+			
+
+			Select(nullptr);
 
 		}
 		else
@@ -202,7 +243,13 @@ const CGraphicsLayer& CGraphicsLayer::operator=(const CGraphicsLayer &src)
 			{
 				//pWidget->SetRotateAngle(pBaseWgt->GetRotateAngle());
 
-				*pWidget = *pBaseWgt;
+				pWidget->CopyBaseProperty(pBaseWgt);
+				pWidget->CopyDynamicPro(pBaseWgt->CreateDynamicPro());
+
+
+				SetCurrentWidget(pWidget);
+
+				Select(nullptr);
 
 				if (pBaseWgt->GetWidgetType() == DRAW_TOOLS_POLYLINE || pBaseWgt->GetWidgetType() == DRAW_TOOLS_POLYGON || pBaseWgt->GetWidgetType() == DRAW_TOOLS_PIPE)
 				{
@@ -219,6 +266,7 @@ const CGraphicsLayer& CGraphicsLayer::operator=(const CGraphicsLayer &src)
 
 
 						PloyLine->UpdateAllPoints();
+
 					}
 				}
 			}
@@ -230,14 +278,125 @@ const CGraphicsLayer& CGraphicsLayer::operator=(const CGraphicsLayer &src)
 					m_pScene->addItem(pWidget);
 				}
 
-				
-
 				AddWidget(pWidget);
 			}
 
 		}
+
+
 	}
+
+
+
+
 	return *this;
+}
+
+CGroupWidget *CGraphicsLayer::CopyGroupInfo(CGroupWidget* pGroupWgt)
+{
+	Q_ASSERT(pGroupWgt);
+	if (pGroupWgt == nullptr)
+	{
+		return nullptr;
+	}
+
+	if (pGroupWgt == nullptr)
+	{
+		//*this;
+	}
+	std::vector <CBaseWidget *> arrBaseWgt;
+
+	CBaseWidget *pWidget = nullptr;
+
+	for (int i = 0; i < pGroupWgt->GetWidgetCount(); i++)
+	{
+
+		if (pGroupWgt->GetWidget(i)->GetWidgetType() == CShapeWidget::WIDGET_GROUP)
+		{
+			pWidget = CopyGroupInfo((CGroupWidget*)pGroupWgt->GetWidget(i));
+		}
+		else
+		{
+			pWidget = CWidgetFactory::CreateWidget(pGroupWgt->GetWidget(i)->GetPosition(), pGroupWgt->GetWidget(i)->GetWidgetType());
+
+			Q_ASSERT(pWidget);
+
+		}
+
+		if (pWidget)
+		{
+			//*pWidget = *pGroupWgt;
+			pWidget->CopyBaseProperty(pGroupWgt->GetWidget(i));
+			pWidget->CopyDynamicPro(pGroupWgt->GetWidget(i)->CreateDynamicPro());
+
+			//pWidget->SetRotateAngle(pGroupWgt->GetWidget(i)->GetRotateAngle());
+			arrBaseWgt.push_back(pWidget);
+		}
+	}
+
+// 	if (m_pScene != nullptr)
+// 	{
+// 		GroupInputWidgets(arrBaseWgt, pGroupWgt->GetRotateAngle(), CGraphicsLayer::FATHER_GROUP);
+// 	}
+// 	else
+	
+
+// 		std::vector<CBaseWidget *> arrSel;
+// 
+// 		bool bFlag = false;
+// 		QRectF rcUnion, rcPos;
+// 
+// 		// 计算整个group的全部空间
+// 		for (auto it : arrBaseWgt)
+// 		{
+// 			if ((it)->IsLocked())
+// 				continue;
+// 
+// 			if (bFlag == false)
+// 			{
+// 				bFlag = true;
+// 				rcUnion = (it)->GetPosition();
+// 			}
+// 			else
+// 			{
+// 				rcUnion = rcUnion.united((it)->GetPosition());
+// 			}
+// 			arrSel.push_back(it);
+// 		}
+// 		Q_ASSERT(rcUnion.width() != 0 && rcUnion.height() != 0);
+// 		if (rcUnion.width() == 0 || rcUnion.height() == 0)
+// 		{
+// 			//*this;
+// 		}
+// 
+// 		// 添加一个group
+// 		QRectF rcRelation;
+// 		CGroupWidget *pGroup = new CGroupWidget;
+// 
+// 		for (auto it2 : arrSel)
+// 		{
+// 			if (it2->IsLocked() == true)
+// 			{
+// 				continue;
+// 			}
+// 
+// 			// 每个图元与整个group的相对位置
+// 			rcPos = (it2)->GetPosition();
+// 
+// 			rcRelation = BuildRelativeLocation(rcUnion, rcPos);
+// 
+// 			pGroup->AddWidget(it2, rcRelation);
+// 		}
+
+	CGroupWidget *pGroup = new CGroupWidget;
+	CreateGroupWidgets(arrBaseWgt, pGroupWgt->GetRotateAngle(), pGroup);
+
+
+	Select(nullptr);
+
+
+	return pGroup;
+
 }
 
 void CGraphicsLayer::SetCurrentWidget(CBaseWidget *pWidget)
@@ -333,7 +492,9 @@ bool CGraphicsLayer::EraseWidget(CBaseWidget *pObj)
 			//pObj->setParentItem(nullptr);
 			m_arrWidgets.erase(it_find);
 			// 回收内存
-			delete pObj;
+			//m_pScene->removeItem(pObj);
+
+			pObj->deleteLater();
 			return true;
 		}
 	}
@@ -1337,7 +1498,6 @@ bool CGraphicsLayer::GroupWidgets(CGroupWidget *pGroup)
 		
 		RemoveWidget(it2);
 		
-		
 		m_pScene->removeItem(it2);
 		
 		pGroup->AddWidget(it2, rcRelation);
@@ -1351,7 +1511,7 @@ bool CGraphicsLayer::GroupWidgets(CGroupWidget *pGroup)
 	//m_pScene->addItem(pGroup);
 	Select(pGroup);
 	SetCurrentWidget(pGroup);
-
+	qDebug() << m_pScene->views()[0]->items();
 	return true;
 }
 
@@ -1486,8 +1646,11 @@ bool CGraphicsLayer::CroupGroupWidgets(const std::vector <CBaseWidget *> &arr, d
 
 	//AddWidget(pGroup);
 
-
-	m_pScene->addItem(pGroup);
+	if (m_pScene != nullptr)
+	{
+		m_pScene->addItem(pGroup);
+	}
+	
 	//Select(pGroup);
 
 	pGroup->SetRotateAngle(dAngle);
@@ -1500,11 +1663,11 @@ bool CGraphicsLayer::CroupGroupWidgets(const std::vector <CBaseWidget *> &arr, d
 
 bool CGraphicsLayer::CreateGroupWidgets(const std::vector <CBaseWidget *> &arr, double dAngle, CGroupWidget *pGroup)
 {
-	Q_ASSERT(m_pScene);
-	if (m_pScene == nullptr)
-	{
-		return false;
-	}
+// 	Q_ASSERT(m_pScene);
+// 	if (m_pScene == nullptr)
+// 	{
+// 		return false;
+// 	}
 
 	Q_ASSERT(pGroup);
 	if (pGroup == nullptr)

@@ -1,0 +1,93 @@
+
+<style>
+    body{ padding:50px 0 0 50px;}
+    .datainp{ width:150px; height:38px; border:1px #ccc solid;}
+    .floatLeft{ float:left}
+
+    .panel .slidedown .glyphicon,
+    .chat .glyphicon {
+        margin-right: 5px;
+    }
+
+    .table-menu > td
+    {
+        color: #b057f0;
+        width: 100px;
+        white-space: nowrap;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .table-data > td
+    {
+        color: #ed1e12;
+        width: 100px;
+        border-width: 1px;
+        white-space: nowrap;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .ReportArea table{border-right:1px solid #090408;border-bottom:1px solid #090408;margin-left:3%;margin-right:3%;line-height: 33px;}
+    .ReportArea table td{border-left:1px solid #090408;border-top:1px solid #090408;font-size: 18px;line-height: 33px;}
+
+</style>
+
+<p style="background:#ffffff">
+
+<div style="font-size:16px;color:#281ef0;padding-top:1%;text-align: center;font-weight:bold;">日报表</div>
+
+<div class="content" style="padding-top:1%;">
+    <!--<div ng-repeat="stationInfo in stationInfoList">-->
+        <!--<span>{{stationInfo.strName}}</span>-->
+    <!--</div>-->
+    <span style="line-height:2em; margin-left:1%">场站选择：</span>
+    <span style="width:20%">
+         <select class="c12" name="station" id="station" style="width:95%" ng-model="ftKind2">
+             <option value="{{stationInfo.nStationID}}" ng-repeat="stationInfo in stationInfoList">{{stationInfo.strName}}</option>
+         </select>
+    </span>
+
+    <span style="line-height:2em; margin-left:1%">设备选择：</span>
+    <span style="width:20%">
+        <select class="c12" name="device" id="device" style="width:95%" ng-model="ftKind1">
+            <option></option>
+        </select>
+    </span>
+
+    <span style="line-height:2em; margin-left:1%">测点选择：</span>
+    <span style="width:20%">
+        <select class="c12" name="point" id="point" style="width:95%" ng-model="ftKind3">
+            <option></option>
+        </select>
+    </span>
+
+    <div class="clear"></div>
+</div>
+    <!--<section class="demo">-->
+        <!--<div class="demo_con">-->
+            <!--<button type="button" class="button blue larrow">前一天</button>-->
+        <!--</div>-->
+    <!--</section>-->
+
+<p style="line-height:2em; margin-left:1%">
+    <input class="datainp floatLeft" id="reportTime" type="text" placeholder="查询时间"  readonly>
+    <input class="floatLeft" style="height:38px" type="button" onClick="jeDate({dateCell:'#reportTime',isTime:true,minDate:'2017-06-01 00:00:00',format:'YYYY-MM-DD hh:mm:ss'})" value=" ... ">
+
+    <span class="floatLeft" style="margin:10px"></span>
+
+    <div role="group">
+
+        <button type="button" class="button blue larrow " ng-click="this.blur();prevTime()">前一天</button>
+        <button type="button" class="button blue" ng-click="this.blur();currentTime()">今天</button>
+        <button type="button" class="button blue rarrow" ng-click="this.blur();nextTime()">后一天</button>
+        <button type="button" class="button blue" ng-click="this.blur();reportSearch()">查询</button>
+        <button type="button" class="button blue round" ng-click="this.blur();exportReport()">导出</button>
+
+    </div>
+</p>
+
+<div style="float:none" align="center">
+    <div id="reportTable">
+    </div>
+</div>

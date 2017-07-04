@@ -73,7 +73,7 @@ public:
 	//! 画面文件操作类型文本
 	static std::array<QString, MAX_FILE_OP_NUM> m_arrFileOpTypeTxt;
 
-	const std::string  & GetGraphFileName() const;
+	const QString  & GetGraphFileName() const;
 	// 文件操作类型
 	void SetFileOpType(const QString  & szTxt);
 	QString GetFileOpTypeTxt() const;
@@ -82,7 +82,7 @@ public:
 	void SetGraphXPos(const std::string  & szX);
 	void SetGraphYPos(const std::string  & szY);
 
-	void SetFileName(const std::string  & szName);
+	void SetFileName(const QString  & szName);
 
 	unsigned int GetGraphXPos() const
 	{
@@ -110,24 +110,45 @@ public:
 	bool AddFileOpEvent(CDyncFileOpEventItem * pFileOp);
 	// 保存
 	bool SaveFileOp(CDyncFileOpEventItem * pFileOp);
-private:
+public:
 	//! 文件操作类型
 	FILE_OP_TYPE  m_FileOpType;
 	//! 文件名，格式： 目录\文件 不包含后缀
-	std::string  m_szGraphFileName;
+	QString  m_szGraphFileName;
 	//监视器
 	int m_nMontor;
 	//参数文件
 	QString m_szParaFile;
-	//水平位置
-	QString m_strHorPos;
-	//垂直位置
-	QString m_strVorPos;
 	//宽度
 	int m_nWidth;
 	//高度
 	int m_nHeight;
-	//
+	//标题
+	bool m_bTitle;
+	//边框
+	bool m_bFrame;
+	//可变边框
+	bool m_bChangeableFrame;
+	//系统菜单
+	bool m_bSystemMenu;
+	//最大化图标
+	bool m_bMaxIcon;
+	//最小化图标
+	bool m_bMinIcon;
+	//保持比例打印
+	bool m_bScalePrint;
+	//打印页宽
+	int m_nPrintWidth;
+	//打印页高
+	int m_nPrintHeight;
+	//顶边界
+	int m_nTopMargin;
+	//底边界
+	int m_nBottomMargin;
+	//左边界
+	int m_nLeftMargin;
+	//右边界
+	int m_nRightMaring;
 
 	unsigned int m_nXPos;
 	unsigned int m_nYPos;

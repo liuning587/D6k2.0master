@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StringPool Description="test" IsTranslate="false">
+    <Element OccNo="1" Description="fes0" Language=""/>
+    <Element OccNo="2" Description="transform0" Language=""/>
+    <Element OccNo="3" Description="nontransform1" Language=""/>
+    <Element OccNo="4" Description="analogalarm0" Language=""/>
+    <Element OccNo="5" Description="analogalarmofflimitdesc0" Language=""/>
+    <Element OccNo="6" Description="digitalalarm0" Language=""/>
+    <Element OccNo="7" Description="digtalalarmlimit0" Language=""/>
+    <Element OccNo="8" Description="channel0" Language=""/>
+    <Element OccNo="9" Description="device0" Language=""/>
+    <Element OccNo="10" Description="AnalogInput0" Language=""/>
+    <Element OccNo="11" Description="AnalogInput1" Language=""/>
+    <Element OccNo="12" Description="AnalogInput2" Language=""/>
+    <Element OccNo="13" Description="AnalogInput3" Language=""/>
+    <Element OccNo="14" Description="AnalogInput4" Language=""/>
+    <Element OccNo="15" Description="DigitalInput0" Language=""/>
+    <Element OccNo="16" Description="AnalogOutput0" Language=""/>
+    <Element OccNo="17" Description="DigitalOutput0" Language=""/>
+    <Element OccNo="18" Description="uservariable1" Language=""/>
+    <Element OccNo="19" Description="system-year" Language=""/>
+    <Element OccNo="20" Description="system-month" Language=""/>
+    <Element OccNo="21" Description="system-day" Language=""/>
+    <Element OccNo="22" Description="WIN-H7OD9596KPT" Language=""/>
+    <Element OccNo="23" Description="SCADA核心模块" Language=""/>
+    <Element OccNo="24" Description="实时图形界面模块" Language=""/>
+    <Element OccNo="25" Description="告警模块" Language=""/>
+    <Element OccNo="26" Description="Scada0" Language=""/>
+    <Element OccNo="27" Description="scadauservariable1" Language=""/>
+</StringPool>

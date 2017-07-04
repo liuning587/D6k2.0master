@@ -83,6 +83,15 @@
     <ClCompile Include="..\fespub\tag_att.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="server_db.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scada_db.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client_db.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base_mem_db.h">
@@ -125,6 +134,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\scadaapi\scdapp_def.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="server_db.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scada_db.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="client_db.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

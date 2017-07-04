@@ -7575,6 +7575,21 @@ bool CFesModule::GetDesPoolArr(std::unordered_map<std::string, int32u> *pHash, s
 	return true;
 }
 
+QString CFesModule::GetOccNoFromScadaVariableUserSourceTagName(const QString &strFes, const QString &strRelatedTagName)
+{
+	auto pFesData = m_pConfig->GetFesData(strFes.toStdString());
+	Q_ASSERT(pFesData);
+	if (!pFesData)
+	{
+		return nullptr;
+	}
+
+	QString strTmp = "";
+	pFesData->GetUserVariableRelatedSourceOccNo(strFes, strRelatedTagName, strTmp);
+
+	return strTmp;
+}
+
 /*! \fn QString CFesModel::GetGroupName(QModelIndex *pIndex, int nType)
 ********************************************************************************************************* 
 ** \brief CFesModel::GetGroupName 

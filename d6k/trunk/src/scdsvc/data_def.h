@@ -69,6 +69,8 @@ enum
 	//INVALID_TYPE = 0,
 	AIN_TYPE = 1,
 	DIN_TYPE = 2,
+	USERVAR_TYPE = 3 ,
+	SYSVAR_TYPE = 4 ,
 	MAX_DATA_TYPE = 100,
 };
 

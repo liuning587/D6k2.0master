@@ -46,10 +46,8 @@
 CRealTimeView::CRealTimeView(QWidget *parent) :
 QGraphicsView(parent)
 {
-
-// 	setStyleSheet("background: transparent;border:0px");
-// 	setWindowFlags(Qt::FramelessWindowHint);
-	
+ 	setStyleSheet("background: transparent;border:0px");
+ 	setWindowFlags(Qt::FramelessWindowHint);	
 	this->setViewportMargins(13, 13, 0, 0);
 }
 
@@ -58,22 +56,21 @@ CRealTimeView::CRealTimeView(QGraphicsScene *pScene, QWidget * parent)
 {
     this->setViewportMargins(13, 13, 0, 0);
 
-    m_nTimerID = startTimer(1000);
-
     setCacheMode(CacheBackground);
-//	setRenderHint(QPainter::Antialiasing);
+	setInteractive(true);
+	setRenderHint(QPainter::Antialiasing);
 	setMouseTracking(true);
-	//setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+	setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
-// 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-// 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-//  	setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-//  	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+ 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+ 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+ 	setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-// 	setStyleSheet("background: transparent;border:0px");
-// 	setWindowFlags(Qt::FramelessWindowHint);
-// 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-// 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+ 	setStyleSheet("background: transparent;border:0px");
+	setWindowFlags(Qt::FramelessWindowHint);
+ //	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+ //	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
       
 //	m_pGraphFile = std::make_shared<CGraphFile>();
 
@@ -109,7 +106,7 @@ CRealTimeView::CRealTimeView(QGraphicsScene *pScene, QWidget * parent)
 
 CRealTimeView::~CRealTimeView()
 { 
-	killTimer(m_nTimerID);
+
 }
 
 CGraphScene *CRealTimeView::GetGraphicsScene() const
@@ -117,23 +114,47 @@ CGraphScene *CRealTimeView::GetGraphicsScene() const
 	return dynamic_cast<CGraphScene *>(scene());
 } 
    
+void CRealTimeView::drawBackground(QPainter *painter, const QRectF &rect)
+{
+	CGraphScene * pScene = GetGraphicsScene();
+	if (pScene)
+	{
+		CGraphFile  *pFile = (pScene->GetGraphFile());
+		if (pFile)
+		{
+			pFile->DrawBackground(painter, rect);
+		}
+	}
+}
+
+
 void CRealTimeView::paintEvent(QPaintEvent *event)
 {
-//     if (viewport()->width() != m_nViewPortWidth || viewport()->height() != m_nViewPortHeight)
-//     {
-//         //当视图大小发送变化时,需要重绘背景
-//         m_nViewPortWidth = viewport()->width();
-//         m_nViewPortHeight = viewport()->height();
-// 
-//         setCacheMode(CacheNone);
-//     }
-//     else
-//     {
-//         //当没有变化时
-//         setCacheMode(CacheBackground);
-//     }
+     /*if (viewport()->width() != m_nViewPortWidth || viewport()->height() != m_nViewPortHeight)
+     {
+         //当视图大小发送变化时,需要重绘背景
+         m_nViewPortWidth = viewport()->width();
+        m_nViewPortHeight = viewport()->height();
+ 
+         setCacheMode(CacheNone);
+     }
+     else
+     {
+         //当没有变化时
+         setCacheMode(CacheBackground);
+     }*/
     QGraphicsView::paintEvent(event);
 }
+
+/*
+void CRealTimeView::drawBackground(QPainter *painter, const QRectF &rect)
+{
+	CGraphScene * pScene = GetGraphicsScene();
+	if (pScene)
+	{
+		pScene->GetGraphFile()->DrawBackground(painter, rect);
+	}
+}*/
 
 void CRealTimeView::contextMenuEvent(QContextMenuEvent *event)
 {
@@ -144,16 +165,6 @@ void CRealTimeView::contextMenuEvent(QContextMenuEvent *event)
 }
 
 
-void CRealTimeView::timerEvent(QTimerEvent *event)
-{
-	/*Q_ASSERT(event);
-	if (event)
-	{
-		if (event->timerId()==m_nTimerID)
-		{
-			update();
-		}
-	}*/
-}
+
 
 /** @}*/

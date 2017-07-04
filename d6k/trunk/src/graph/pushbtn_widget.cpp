@@ -3,9 +3,15 @@
 #include "graph_module.h"
 #include "colour_define.h"
 #include "dync_event.h"
+#include "stl_util-inl.h"
+#include "base_dync_event_item.h"
+#include "dync_file_op_event.h"
+#include "dync_var_op_event.h"
+
 
 #include <QStyleOptionGraphicsItem>
 #include <QPainter>
+#include <QXmlStreamWriter>
 
 CPushBtnWidget::CPushBtnWidget()
 	: CBaseWidget()
@@ -18,8 +24,8 @@ CPushBtnWidget::CPushBtnWidget(QRectF rcPos, BTN_TYPE shape):CBaseWidget(rcPos)
 	m_Shape = shape;
 
 	m_eRotateCenter = ROTATE_MIDCENTER;
-	//命令
-	m_pEventIntent = new CDyncEventData;
+
+	m_eExecType = BTN_EXEC_ORDER;
 
 	switch (shape)
 	{
@@ -192,6 +198,7 @@ CPushBtnWidget::CPushBtnWidget(QRectF rcPos, BTN_TYPE shape):CBaseWidget(rcPos)
 
 CPushBtnWidget::~CPushBtnWidget()
 {
+	STLDeleteElements(&m_arrEventIntent);
 }
 
 
@@ -1109,6 +1116,326 @@ void CPushBtnWidget::SetFontLayout(QTextOption &txtOpt)
 	{
 		//中  - 右
 		txtOpt.setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+	}
+}
+
+CDyncEventData* CPushBtnWidget::GetEventActionData(BTN_OPERATOR eBtnOper)
+{
+	for (auto item : m_arrEventIntent)
+	{
+		if (item->GetActionType() == eBtnOper)
+		{
+			return item;
+		}
+	}
+
+	CDyncEventData* pEventData = new CDyncEventData;
+
+	pEventData->SetActionType(static_cast<CDyncEventData::ACTION_TYPE>(eBtnOper));
+	m_arrEventIntent.push_back(pEventData);
+
+	return pEventData;
+}
+
+bool CPushBtnWidget::SaveXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter)
+{
+	Q_ASSERT(pXmlWriter);
+	if (pXmlWriter == nullptr)
+		return false;
+
+	pXmlWriter->writeStartElement("Widget");
+	pXmlWriter->writeAttribute("Type", QString::number(m_nObjType));
+	//暂时没有用
+	//pXmlWriter->writeAttribute("ClassType", QString::number(m_nClassType)); 
+	pXmlWriter->writeAttribute("ID", QString::number(m_nID));
+	//zvalue
+	pXmlWriter->writeAttribute("ZValue", QString::number(this->zValue()));
+	pXmlWriter->writeAttribute("Name", m_szName.c_str());
+	pXmlWriter->writeAttribute("WidgetName", QString::fromLocal8Bit(m_szWidgetName.c_str()));
+	pXmlWriter->writeAttribute("Pos.x", QString::number(m_rcPos.x()));
+	pXmlWriter->writeAttribute("Pos.y", QString::number(m_rcPos.y()));
+	//大小
+	pXmlWriter->writeAttribute("Width", QString::number(m_rcPos.width()));
+	pXmlWriter->writeAttribute("Height", QString::number(m_rcPos.height()));
+	//旋转中心
+	pXmlWriter->writeAttribute("RotateCenter", QString::number(m_eRotateCenter));
+	//旋转角度
+	pXmlWriter->writeAttribute("Rotate", QString::number(m_dblRotateAngle));
+	//结束角度
+	pXmlWriter->writeAttribute("EndAngle", QString::number(m_nEndAngle));
+	//锁定
+	pXmlWriter->writeAttribute("Lock", QString::number(m_bLocked));
+	//静态属性
+	SaveBaseXml(pXmlWriter);
+	//动态属性
+	SaveDynamicXml(pXmlWriter);
+	//保存按钮属性
+	SaveBtnExecXml(pXmlWriter);
+
+
+	pXmlWriter->writeEndElement();
+
+
+	return true;
+}
+
+void CPushBtnWidget::SaveBtnExecXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter)
+{
+	//窗口属性
+	pXmlWriter->writeStartElement("ButtonExec");
+
+	pXmlWriter->writeAttribute("Variable", m_strBtnBindValue);
+	pXmlWriter->writeAttribute("OrderType", QString::number(m_eExecType));
+
+	pXmlWriter->writeStartElement("PressOrder");
+	SaveOrderXml(pXmlWriter, GetEventActionData(ACTION_PRESSED));
+	pXmlWriter->writeEndElement();
+
+	pXmlWriter->writeStartElement("ReleaseOrder");
+	SaveOrderXml(pXmlWriter, GetEventActionData(ACTION_RELEASE));
+	pXmlWriter->writeEndElement();
+
+
+	pXmlWriter->writeEndElement();
+
+}
+
+void CPushBtnWidget::SaveOrderXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter, CDyncEventData* pOrder)
+{
+	Q_ASSERT(pOrder);
+	if (pOrder == nullptr)
+	{
+		return;
+	}
+
+	for (auto item : pOrder->getEvents())
+	{
+		if (item->GetEventType() == CBaseDyncEventItem::DYNC_FILE_OP)
+		{
+			//文件操作
+			CDyncFileOpEventItem *pFileItem = dynamic_cast<CDyncFileOpEventItem*>(item);
+
+			Q_ASSERT(pFileItem);
+			if (pFileItem == nullptr)
+			{
+				return;
+			}
+
+			pXmlWriter->writeStartElement("Window");
+			pXmlWriter->writeAttribute("Screen", pFileItem->m_szGraphFileName);
+			pXmlWriter->writeAttribute("Action", QString::number(pFileItem->m_FileOpType));
+			pXmlWriter->writeAttribute("Monitor", QString::number(pFileItem->m_nMontor));
+			pXmlWriter->writeAttribute("ParaFile", pFileItem->m_szParaFile);
+			pXmlWriter->writeAttribute("XPos", QString::number(pFileItem->m_nXPos));
+			pXmlWriter->writeAttribute("YPos", QString::number(pFileItem->m_nYPos));
+
+			pXmlWriter->writeAttribute("Width", QString::number(pFileItem->m_nWidth));
+			pXmlWriter->writeAttribute("Height", QString::number(pFileItem->m_nHeight));
+			pXmlWriter->writeAttribute("Caption", QString::number(pFileItem->m_bTitle));
+			pXmlWriter->writeAttribute("Border", QString::number(pFileItem->m_bFrame));
+			pXmlWriter->writeAttribute("ResizeBorder", QString::number(pFileItem->m_bChangeableFrame));
+			pXmlWriter->writeAttribute("SysMenu", QString::number(pFileItem->m_bSystemMenu));
+			pXmlWriter->writeAttribute("MaxBox", QString::number(pFileItem->m_bMaxIcon));
+			pXmlWriter->writeAttribute("MinBox", QString::number(pFileItem->m_bMinIcon));
+			pXmlWriter->writeAttribute("ScalePrint", QString::number(pFileItem->m_bScalePrint));
+			pXmlWriter->writeAttribute("PrintWidth", QString::number(pFileItem->m_nPrintWidth));
+			pXmlWriter->writeAttribute("PrintHeight", QString::number(pFileItem->m_nPrintHeight));
+			pXmlWriter->writeAttribute("TopMargin", QString::number(pFileItem->m_nTopMargin));
+			pXmlWriter->writeAttribute("BottomMargin", QString::number(pFileItem->m_nBottomMargin));
+			pXmlWriter->writeAttribute("LeftMargin", QString::number(pFileItem->m_nLeftMargin));
+			pXmlWriter->writeAttribute("RightMargin", QString::number(pFileItem->m_nRightMaring));
+			pXmlWriter->writeEndElement();
+
+		}
+		else if (item->GetEventType() == CBaseDyncEventItem::DYNC_VAR_OP)
+		{
+			//变量
+			CDyncVarOpEventItem *pVarItem = dynamic_cast<CDyncVarOpEventItem*>(item);
+
+			Q_ASSERT(pVarItem);
+			if (pVarItem == nullptr)
+			{
+				return;
+			}
+
+			pXmlWriter->writeStartElement("Variable");
+			pXmlWriter->writeAttribute("BindVar", pVarItem->m_strBindValue);
+			pXmlWriter->writeAttribute("Action", QString::number(pVarItem->m_eAction));
+			pXmlWriter->writeAttribute("TransferVar", pVarItem->m_strTransformPara);
+			pXmlWriter->writeAttribute("Value", pVarItem->m_strValue);
+			pXmlWriter->writeAttribute("StrobeTime", QString::number(pVarItem->m_nStrobeTime));
+			pXmlWriter->writeAttribute("MaxValue", QString::number(pVarItem->m_fMaxValue));
+
+			pXmlWriter->writeAttribute("MinValue", QString::number(pVarItem->m_fMinValue));
+			pXmlWriter->writeAttribute("MaxCharacterLength", QString::number(pVarItem->m_nMaxCharNums));
+			pXmlWriter->writeEndElement();
+
+		}
+	}
+
+}
+
+bool CPushBtnWidget::LoadXml(std::shared_ptr<QXmlStreamReader> pXmlReader)
+{
+	//读取绑定值属性
+	m_strBtnBindValue = pXmlReader->attributes().value("Variable").toString();
+	m_eExecType = static_cast<BTN_EXEC_TYPE>(pXmlReader->attributes().value("OrderType").toInt());
+
+	//命令属性
+	while (!pXmlReader->atEnd())
+	{
+		pXmlReader->readNext();
+
+		if (pXmlReader->isStartElement())
+		{
+			if (pXmlReader->name().toString() == "PressOrder")
+			{
+				CDyncEventData* pEventData = GetEventActionData(BTN_OPERATOR::ACTION_PRESSED);
+				Q_ASSERT(pEventData);
+
+				if (pEventData == nullptr)
+				{
+					return false;
+				}
+
+				pEventData->SetActionType(CDyncEventData::ACTION_PRESSED);
+
+				LoadOrderInfo(pXmlReader,pEventData);
+			}
+			else if (pXmlReader->name().toString() == "ReleaseOrder")
+			{
+				CDyncEventData* pEventData = GetEventActionData(BTN_OPERATOR::ACTION_RELEASE);
+
+				Q_ASSERT(pEventData);
+
+				if (pEventData == nullptr)
+				{
+					return false;
+				}
+
+				pEventData->SetActionType(CDyncEventData::ACTION_RELEASE);
+
+				LoadOrderInfo(pXmlReader, pEventData);
+			}
+		}
+		if (pXmlReader->isEndElement())
+		{
+			if (pXmlReader->name().toString() == "ButtonExec")
+			{
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+void CPushBtnWidget::LoadOrderInfo(std::shared_ptr<QXmlStreamReader> pXmlReader, CDyncEventData* pOrder)
+{
+	Q_ASSERT(pOrder);
+
+	if (pOrder == nullptr)
+	{
+		return;
+	}
+
+	while (!pXmlReader->atEnd())
+	{
+		pXmlReader->readNext();
+		if (pXmlReader->isStartElement())
+		{
+			if (pXmlReader->name().toString() == "Window")
+			{
+				CDyncFileOpEventItem *pEventItem = dynamic_cast<CDyncFileOpEventItem *>(pOrder->CreateEventItem(CBaseDyncEventItem::DYNC_FILE_OP));
+
+				Q_ASSERT(pEventItem);
+				if (pEventItem == nullptr)
+				{
+					return;
+				}
+
+				pEventItem->m_OpEventType = CBaseDyncEventItem::DYNC_FILE_OP;
+
+				//! 文件操作类型
+				pEventItem->m_FileOpType = static_cast<CDyncFileOpEventItem::FILE_OP_TYPE>(pXmlReader->attributes().value("Action").toInt());;
+				//! 文件名，格式： 目录\文件 不包含后缀
+				pEventItem->m_szGraphFileName = pXmlReader->attributes().value("Screen").toString();;
+				//监视器
+				pEventItem->m_nMontor = pXmlReader->attributes().value("Monitor").toInt();;
+				//参数文件
+				pEventItem->m_szParaFile = pXmlReader->attributes().value("ParaFile").toString();;
+
+				pEventItem->m_nXPos = pXmlReader->attributes().value("XPos").toInt();;
+				pEventItem->m_nYPos = pXmlReader->attributes().value("YPos").toInt();;
+
+
+				//宽度
+				pEventItem->m_nWidth = pXmlReader->attributes().value("Width").toInt();;
+				//高度
+				pEventItem->m_nHeight = pXmlReader->attributes().value("Height").toInt();;
+				//标题
+				pEventItem->m_bTitle = pXmlReader->attributes().value("Caption").toInt();;
+				//边框
+				pEventItem->m_bFrame = pXmlReader->attributes().value("Border").toInt();
+				//可变边框
+				pEventItem->m_bChangeableFrame = pXmlReader->attributes().value("ResizeBorder").toInt();
+				//系统菜单
+				pEventItem->m_bSystemMenu = pXmlReader->attributes().value("SysMenu").toInt();
+				//最大化图标
+				pEventItem->m_bMaxIcon = pXmlReader->attributes().value("MaxBox").toInt();
+				//最小化图标
+				pEventItem->m_bMinIcon = pXmlReader->attributes().value("MinBox").toInt();
+				//保持比例打印
+				pEventItem->m_bScalePrint = pXmlReader->attributes().value("ScalePrint").toInt();
+				//打印页宽
+				pEventItem->m_nPrintWidth = pXmlReader->attributes().value("PrintWidth").toInt();
+				//打印页高
+				pEventItem->m_nPrintHeight = pXmlReader->attributes().value("PrintHeight").toInt();
+				//顶边界
+				pEventItem->m_nTopMargin = pXmlReader->attributes().value("TopMargin").toInt();
+				//底边界
+				pEventItem->m_nBottomMargin = pXmlReader->attributes().value("BottomMargin").toInt();
+				//左边界
+				pEventItem->m_nLeftMargin = pXmlReader->attributes().value("LeftMargin").toInt();
+				//右边界
+				pEventItem->m_nRightMaring = pXmlReader->attributes().value("RightMargin").toInt();
+
+			}
+			else if (pXmlReader->name().toString() == "Variable")
+			{
+				CDyncVarOpEventItem *pEventItem = dynamic_cast<CDyncVarOpEventItem *>(pOrder->CreateEventItem(CBaseDyncEventItem::DYNC_VAR_OP));
+
+				Q_ASSERT(pEventItem);
+				if (pEventItem == nullptr)
+				{
+					return;
+				}
+
+				pEventItem->m_OpEventType = CBaseDyncEventItem::DYNC_VAR_OP;
+
+				//! 
+				pEventItem->m_eAction = static_cast<CDyncVarOpEventItem::VAR_ACTION>(pXmlReader->attributes().value("Action").toInt());;
+				//! 
+				pEventItem->m_strBindValue = pXmlReader->attributes().value("BindVar").toString();;
+				//
+				pEventItem->m_strTransformPara = pXmlReader->attributes().value("TransferVar").toString();;
+				//
+				pEventItem->m_strValue = pXmlReader->attributes().value("Value").toString();;
+
+				pEventItem->m_nStrobeTime = pXmlReader->attributes().value("StrobeTime").toInt();;
+				pEventItem->m_fMaxValue = pXmlReader->attributes().value("MaxValue").toFloat();;
+
+				pEventItem->m_fMinValue = pXmlReader->attributes().value("MinValue").toFloat();;
+				pEventItem->m_nMaxCharNums = pXmlReader->attributes().value("MaxCharacterLength").toInt();;
+			}
+		}
+		if (pXmlReader->isEndElement())
+		{
+			if (pXmlReader->name().toString() == "PressOrder" || pXmlReader->name().toString() == "ReleaseOrder")
+			{
+				return;
+			}
+		}
 	}
 }
 

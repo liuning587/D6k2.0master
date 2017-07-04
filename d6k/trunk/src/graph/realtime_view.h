@@ -42,21 +42,17 @@ public:
 	CRealTimeView(QGraphicsScene *scene, QWidget * parent = 0);
 
 	~CRealTimeView();
-public:
-	void timerEvent(QTimerEvent *event);
 
 protected:
  
 protected:
-	
+	virtual void drawBackground(QPainter *painter, const QRectF &rect);
 	virtual void contextMenuEvent(QContextMenuEvent *event);
-    virtual void paintEvent(QPaintEvent *event);
-   	 
+	virtual void paintEvent(QPaintEvent *event);
 	//·µ»Ø³¡¾°
 	CGraphScene *GetGraphicsScene() const; 
 
-private:
-	int m_nTimerID;
+
 };
 
 #endif // REALTIME_GRAPH_VIEW_H

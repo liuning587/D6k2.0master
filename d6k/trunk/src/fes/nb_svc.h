@@ -50,17 +50,23 @@ public:
 	virtual void Shutdown();
 protected:
 	virtual void MainLoop();
-
+	//更新节点状态
 	void UpdateNetState();
-
+	//邮件转发
 	void TransEmails();
-
+	//指令接收
+	void RecvSvcInfo();
+	//传送数据
 	void TransDataInfo();
-
+	//DI全数据同步
 	void SendDinToSvr();
-
+	//AI全数据同步
 	void SendAinToSvr();
-
+	//uservar全数据同步
+	void SendUserVarToSvr();
+	//sysvar全数据同步
+	void SendSysVarToSvr();
+	//告警数据同步
 	void SendAlarmData();
 
 	void SendAinAlarmData(EMSG_BUF *pEMsgBuf);

@@ -3,19 +3,10 @@
  */
 
 
-DaQOCloud.controller('shortCurveCtrl',['$scope','$http','$rootScope','$filter','$location',function($scope, $http, $rootScope,$filter,$location) {
+DaQOCloud.controller('shortCurveCtrl',['$scope','$http','$rootScope','$filter','shortCurveService',function($scope, $http, $rootScope,$filter,shortCurveService) {
 
     // 基于准备好的dom，初始化echarts实例
-    var myChart = document.getElementById('shortCurve');
-
-    //自适应宽高
-    var myChartContainer = function () {
-        myChart.style.width = this.getWidth+'px';
-        myChart.style.height = this.getHeight+'px';
-    };
-    myChartContainer();
-
-    var myChart = echarts.init(myChart);
+    var myChart = echarts.init(document.getElementById('shortCurve'));
 
     function loadPieOfVolume(small, big) {
 
@@ -97,11 +88,28 @@ DaQOCloud.controller('shortCurveCtrl',['$scope','$http','$rootScope','$filter','
         myChart.setOption(option);
     }
 
-    loadPieOfVolume(100,50);
+
+
+    $scope.doFilter = function () {
+        console.log('loading......');
+        $http({
+            method: 'POST',
+            data:'zyj',
+            url: '/hisDataOfCurve/shortCurve'
+        }).success(function (data, status) {
+            console.log(data.predict_time);
+            loadPieOfVolume(100,50);
+        }).error(function (data, status) {
+            alert("error");
+        })
+    };
+
+    shortCurveService.getMenuInfo().then(function (result) {
+        $scope.shortCurveMenu = result;
+    });
 
     //浏览器大小改变时重置大小
     window.onresize = function () {
-        myChartContainer();
         myChart.resize();
     };
 

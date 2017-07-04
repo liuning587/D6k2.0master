@@ -135,8 +135,6 @@ int32u CScadaApi::GetNodeOccNoByTagName(const std::string& tagName)
 	}
 }
 
-
-
 bool CScadaApi::GetIOOccNoByTagName(int32u nNodeOccNo, const std::string& tagName, const std::string& szAttr, int32u* pOccNo, int32u* pIddType, int32u *pFiledID)
 {
 	Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <=MAX_NODE_OCCNO);
@@ -144,6 +142,7 @@ bool CScadaApi::GetIOOccNoByTagName(int32u nNodeOccNo, const std::string& tagNam
 	{
 		return false;
 	}
+
 	Q_ASSERT(!tagName.empty() && tagName.length() > 0);
 	if (tagName.empty() || tagName.length() == 0)
 	{
@@ -207,8 +206,8 @@ bool CScadaApi::GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int
 	}
 
 	//包含系统变量或者前置变量,暂时按照$或者结构数目区分
-	if (szTagNameList.size()==2 || QString(pszTagName).contains('$'))
-	{
+//	if (szTagNameList.size()==2 || QString(pszTagName).contains('$'))
+//	{
 		QString szNodeTagName = szTagNameList.at(0);
 		int32u nNodeOccNo = GetNodeOccNoByTagName(szNodeTagName.toStdString());
 		Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <= MAX_NODE_OCCNO);
@@ -219,8 +218,19 @@ bool CScadaApi::GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int
 		}
 		*pNodeOccNo = nNodeOccNo;
 
-	}
-	else if (szTagNameList.size()==3)
+		bool bRet = GetIOOccNoByTagName(nNodeOccNo,
+			szTagNameList.at(1).toStdString().c_str(),
+			szTagNameList.at(2).toStdString().c_str(),
+			pOccNo,
+			pIddType,
+			pFiledID);
+		if (!bRet)
+		{
+			return false;
+		}
+//	}
+//	else if (szTagNameList.size()==3)
+/*
 	{
 		QString szNodeTagName = szTagNameList.at(0);
 
@@ -243,7 +253,7 @@ bool CScadaApi::GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int
 		{
 			return false;
 		}
-	}
+	}*/
 
 	return true;
 }
@@ -332,6 +342,8 @@ bool CScadaApi::PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int
 		}
 
 		bRet = pFes->PutRtData(nIddType, nOccNo, nFiledID, pData, pExt, pSrc); 
+
+		int nn = 0;
 		break;
 	}
 	case NODE_CLIENT:

@@ -36,6 +36,7 @@
 #include "background.h"
 #include "base_widget.h"
 #include "group_widget.h"
+#include "pushbtn_widget.h"
 
 #include <QFile> 
 #include <QDebug>
@@ -1107,6 +1108,19 @@ void CGraphXmlSerializer::LoadAttrInfo(std::shared_ptr<QXmlStreamReader> pXml, C
 					}
 				}
 
+			}
+			else if (pXml->name().toString() == "ButtonExec")
+			{
+				if (pWidget->GetWidgetType() >= DRAW_TOOLS_BTN_NORMAL && pWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
+				{
+					//°´Å¥
+					CPushBtnWidget *ptnWgt = dynamic_cast<CPushBtnWidget*>(pWidget);
+					Q_ASSERT(ptnWgt);
+					if (ptnWgt != nullptr)
+					{
+						ptnWgt->LoadXml(pXml);
+					}
+				}
 			}
 		}
 	}

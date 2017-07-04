@@ -669,6 +669,8 @@ public:
 	{
 		m_PixMap = pixmap;
 	}*/
+	//复制静态属性
+	void CopyBaseProperty(CBaseWidget *pSourceWgt);
 	//复制动态属性
 	void CopyDynamicPro(const std::vector<CBaseDyncData *> &arrDyncs);
 

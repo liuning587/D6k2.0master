@@ -14,7 +14,7 @@ CRealTimeTask::~CRealTimeTask()
 {
 
 }
-CRealTimeTask::CRealTimeTask(std::shared_ptr<CGraphFile>& pFile):m_pGraphFile(pFile)
+CRealTimeTask::CRealTimeTask(CGraphFile* pFile):m_pGraphFile(pFile)
 {
 	Q_ASSERT(pFile);
 
@@ -46,7 +46,7 @@ void CRealTimeTask::MainLoop(void *pImpl)
 	}
 }
 
-bool CRealTimeTask::Initialize(std::shared_ptr<CGraphFile>& pFile,  unsigned int nMode)
+bool CRealTimeTask::Initialize(CGraphFile* pFile,  unsigned int nMode)
 {
 	Q_ASSERT(pFile);
 	if (pFile == nullptr)

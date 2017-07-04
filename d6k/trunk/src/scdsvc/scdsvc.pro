@@ -29,7 +29,8 @@ UI_DIR += ./GeneratedFiles
 RCC_DIR += ./GeneratedFiles
 TRANSLATIONS += scdsvc-zh-CN.ts
 win32:RC_FILE = scdsvc.rc
-HEADERS += ../scdpub/variant_data.h \
+HEADERS += ../../include/scadaapi/scdapp_def.h \
+    ../scdpub/variant_data.h \
     ./audiodataunit.h \
     ./base_mem_db.h \
     ./base_module.h \
@@ -45,8 +46,9 @@ HEADERS += ../scdpub/variant_data.h \
     ./meta_object_property.h \
     ./nb_svc.h \
     ./object_model.h \
+    ./sapp.h \
+    ./scada_db.h \
     ./scada_main.h \
-    ./scdsvc.h \
     ./scdsvc_global.h \
     ./server_db.h \
     ./sharemem.h \
@@ -56,8 +58,7 @@ HEADERS += ../scdpub/variant_data.h \
     ./sysvar_db.h \
     ./threadsafedata.h \
     ./audio_alarm_svc.h \
-    ./sapp.h \
-    ./scada_db.h \
+    ./scdsvc.h
 SOURCES += ../scdpub/variant_data.cpp \
     ./audiodataunit.cpp \
     ./audio_alarm_svc.cpp \
@@ -75,7 +76,10 @@ SOURCES += ../scdpub/variant_data.cpp \
     ./meta_object_property.cpp \
     ./nb_svc.cpp \
     ./node_mem.cpp \
+    ./node_scd_mem.cpp \
     ./object_model.cpp \
+    ./sapp.cpp \
+    ./scada_db.cpp \
     ./scada_main.cpp \
     ./scdsvc.cpp \
     ./server_db.cpp \
@@ -83,8 +87,6 @@ SOURCES += ../scdpub/variant_data.cpp \
     ./shm_mgr.cpp \
     ./subscription_list.cpp \
     ./sub_svc.cpp \
-    ./sysvar_db.cpp \
-    ./sapp.cpp \
-    ./scada_db.cpp \
+    ./sysvar_db.cpp
 TRANSLATIONS += ./scdsvc-zh-CN.ts
 RESOURCES += scdsvc.qrc

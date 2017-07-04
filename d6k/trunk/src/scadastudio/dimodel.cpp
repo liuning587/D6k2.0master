@@ -130,17 +130,17 @@ QVariant CDIModel::data(const QModelIndex &index, int role) const
 		{
 			return m_arrDIs[nRow]->m_strAlarmTag;
 		}
-		else if (index.column() == AlarmType)
-		{
-			if (m_arrDIs[nRow]->m_nAlarmType == AIALARM)
-			{
-				return m_mapAlarmType[AIALARM];
-			}
-			else if (m_arrDIs[nRow]->m_nAlarmType == DIALARM)
-			{
-				return m_mapAlarmType[DIALARM];
-			}
-		}
+		//else if (index.column() == AlarmType)
+		//{
+		//	if (m_arrDIs[nRow]->m_nAlarmType == AIALARM)
+		//	{
+		//		return m_mapAlarmType[AIALARM];
+		//	}
+		//	else if (m_arrDIs[nRow]->m_nAlarmType == DIALARM)
+		//	{
+		//		return m_mapAlarmType[DIALARM];
+		//	}
+		//}
 		else if (index.column() == SaveDisk)
 		{
 			return m_arrDIs[nRow]->m_bSaveDisk;
@@ -248,10 +248,10 @@ QVariant CDIModel::data(const QModelIndex &index, int role) const
 		{
 			return m_arrDIs[nRow]->m_strAlarmTag;
 		}
-		else if (index.column() == AlarmType)
-		{
-			return (uint)m_arrDIs[nRow]->m_nAlarmType;
-		}
+		//else if (index.column() == AlarmType)
+		//{
+		//	return (uint)m_arrDIs[nRow]->m_nAlarmType;
+		//}
 		else if (index.column() == SaveDisk)
 		{
 			return m_arrDIs[nRow]->m_bSaveDisk;
@@ -748,6 +748,7 @@ void CDIModel::InitPara()
 	para.tagname = "BlockOccNo";
 	m_mapInfo.insert(BlockOccNo, para);
 	m_lstHorizontalHeader.append(para.desc);
+	((CDITable *)parent())->setItemDelegateForColumn(BlockOccNo, pReadOnlyDelegate);
 
 	////
 	//para.desc = tr("DataType");
@@ -886,18 +887,18 @@ void CDIModel::InitPara()
 	m_lstHorizontalHeader.append(para.desc);
 	((CDITable *)parent())->setItemDelegateForColumn(AlarmTagName, pReadOnlyDelegate);
 
-	para.desc = tr("AlarmType");
-	para.tagname = "AlarmType";
-	m_mapInfo.insert(AlarmType, para);
-	m_lstHorizontalHeader.append(para.desc);
-	m_mapAlarmType.clear();
-	tmp.desc = tr("ai alarm");
-	tmp.ID = AIALARM;		//AIALARM
-	m_mapAlarmType.insert(AIALARM, tmp.desc);
-	tmp.desc = tr("di alarm");
-	//tmp.ID = DIALARM;		//DIALARM
-	m_mapAlarmType.insert(DIALARM, tmp.desc);
-	((CDITable *)parent())->setItemDelegateForColumn(AlarmType, pReadOnlyDelegate);
+	//para.desc = tr("AlarmType");
+	//para.tagname = "AlarmType";
+	//m_mapInfo.insert(AlarmType, para);
+	//m_lstHorizontalHeader.append(para.desc);
+	//m_mapAlarmType.clear();
+	//tmp.desc = tr("ai alarm");
+	//tmp.ID = AIALARM;		//AIALARM
+	//m_mapAlarmType.insert(AIALARM, tmp.desc);
+	//tmp.desc = tr("di alarm");
+	////tmp.ID = DIALARM;		//DIALARM
+	//m_mapAlarmType.insert(DIALARM, tmp.desc);
+	//((CDITable *)parent())->setItemDelegateForColumn(AlarmType, pReadOnlyDelegate);
 	
 
 	para.desc = tr("SaveDisk");

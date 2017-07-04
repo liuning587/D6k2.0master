@@ -54,6 +54,25 @@ DIN*CDbSvc::GetDinByIndex(int32u nIdx)
 	return &m_pDins[nIdx];
 }
 
+
+VARDATA * CDbSvc::GetUserVarByIndex(int32u nIdx)
+{
+	Q_ASSERT(nIdx < MAX_OCCNO && nIdx < m_nUserVariableCount);
+	if (nIdx >= m_nUserVariableCount || nIdx >= MAX_OCCNO)
+		return nullptr;
+
+	return &m_pUserVariable[nIdx];
+}
+
+VARDATA * CDbSvc::GetSysVarByIndex(int32u nIdx)
+{
+	Q_ASSERT(nIdx < MAX_OCCNO && nIdx < m_nSystemVariableCount);
+	if (nIdx >= m_nSystemVariableCount || nIdx >= MAX_OCCNO)
+		return nullptr;
+
+	return &m_pSystemVariable[nIdx];
+}
+
 AOUT*CDbSvc::GetAoutByIndex(int32u nIdx)
 {
 	Q_ASSERT(nIdx < MAX_OCCNO && nIdx < m_nAoutCount);

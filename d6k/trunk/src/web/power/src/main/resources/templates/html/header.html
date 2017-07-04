@@ -58,7 +58,7 @@
     <div class="data measurement-panel-lime">
         <div class="measurement-panel-heading">
             <span class="pull-left">温度</span>
-            <span class="measurement measurement_set" data-name="ThisMonthKwh" data-measurementID="1-56-3-0400" data-measurementType="3">32.3</span>
+                <span class="measurement measurement_set" data-name="ThisMonthKwh" data-measurementID="1-56-3-0400" data-measurementType="3">32.3</span>
             <span class="pull-right">℃</span>
         </div>
         <div class="clear"></div>
@@ -100,14 +100,14 @@
         </li>
         <img class="line" src="../img/line02.png" />
 
-        <li ng-class="{'current_nav_f':$state.includes('userManage')}" ng-click="gotoUserManagePage()">
+        <li ng-class="{'current_nav_f':$state.includes('realtimeCurve')}" ng-click="$state.go('realtimeCurve')">
             <span><img src="../img/curve.png" /></span>
             <span>实时曲线</span>
             <div class="clear"></div>
         </li>
         <img class="line" src="../img/line02.png" />
 
-        <li ng-class="{'current_nav_f':$state.includes('macModel')}" ng-click="$state.go('macModel')">
+        <li ng-class="{'current_nav_f':$state.includes('report')}" ng-click="$state.go('report')">
             <span><img src="../img/report.png" /></span>
             <span>报表统计</span>
             <div class="clear"></div>
@@ -135,12 +135,25 @@
         </li>
         <img class="line" src="../img/line02.png" />
 
+        <img class="line" src="../img/line02.png" />
+        <li ng-class="{'current_nav_f':$state.includes('stationInfo')}" ng-click="$state.go('stationInfo')">
+            <span><img src="../img/Statistics.png" /></span>
+            <span>场站信息</span>
+            <div class="clear"></div>
+        </li>
+
         <li ng-class="{'current_nav_f':$state.includes('proConfig')}" ng-click="$state.go('proConfig')">
             <span><img src="../img/set.png" /></span>
             <span>电站设置</span>
             <div class="clear"></div>
         </li>
         <img class="line" src="../img/line02.png" />
+
+        <li ng-class="{'current_nav_f':$state.includes('userManage')}" ng-click="gotoUserManagePage()">
+            <span><img src="../img/person.png" /></span>
+            <span>用户管理</span>
+            <div class="clear"></div>
+        </li>
 
         <li ng-class="{'current_nav_f':$state.includes('proConfig')}" ng-click="$state.go('proConfig')">
             <span><img src="../img/help.png" /></span>

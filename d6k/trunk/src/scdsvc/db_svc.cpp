@@ -446,13 +446,167 @@ bool CDbSvc::UpdateDinValue(int32u nNodeOccNo, int32u nOccNo, int8u nVal)
 		}
 	}
 	CVariant nVariant(nVal, DT_BOOLEAN);
-// 	CVariant nVariant;
-// 	nVariant.Type = DT_CHAR;
-// 	memcpy(&nVariant.Value, &nVal, sizeof  int8u);
+
 	return pFes->UpdateDinValue(nOccNo, nVariant, 1);
 }
 
 
+
+bool CDbSvc::UpdateUserVarValue(int32u nNodeOccNo, int32u nOccNo, fp64 nVal)
+{
+	Q_ASSERT(nNodeOccNo != INVALID_OCCNO  && nNodeOccNo <= MAX_NODE_OCCNO);
+	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
+	{
+		return false;
+	}
+
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+	{
+		return false;
+	}
+
+	auto it = m_mapFes.find(nNodeOccNo);
+
+	std::shared_ptr<CFesDB> pFes = nullptr;
+	if (it == m_mapFes.end())
+	{
+		return false;
+	}
+	else
+	{
+		pFes = it->second;
+		Q_ASSERT(pFes);
+		if (!pFes)
+		{
+			return false;
+		}
+	}
+	VARDATA * pData;
+
+	pFes->GetUserVarByOccNo(nOccNo, &pData);
+
+	switch (pData->DataType)
+	{
+	case DT_BOOLEAN:
+	{
+		CVariant nVariant(nVal,DT_BOOLEAN);
+		return pFes->UpdateUserVal(nOccNo, nVariant, 1);
+	}
+	case DT_CHAR:
+	{
+		CVariant nVariant(nVal, DT_CHAR);
+		return pFes->UpdateUserVal(nOccNo, nVariant, 1);
+	}
+	case DT_BYTE:
+	{
+		CVariant nVariant(nVal, DT_BYTE);
+		return pFes->UpdateUserVal(nOccNo, nVariant, 1);
+	}
+	case DT_INT:
+	{
+		CVariant nVariant(nVal, DT_INT);
+		return pFes->UpdateUserVal(nOccNo, nVariant, 1);
+	}
+	case DT_SHORT:
+	{
+		CVariant nVariant(nVal, DT_SHORT);
+		return pFes->UpdateUserVal(nOccNo, nVariant, 1);
+	}
+	case DT_FLOAT:
+	//{
+	//	CVariant nVariant(nVal, DT_FLOAT);
+	//	return pFes->UpdateUserVal(nOccNo, nVariant, 1);
+	//}
+	case DT_DOUBLE:
+	{
+		CVariant nVariant(nVal, DT_DOUBLE);
+		return pFes->UpdateUserVal(nOccNo, nVariant, 1);
+	}
+	default:
+		break;
+	}
+	
+	return false;
+}
+
+bool CDbSvc::UpdateSysVarValue(int32u nNodeOccNo, int32u nOccNo, fp64 nVal)
+{
+	Q_ASSERT(nNodeOccNo != INVALID_OCCNO  && nNodeOccNo <= MAX_NODE_OCCNO);
+	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
+	{
+		return false;
+	}
+
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+	{
+		return false;
+	}
+
+	auto it = m_mapFes.find(nNodeOccNo);
+
+	std::shared_ptr<CFesDB> pFes = nullptr;
+	if (it == m_mapFes.end())
+	{
+		return false;
+	}
+	else
+	{
+		pFes = it->second;
+		Q_ASSERT(pFes);
+		if (!pFes)
+		{
+			return false;
+		}
+	}
+	VARDATA * pData;
+
+	pFes->GetSysVarByOccNo(nOccNo, &pData);
+
+	switch (pData->DataType)
+	{
+	case DT_BOOLEAN:
+	{
+		CVariant nVariant(nVal, DT_BOOLEAN);
+		return pFes->UpdateSysVal(nOccNo, nVariant, 1);
+	}
+	case DT_CHAR:
+	{
+		CVariant nVariant(nVal, DT_CHAR);
+		return pFes->UpdateSysVal(nOccNo, nVariant, 1);
+	}
+	case DT_BYTE:
+	{
+		CVariant nVariant(nVal, DT_BYTE);
+		return pFes->UpdateSysVal(nOccNo, nVariant, 1);
+	}
+	case DT_INT:
+	{
+		CVariant nVariant(nVal, DT_INT);
+		return pFes->UpdateSysVal(nOccNo, nVariant, 1);
+	}
+	case DT_SHORT:
+	{
+		CVariant nVariant(nVal, DT_SHORT);
+		return pFes->UpdateSysVal(nOccNo, nVariant, 1);
+	}
+	case DT_FLOAT:
+	{
+		CVariant nVariant(nVal, DT_FLOAT);
+		return pFes->UpdateSysVal(nOccNo, nVariant, 1);
+	}
+	case DT_DOUBLE:
+	{
+		CVariant nVariant(nVal, DT_DOUBLE);
+		return pFes->UpdateSysVal(nOccNo, nVariant, 1);
+	}
+	default:
+		break;
+	}
+
+	return false;
+}
 
 size_t CDbSvc::BuildAppDB(char* pAddr)
 {
@@ -467,6 +621,7 @@ size_t CDbSvc::BuildAppDB(char* pAddr)
 		nSize += BuildAppNodeDB(pAddr, iter.first, iter.second);
 		pAddr += nSize;
 	}
+	return nSize;
 }
 
 size_t CDbSvc::BuildAppNodeDB(char* pAddr, int32u nOccNo, std::vector<std::shared_ptr<SAPP>>& arrAppNodes)

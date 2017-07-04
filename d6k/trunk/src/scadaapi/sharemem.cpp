@@ -356,7 +356,7 @@ void CShareMem::Destroy()
 		void* pdata = NULL;
 		if (m_pAllocator->find(szMemName, pdata) == -1 || pdata == NULL)
 			return ;
-
+		m_pAllocator->unbind(szMemName);
 		m_pAllocator->remove();
 
 		delete m_pAllocator;
@@ -385,7 +385,7 @@ void CShareMem::ReleaseMem()
 
 	if (m_pAllocator)
 	{
-		m_pAllocator->unbind(szMemName);
+		
 		delete m_pAllocator;
 		m_pAllocator = NULL;
 	}

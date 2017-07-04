@@ -515,7 +515,7 @@ void CFixdDeploy::UpdateDevData(QTableWidget *pCurrentTable, int iNumber, const 
 	}
 	else
 	{
-		pCurrentTable->item(pCurrentTable->currentItem()->row(),1)->setText(strValue);
+		//pCurrentTable->item(pCurrentTable->currentItem()->row(),1)->setText(strValue);
 	}
 	//pCurrentTable->item(iRowNumber, 1)->setText(strValue);
 }
@@ -558,7 +558,7 @@ void CFixdDeploy::Slot_SendUpdatePoints()
 				//value 由于不知道类型  用字符串标识
 				singleData.strValue = pCurrentTableWgt->item(lstRows.at(i), 1)->text();
 				//数据类型
-				singleData.nTagType = pCurrentTableWgt->item(lstRows.at(i), 6)->data(Qt::UserRole).toInt();
+				singleData.nTagType = pCurrentTableWgt->item(lstRows.at(i), 6)->data(Qt::UserRole+1).toInt();
 				//数据长度
 				singleData.nLength = pCurrentTableWgt->item(lstRows.at(i), 7)->text().toInt();
 
@@ -707,7 +707,7 @@ void CFixdDeploy::Slot_SendCurrentAllPoints()
 				//所有数据都用字符串传送
 				singleData.strValue = pCurrentTableWgt->item(i, 1)->text();
 				//数据类型
-				singleData.nTagType = pCurrentTableWgt->item(i, 6)->data(Qt::UserRole).toInt();
+				singleData.nTagType = pCurrentTableWgt->item(i, 6)->data(Qt::UserRole+1).toInt();
 				//数据长度
 				singleData.nLength = pCurrentTableWgt->item(i, 7)->text().toInt();
 

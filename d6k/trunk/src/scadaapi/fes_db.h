@@ -186,6 +186,44 @@ private:
 	bool GetDoutOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetDoutPin(int32u nOccNo, IO_VARIANT &RetData) const;
 
+	//uservar
+	bool GetUserVarScanEnable(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVarQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserNegVal(int32u nOccNO, IO_VARIANT& RetData) const;
+	bool GetUserVarMaxRange(int32u nOccNo, IO_VARIANT &RetData)const;
+	bool GetUserVarMinRange(int32u nOccNo, IO_VARIANT &RetData)const;
+
+	bool GetUserVaState(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserValRawValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+
+	bool GetUserVaManSet(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaLowOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaHighOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaHighQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaLowQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetUserVaDesc0(int32u nOccNo, IO_VARIANT &RetData) const;
+
+	//sysvar
+	bool GetSysVarScanEnable(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVarQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaState(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysValRawValEx(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaManSet(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaLowOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaHighOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaHighQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaLowQua(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysVaDesc0(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetSysNegVal(int32u nOccNo, IO_VARIANT& RetData) const;
+	bool GetSysVarMaxRange(int32u nOccNo, IO_VARIANT &RetData)const;
+	bool GetSysVarMinRange(int32u nOccNo, IO_VARIANT &RetData)const;
+
+	bool SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
+	bool SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
+
+
 	bool SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
 	bool SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
 

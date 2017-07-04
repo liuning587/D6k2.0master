@@ -375,6 +375,7 @@ void CAOModel::InitPara()
 	para.tagname = "BlockOccNo";
 	m_mapInfo.insert(BlockOccNo, para);
 	m_lstHorizontalHeader.append(para.desc);
+	((CAOTable *)parent())->setItemDelegateForColumn(BlockOccNo, pReadDelegate);
 
 	//para.desc = tr("DataType");
 	//para.tagname = "DataType";

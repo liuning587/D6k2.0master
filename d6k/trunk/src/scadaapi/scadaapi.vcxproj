@@ -140,6 +140,7 @@
     <ClCompile Include="..\scdpub\variant_data.cpp" />
     <ClCompile Include="base_mem_db.cpp" />
     <ClCompile Include="base_module.cpp" />
+    <ClCompile Include="client_db.cpp" />
     <ClCompile Include="db_svc.cpp" />
     <ClCompile Include="fes_db.cpp" />
     <ClCompile Include="GeneratedFiles\qrc_scadaapi.cpp">
@@ -151,6 +152,8 @@
     <ClCompile Include="mem_db.cpp" />
     <ClCompile Include="scadaapi.cpp" />
     <ClCompile Include="scadasvc_api.cpp" />
+    <ClCompile Include="scada_db.cpp" />
+    <ClCompile Include="server_db.cpp" />
     <ClCompile Include="sharemem.cpp" />
     <ClCompile Include="tagname_pool.cpp" />
   </ItemGroup>
@@ -161,12 +164,15 @@
     <ClInclude Include="..\scdsvc\data_def.h" />
     <ClInclude Include="base_mem_db.h" />
     <ClInclude Include="base_module.h" />
+    <ClInclude Include="client_db.h" />
     <ClInclude Include="db_svc.h" />
     <ClInclude Include="fes_db.h" />
     <ClInclude Include="mem_db.h" />
     <ClInclude Include="scadaapi.h" />
     <ClInclude Include="scadaapi_global.h" />
     <ClInclude Include="..\..\include\scadaapi\scdsvcapi.h" />
+    <ClInclude Include="scada_db.h" />
+    <ClInclude Include="server_db.h" />
     <ClInclude Include="sharemem.h" />
     <ClInclude Include="tagname_pool.h" />
   </ItemGroup>

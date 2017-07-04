@@ -61,7 +61,7 @@ CCommPlugin::CCommPlugin(CFtuModule *pModule)
     //连接成功
 	connect(m_pSocketThread, SIGNAL(Signal_ConnectSuccess(QString)), this, SLOT(Slot_sockeConnectSuccess(QString)));
     //总召唤确认
-    connect(m_pApduRecver,SIGNAL(Signal_AllCallRespond()),this,SIGNAL(Signal_AllCallRespond()));
+    connect(m_pApduRecver,SIGNAL(Signal_AllCallRespond()),this,SLOT(Slot_AllCallRespond()));
     connect(m_pApduRecver,SIGNAL(Signal_onePointDisRemote(int,int,int)),this,SIGNAL(Signal_onePointDisRemote(int,int,int)));
     connect(m_pApduRecver,SIGNAL(Signal_OnePointRemote(int,int,int)),this,SIGNAL(Signal_OnePointRemote(int,int,int)));
 
@@ -183,11 +183,15 @@ void CCommPlugin::StartRun(const QString &strIP, int iPort)
 void CCommPlugin::StopRun()
 {
 	m_pSocketThread->CloseSocket();
-	//关闭所有定时器
+	m_k = 0;
+	m_w = 0;
+	m_bIsRunning = false;
+	m_nRecvNum = 0;
+	m_nSendNum = 0;
+	//关闭所有的定时器
 	m_pTimerOut1->stop();
 	m_pTimerOut2->stop();
 	m_pTimerOut3->stop();
-	//m_pTimer->stop();
 
 }
 
@@ -330,8 +334,8 @@ void CCommPlugin::Slot_sockeConnectSuccess(QString strLocalInfo)
     m_pApduSender->Send_U(STARTDT_ACT);
 	emit Signal_SocketConnectSuccess(strLocalInfo);
 	m_pTimeGeneralSendMsg->start();
-    m_pTimerSyncTimeMsg->start();
-    m_pTimerKwhMsg->start();
+    //m_pTimerSyncTimeMsg->start();
+    //m_pTimerKwhMsg->start();
 }
 
 /*********************************************************************************************************
@@ -366,18 +370,22 @@ bool CCommPlugin::OnTimerSend(int nFrameType, int nUtype)
 		m_pTimerOut2->stop();
 		//链路中只要有包就重新触发t3超时
 		m_pTimerOut3->start();
+		if (!m_pTimerOut1->isActive())
+		{
+			m_pTimerOut1->start();
+		}
 	}
 	break;
 	case TYPE_U:
 	{
 		//发送U帧，激活的时候需要t1超时
-		if (nUtype == TESTFR_ACT || nUtype == STARTDT_ACT)//需要确认的
-		{
+		//if (nUtype == TESTFR_ACT || nUtype == STARTDT_ACT)//需要确认的
+		//{
 			if (!m_pTimerOut1->isActive())
 			{
 				m_pTimerOut1->start();
 			}
-		}
+		//}
 		//链路中只要有包就重新触发t3超时
 		m_pTimerOut3->start();
 	}
@@ -405,8 +413,12 @@ bool CCommPlugin::OnTimerRecv(int nFrameType)
 	{
 		//当在t1时间内收到I帧数据
 		m_pTimerOut1->stop();
-		//重启t2
-		m_pTimerOut2->start();
+		if (!m_pTimerOut2->isActive())
+		{
+			//重启t2
+			m_pTimerOut2->start();
+
+		}
 		//重启t3
 		m_pTimerOut3->start();
 
@@ -790,6 +802,11 @@ void CCommPlugin::Slot_SetZoomArea(ZOOM_BASE &zoomBaseInfo)
 void CCommPlugin::Slot_TimeOutT0()
 {
 	emit Signal_SocketError("trying connect TCP server.....");
+
+	m_pTimeGeneralSendMsg->stop();
+	m_pTimerSyncTimeMsg->stop();
+	m_pTimerKwhMsg->stop();
+
 	this->StartRun(m_strIP, m_iPort);
 }
 /*********************************************************************************************************
@@ -861,6 +878,18 @@ void CCommPlugin::Slot_ResetProcess()
     }
 }
 
+void CCommPlugin::Slot_DisConnect()
+{
+	StopRun();
+}
+
+void CCommPlugin::Slot_AllCallRespond()
+{
+	emit Signal_AllCallRespond();
+	m_pTimerSyncTimeMsg->start();
+	Slot_SendSyncRequestMsg();
+}
+
 //切换定值区
 void CCommPlugin::Slot_SwitchFixArea(unsigned short uFixArea)
 {
@@ -919,12 +948,12 @@ void CCommPlugin::Slot_SendGeneralResquestMsg()
 // 		return;
 // 	}
 
-	telectrl.m_nCtrlType = TELECTRL_REQUEST_KWHGENERALCALL;
-	IsOK = OnCommand(&telectrl);
-	if (!IsOK)
-	{
-		return;
-	}
+	//telectrl.m_nCtrlType = TELECTRL_REQUEST_KWHGENERALCALL;
+	//IsOK = OnCommand(&telectrl);
+	//if (!IsOK)
+	//{
+	//	return;
+	//}
 }
 
 //时间对时

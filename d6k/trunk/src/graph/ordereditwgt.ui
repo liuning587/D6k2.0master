@@ -181,10 +181,20 @@
                    <string>Value</string>
                   </property>
                  </item>
+                 <item row="3" column="1">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </item>
                  <item row="4" column="0">
                   <property name="text">
                    <string>strobe
  Time</string>
+                  </property>
+                 </item>
+                 <item row="4" column="1">
+                  <property name="text">
+                   <string>0</string>
                   </property>
                  </item>
                  <item row="5" column="0">
@@ -192,14 +202,29 @@
                    <string>Max Value</string>
                   </property>
                  </item>
+                 <item row="5" column="1">
+                  <property name="text">
+                   <string>100.0</string>
+                  </property>
+                 </item>
                  <item row="6" column="0">
                   <property name="text">
                    <string>Min Value</string>
                   </property>
                  </item>
+                 <item row="6" column="1">
+                  <property name="text">
+                   <string>0.0</string>
+                  </property>
+                 </item>
                  <item row="7" column="0">
                   <property name="text">
                    <string>Max Char Length</string>
+                  </property>
+                 </item>
+                 <item row="7" column="1">
+                  <property name="text">
+                   <string>0</string>
                   </property>
                  </item>
                 </widget>
@@ -391,9 +416,19 @@
                    <string>Monitor</string>
                   </property>
                  </item>
+                 <item row="2" column="1">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </item>
                  <item row="3" column="0">
                   <property name="text">
                    <string>Parameter File</string>
+                  </property>
+                 </item>
+                 <item row="3" column="1">
+                  <property name="text">
+                   <string>0</string>
                   </property>
                  </item>
                  <item row="4" column="0">
@@ -401,9 +436,19 @@
                    <string>X Pos</string>
                   </property>
                  </item>
+                 <item row="4" column="1">
+                  <property name="text">
+                   <string>100</string>
+                  </property>
+                 </item>
                  <item row="5" column="0">
                   <property name="text">
                    <string>Y Pos</string>
+                  </property>
+                 </item>
+                 <item row="5" column="1">
+                  <property name="text">
+                   <string>100</string>
                   </property>
                  </item>
                  <item row="6" column="0">
@@ -411,9 +456,19 @@
                    <string>Width</string>
                   </property>
                  </item>
+                 <item row="6" column="1">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </item>
                  <item row="7" column="0">
                   <property name="text">
                    <string>Height</string>
+                  </property>
+                 </item>
+                 <item row="7" column="1">
+                  <property name="text">
+                   <string>0</string>
                   </property>
                  </item>
                  <item row="8" column="0">
@@ -424,12 +479,28 @@
                    <enum>Unchecked</enum>
                   </property>
                  </item>
+                 <item row="8" column="1">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="flags">
+                   <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
+                  </property>
+                 </item>
                  <item row="9" column="0">
                   <property name="text">
                    <string>Border</string>
                   </property>
                   <property name="checkState">
                    <enum>Unchecked</enum>
+                  </property>
+                 </item>
+                 <item row="9" column="1">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="flags">
+                   <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
                   </property>
                  </item>
                  <item row="10" column="0">
@@ -448,12 +519,22 @@
                    <enum>Unchecked</enum>
                   </property>
                  </item>
+                 <item row="11" column="1">
+                  <property name="flags">
+                   <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
+                  </property>
+                 </item>
                  <item row="12" column="0">
                   <property name="text">
                    <string>Maximized Box</string>
                   </property>
                   <property name="checkState">
                    <enum>Unchecked</enum>
+                  </property>
+                 </item>
+                 <item row="12" column="1">
+                  <property name="flags">
+                   <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
                   </property>
                  </item>
                  <item row="13" column="0">
@@ -464,6 +545,11 @@
                    <enum>Unchecked</enum>
                   </property>
                  </item>
+                 <item row="13" column="1">
+                  <property name="flags">
+                   <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
+                  </property>
+                 </item>
                  <item row="14" column="0">
                   <property name="text">
                    <string>Keep Print Proportions</string>
@@ -472,9 +558,19 @@
                    <enum>Unchecked</enum>
                   </property>
                  </item>
+                 <item row="14" column="1">
+                  <property name="flags">
+                   <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
+                  </property>
+                 </item>
                  <item row="15" column="0">
                   <property name="text">
                    <string>Print Page Width</string>
+                  </property>
+                 </item>
+                 <item row="15" column="1">
+                  <property name="text">
+                   <string>-1</string>
                   </property>
                  </item>
                  <item row="16" column="0">
@@ -482,9 +578,19 @@
                    <string>Print Page Height</string>
                   </property>
                  </item>
+                 <item row="16" column="1">
+                  <property name="text">
+                   <string>-1</string>
+                  </property>
+                 </item>
                  <item row="17" column="0">
                   <property name="text">
                    <string>Top Margin</string>
+                  </property>
+                 </item>
+                 <item row="17" column="1">
+                  <property name="text">
+                   <string>-1</string>
                   </property>
                  </item>
                  <item row="18" column="0">
@@ -492,14 +598,29 @@
                    <string>Bottom Margin</string>
                   </property>
                  </item>
+                 <item row="18" column="1">
+                  <property name="text">
+                   <string>-1</string>
+                  </property>
+                 </item>
                  <item row="19" column="0">
                   <property name="text">
                    <string>Left Margin </string>
                   </property>
                  </item>
+                 <item row="19" column="1">
+                  <property name="text">
+                   <string>-1</string>
+                  </property>
+                 </item>
                  <item row="20" column="0">
                   <property name="text">
                    <string>Right Margin</string>
+                  </property>
+                 </item>
+                 <item row="20" column="1">
+                  <property name="text">
+                   <string>-1</string>
                   </property>
                  </item>
                 </widget>

@@ -205,7 +205,7 @@ void CNetbusSvc::TransEmails()
 
 			memcpy(m_pBuf->BuffData,&msg,sizeof DMSG);
 
-			int nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
+			size_t nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
 
 			if (!nRet)
 			{
@@ -230,6 +230,32 @@ void CNetbusSvc::TransEmails()
 }
 
 
+void CNetbusSvc::RecvSvcInfo()
+{
+	int8u cMsg[MAX_EMSG_L + 1] = { 0 };
+
+	int32u nCopySize = 0;
+
+	bool bRet = NBRecvData("SCADA", cMsg, MAX_EMSG_L, &nCopySize, 0);
+
+	if (bRet)
+	{
+		EMSG_BUF* msg = (EMSG_BUF*)cMsg;
+
+		if (msg)
+		{
+			switch (msg->FuncCode)
+			{
+			case  COT_SETVAL:
+				break;
+
+			default: 
+				break;
+			}
+		}
+	}
+}
+
 /*! \fn void CNetbusSvc::TransDataInfo()
 ********************************************************************************************************* 
 ** \brief CNetbusSvc::TransDataInfo 
@@ -243,6 +269,8 @@ void CNetbusSvc::TransDataInfo()
 {
 	SendDinToSvr();
 	SendAinToSvr();
+	SendUserVarToSvr();
+	SendSysVarToSvr();
 }
 
 /*! \fn void CNetbusSvc::UpdateNetState()
@@ -418,6 +446,62 @@ void CNetbusSvc::SendAinToSvr()
 	for (auto iter : arrAiNums)
 	{
 		m_pNetMsgPacker->PackageAllAI(m_pBuf, iter, nSize);
+		int nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
+		if (!nRet)
+		{
+			//TODO LOG
+		}
+	}
+}
+
+void CNetbusSvc::SendUserVarToSvr()
+{
+	Q_ASSERT(m_pNetMsgPacker);
+	if (m_pNetMsgPacker == nullptr)
+		return;
+
+	memset(m_pBuf, 0, sizeof EMSG_BUF);
+
+	m_pBuf->MsgPath = EMSG_PATH::TO_SERVER;
+	m_pBuf->MsgType = MSG_TYPE::COT_PERCYC;
+	m_pBuf->FuncCode = MSG_TYPE::COT_PERCYC;
+	//第一个pair 为起始OccNo 第二个为元素数目
+	std::vector<std::pair<int32u, int32u > > arrUserVarNums;
+	m_pNetMsgPacker->GetUserVarPackageNum(arrUserVarNums);
+
+	int32u nSize;
+
+	for (auto iter : arrUserVarNums)
+	{
+		m_pNetMsgPacker->PackageAllUserVarInfo(m_pBuf, iter, nSize);
+		int nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
+		if (!nRet)
+		{
+			//TODO LOG
+		}
+	}
+}
+
+void CNetbusSvc::SendSysVarToSvr()
+{
+	Q_ASSERT(m_pNetMsgPacker);
+	if (m_pNetMsgPacker == nullptr)
+		return;
+
+	memset(m_pBuf, 0, sizeof EMSG_BUF);
+
+	m_pBuf->MsgPath = EMSG_PATH::TO_SERVER;
+	m_pBuf->MsgType = MSG_TYPE::COT_PERCYC;
+	m_pBuf->FuncCode = MSG_TYPE::COT_PERCYC;
+	//第一个pair 为起始OccNo 第二个为元素数目
+	std::vector<std::pair<int32u, int32u > > arrSysVarNums;
+	m_pNetMsgPacker->GetSysVarPackageNum(arrSysVarNums);
+
+	int32u nSize;
+
+	for (auto iter : arrSysVarNums)
+	{
+		m_pNetMsgPacker->PackageAllSysVarInfo(m_pBuf, iter, nSize);
 		int nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
 		if (!nRet)
 		{

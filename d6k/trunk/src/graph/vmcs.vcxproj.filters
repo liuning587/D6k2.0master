@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -56,6 +56,9 @@
     <ClCompile Include="base_dync.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="base_dync_event_item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="base_module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,7 +74,16 @@
     <ClCompile Include="dync_color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dync_event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dync_file_op_event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="dync_moving.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dync_sys_op_event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dync_text.cpp">
@@ -149,6 +161,9 @@
     <ClCompile Include="xml_serializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dync_var_op_event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="added_widget.h">
@@ -158,6 +173,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="base_dync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="base_dync_event_item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="base_module.h">
@@ -175,7 +193,16 @@
     <ClInclude Include="dync_color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dync_event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dync_file_op_event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="dync_moving.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dync_sys_op_event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dync_text.h">
@@ -346,5 +373,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="vmcs.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dync_var_op_event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

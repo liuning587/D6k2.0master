@@ -130,9 +130,9 @@ bool CDbSvc::BuildTagNameMen(const char* pszFilePath)
 ********************************************************************************************************/
 size_t CDbSvc::BuildTagNameDB(char* pAddress, std::vector<TAG_OCCNO_DEF>& vec)
 {
-	Q_ASSERT(pAddress && !vec.empty());
+	Q_ASSERT(pAddress/* && !vec.empty()*/);
 
-	if (pAddress == Q_NULLPTR || vec.empty())
+	if (pAddress == Q_NULLPTR/* || vec.empty()*/)
 	{
 		return 0;
 	}

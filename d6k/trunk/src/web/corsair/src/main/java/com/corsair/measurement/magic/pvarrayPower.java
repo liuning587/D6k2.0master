@@ -27,7 +27,7 @@ public class pvarrayPower extends AbstractSingleMeasurement {
         return null;
     }
 
-    //适用于长园集团光伏项目 交流汇流箱,取所有汇流箱的功率总和
+    //适用于xx集团光伏项目 交流汇流箱,取所有汇流箱的功率总和
     @Override
     public List<MeasurementValue> getMeasurementValue(List<MeasurementInfo> measurements) {
         List<MeasurementValue> ret = new ArrayList<>();

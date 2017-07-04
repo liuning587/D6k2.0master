@@ -200,13 +200,29 @@ CGraphFile::~CGraphFile()
 //重写赋值函数 
 const CGraphFile& CGraphFile::operator=(const CGraphFile& src)
 {
+	//复制基础信息
+	m_FileInfo = src.m_FileInfo;
+
+	m_nMaxWidgetID = src.m_nMaxWidgetID;
+
+	m_Size = src.m_Size;
+
+	m_nPeriod = src.m_nPeriod;
+
+	m_pBackground->CopyBackground(src.m_pBackground.get());
+
+	//使用同一个scene
+	//m_pScene = nullptr;
+	//
+	m_bFlashFlag = src.m_bFlashFlag;
+	m_scaleFactor = src.m_scaleFactor;
+
 	for (int i=0; i<MAX_LAYER_CNT; i++)
 	{
 		//
 		*m_arrLayers[i] = *(src.GetLayer(i+1));
 	}
 
-	//TODO...................................
 
 	return *this;
 }

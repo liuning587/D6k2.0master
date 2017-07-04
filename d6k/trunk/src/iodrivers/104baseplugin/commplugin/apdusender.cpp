@@ -758,10 +758,10 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 
 
 
-			nSetIndex += nPagLength + sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength;
+			nSetIndex += sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength;
 		}
 
-		int nResult = Send_I(buf, nSetIndex- sizeof(APCI));
+		int nResult = Send_I(buf, nSetIndex + nPagLength  - sizeof(APCI)) ;
 
 		if (nResult != SEND_OK)
 		{

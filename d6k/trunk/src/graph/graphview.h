@@ -457,10 +457,6 @@ protected:
 	void ClearPropMap();
 	//多选
 	QPointF GetMutlStartPoint();
-	//复制基础属性
-	void CopyBaseProperty(CBaseWidget *pDescWgt, CBaseWidget *pSourceWgt);
-	//复制动态属性
-	void CopyDynamicProperty(CBaseWidget *pDescWgt, CBaseWidget *pSourceWgt);
 	//颜色
 	//void ChangeBrowserColor(QtBrowserItem *pBrowser,const QColor& color,int nIndex);
 	//加载组合移动点

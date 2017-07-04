@@ -150,6 +150,9 @@
     <ClCompile Include="sapp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="node_scd_mem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base_module.h">

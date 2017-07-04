@@ -638,6 +638,7 @@ void CDOModel::InitPara()
 	para.tagname = "BlockOccNo";
 	m_mapInfo.insert(BlockOccNo, para);
 	m_lstHorizontalHeader.append(para.desc);
+	((CDOTable *)parent())->setItemDelegateForColumn(BlockOccNo, pDelegateRead);
 
 	//para.desc = tr("DataType");
 	//para.tagname = "DataType";

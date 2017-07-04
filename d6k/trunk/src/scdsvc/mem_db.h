@@ -79,11 +79,14 @@ public:
 	// 本接口暂时采用这种通用设计，为今后SCADA上支持定位变量的可能做准备。
 	virtual bool GetAinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
 	virtual bool GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
+	virtual bool GetUserVarValue(int32u nOccNo, CVariant & val, int8u &nQuality)const ;
+	virtual bool GetSysValValue(int32u nOccNo, CVariant & val, int8u &nQuality) const ;
 
 	//网络总线服务调用，更新测值
 	virtual bool UpdateAinValue(int32u nOccNo, const CVariant & val, int8u nQuality);
 	virtual bool UpdateDinValue(int32u nOccNo, const CVariant & val, int8u nQuality);
-
+	virtual bool UpdateUserVal(int32u nOccNo, const CVariant& val, int8u nQuality);
+	virtual bool UpdateSysVal(int32u nOccNo, const CVariant& val, int8u nQuality);
 
 protected:
 	void LogMsg(const char *szLogTxt, int nLevel);

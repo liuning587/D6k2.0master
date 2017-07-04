@@ -91,6 +91,8 @@ public:
 public:
 	bool UpdateAinValue(int32u nNodeOccNo, int32u nAinOccNo, fp64  nVal);
 	bool UpdateDinValue(int32u nNodeOccNo, int32u nOccNo, int8u  nVal);
+	bool UpdateUserVarValue(int32u nNodeOccNo, int32u nAinOccNo, fp64  nVal);
+	bool UpdateSysVarValue(int32u nNodeOccNo, int32u nAinOccNo, fp64  nVal);
 protected:
 	//加载整个工程文件
 	bool LoadProject(const char *pszFilePath);

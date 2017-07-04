@@ -200,7 +200,7 @@
                         </div>
                 </div>
             </c:forEach>
-            <%--深圳长园集团光伏项目，5个逆变器和1个汇流箱的采集装置,采集装置接着逆变器后面排--%>
+            <%--xx集团光伏项目，5个逆变器和1个汇流箱的采集装置,采集装置接着逆变器后面排--%>
             <c:if test="${not empty packageTransformer}">
                 <div class="col-md-4">
                         <div class="panel-heading" style="padding: 10px 15px;font-size: 16px;">

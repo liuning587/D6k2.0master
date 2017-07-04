@@ -32,7 +32,6 @@ CGraphScene::CGraphScene(CGraphFile *pFile, QObject *parent) :m_pGraphFile(pFile
 QGraphicsScene(parent)
 {
 	Q_ASSERT(pFile);
-	//m_nTimerID = startTimer(1000);
 }
 
 CGraphScene::~CGraphScene()
@@ -87,16 +86,7 @@ bool CGraphScene::LoadFile(const QString &szFileName)
 	return m_pGraphFile->LoadFile(szFileName);
 }
 
-void CGraphScene::timerEvent(QTimerEvent *event)
-{
-	if (event)
-	{
-		if (event->timerId()==m_nTimerID)
-		{
-			update();
-		}
-	}
-}
+
 
 /** @}*/
 

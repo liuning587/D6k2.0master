@@ -17,7 +17,7 @@
 
         <!-- jdbc连接 -->
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/D6000" userId="d6k"
+                        connectionURL="jdbc:mysql://localhost:3306/D6000?useSSL=true" userId="d6k"
                         password="d6k2" />
 
         <!-- 类型转换 -->
@@ -36,8 +36,8 @@
         </javaModelGenerator>
 
         <!-- 生成mapxml文件 -->
-        <sqlMapGenerator targetPackage="com.entity"
-                         targetProject="F:\work\trunk\src\web\power\src\main\java\" >
+        <sqlMapGenerator targetPackage="mapper"
+                         targetProject="F:\work\trunk\src\web\power\src\main\resources\" >
             <!-- 是否在当前路径下新加一层schema,eg：fase路径com.oop.eksp.user.model， true:com.oop.eksp.user.model.[schemaName] -->
             <property name="enableSubPackages" value="false" />
         </sqlMapGenerator>
@@ -64,4 +64,5 @@
         </table>
 
     </context>
+
 </generatorConfiguration>

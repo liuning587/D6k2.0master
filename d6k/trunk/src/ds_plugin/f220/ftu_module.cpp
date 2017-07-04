@@ -897,6 +897,14 @@ void CFtuModule::InitCallZt()
 	//读取定值区号
 	QAction *pFixReadArea = new QAction(tr("Read Fix Area"),pPlcMenu);
 	pPlcMenu->addAction(pFixReadArea);
+	//连接
+	QAction *pConnect = new QAction(tr("Connect"), pPlcMenu);
+	pPlcMenu->addAction(pConnect);
+	//断链
+	QAction *pDisConnect = new QAction(tr("DisConnect"), pPlcMenu);
+	pPlcMenu->addAction(pDisConnect);
+
+
 
     connect(pCommAct, SIGNAL(triggered()), this, SLOT(Slot_CallCommConfig()));
     connect(pGeneralAct, SIGNAL(triggered()), this, SLOT(Slot_GeneralCall()));
@@ -909,6 +917,9 @@ void CFtuModule::InitCallZt()
 	connect(pFixSwitch,SIGNAL(triggered()),this,SLOT(Slot_SwitchFixArea()));
 	//读取定值区号
 	connect(pFixReadArea, SIGNAL(triggered()), this, SLOT(Slot_ReadFixArea()));
+
+	connect(pConnect, SIGNAL(triggered()), this, SLOT(Slot_ConnectDevice()));
+	connect(pDisConnect, SIGNAL(triggered()), this, SLOT(Slot_DisConnect()));
 }
 
 void CFtuModule::Slot_CallCommConfig()
@@ -972,6 +983,22 @@ void CFtuModule::Slot_SwitchFixArea()
 void CFtuModule::Slot_ReadFixArea()
 {
 	m_pCommThread->ReadFixArea();
+}
+
+void CFtuModule::Slot_ConnectDevice()
+{
+	m_pCommThread->SendConnectRequest();
+
+}
+
+void CFtuModule::Slot_DisConnect()
+{
+	m_pCommThread->SendDisConnectRequest();
+	QByteArray byDestr = tr("DisConnect Socket").toLocal8Bit();
+
+	m_pMainModule->LogString(m_strDeviceName.toLocal8Bit().data(), byDestr.data(), 1);
+
+	
 }
 
 

@@ -151,7 +151,7 @@ QGraphicsView(parent)
 // 		this,
 // 		static_cast<void (CGraphView::*)(QtProperty *property, double val)> (&CGraphView::slot_valueChanged));
     //创建后保存一组数据
-	AddHistFiles();
+	//AddHistFiles();
 
 }
 
@@ -2141,8 +2141,8 @@ void  CGraphView::OnPaste()
 
 				if (pWidget)
 				{
-					CopyBaseProperty(pWidget, pGroupWgt->GetWidget(i));
-					CopyDynamicProperty(pWidget, pGroupWgt->GetWidget(i));
+					pWidget->CopyBaseProperty(pGroupWgt->GetWidget(i));
+					pWidget->CopyDynamicPro(pGroupWgt->GetWidget(i)->CreateDynamicPro());
 					//pWidget->SetRotateAngle(pGroupWgt->GetWidget(i)->GetRotateAngle());
 					arrBaseWgt.push_back(pWidget);
 
@@ -2153,11 +2153,15 @@ void  CGraphView::OnPaste()
 
 			CGroupWidget * pGroup = pLayer->GroupInputWidgets(arrBaseWgt, pGroupWgt->GetRotateAngle(), CGraphicsLayer::FATHER_GROUP);
 
+			pLayer->Select(nullptr);
+			pLayer->Select(pGroup);
+
 			if (pGroup != nullptr)
 			{
 				pGraphFile->RenameWidgetItem(m_nCurEditingLayerIndex, pGroup);
 				MoveWidgets(delta);
 			}
+
         }
         else
         {
@@ -2168,8 +2172,8 @@ void  CGraphView::OnPaste()
             {
                 //pWidget->SetRotateAngle(pBaseWgt->GetRotateAngle());
 
-				CopyBaseProperty(pWidget, pBaseWgt);
-				CopyDynamicProperty(pWidget, pBaseWgt);
+				pWidget->CopyBaseProperty(pWidget);
+				pWidget->CopyDynamicPro(pWidget->CreateDynamicPro());
 
                 pLayer->SetCurrentWidget(pWidget);
 
@@ -2288,8 +2292,8 @@ CGroupWidget *CGraphView::CopyGroupInfo(CGroupWidget* pGroupWgt)
 		Q_ASSERT(pWidget);
 		if (pWidget)
 		{
-			CopyBaseProperty(pWidget, pGroupWgt->GetWidget(i));
-			CopyDynamicProperty(pWidget, pGroupWgt->GetWidget(i));
+			pWidget->CopyBaseProperty(pGroupWgt->GetWidget(i));
+			pWidget->CopyDynamicPro(pGroupWgt->GetWidget(i)->CreateDynamicPro());
 			//pWidget->SetRotateAngle(pGroupWgt->GetWidget(i)->GetRotateAngle());
 			arrBaseWgt.push_back(pWidget);
 
@@ -2306,52 +2310,6 @@ CGroupWidget *CGraphView::CopyGroupInfo(CGroupWidget* pGroupWgt)
 
 	return pGropWidget;
 
-}
-
-//复制基础属性
-void CGraphView::CopyBaseProperty(CBaseWidget *pDescWgt, CBaseWidget *pSourceWgt)
-{
-// 	Q_ASSERT(pDescWgt);
-// 	Q_ASSERT(pSourceWgt);
-// 	if (pDescWgt == nullptr || pSourceWgt == nullptr)
-// 	{
-// 		return;
-// 	}
-	
-	//旋转角度
-	pDescWgt->SetRotateAngle(pSourceWgt->GetRotateAngle());
-	pDescWgt->SetEndAngle(pSourceWgt->GetEndAngle());
-	//pen属性
-	pDescWgt->GetPenInfo()->SetColor(pSourceWgt->GetPenInfo()->GetColor());
-	pDescWgt->GetPenInfo()->SetWidth(pSourceWgt->GetPenInfo()->GetWidth());
-	pDescWgt->GetPenInfo()->SetStyle(pSourceWgt->GetPenInfo()->GetStyle());
-	//brush属性
-	pDescWgt->GetBrushInfo()->SetColor(pSourceWgt->GetBrushInfo()->GetColor());
-	pDescWgt->GetBrushInfo()->SetStyle(pSourceWgt->GetBrushInfo()->GetStyle());
-	pDescWgt->GetBrushInfo()->SetGradiendMode(pSourceWgt->GetBrushInfo()->GetGradiendMode());
-	pDescWgt->GetBrushInfo()->SetEndColor(pSourceWgt->GetBrushInfo()->GetEndColor());
-
-	//text属性
-	pDescWgt->GetFontInfo()->SetColor(pSourceWgt->GetFontInfo()->GetColor());
-	pDescWgt->GetFontInfo()->SetFont(pSourceWgt->GetFontInfo()->GetFont());
-	pDescWgt->GetFontInfo()->SetFontLayout(pSourceWgt->GetFontInfo()->GetFontLayout());
-	//
-	pDescWgt->SetText(pSourceWgt->GetText());
-
-	//背景图片属性
-	pDescWgt->GetImageInfo()->SetBackgroundImage(pSourceWgt->GetImageInfo()->GetBackgroundImage());
-	pDescWgt->GetImageInfo()->SetImageSize(pSourceWgt->GetImageInfo()->GetImageSize());
-	pDescWgt->GetImageInfo()->SetImagePosition(pSourceWgt->GetImageInfo()->GetImagePosition());
-	pDescWgt->GetImageInfo()->SetbTiling(pSourceWgt->GetImageInfo()->GetbTiling());
-	pDescWgt->GetImageInfo()->SetStretch(pSourceWgt->GetImageInfo()->GetStretch());
-	//
-
-}
-
-
-void CGraphView::CopyDynamicProperty(CBaseWidget *pDescWgt, CBaseWidget *pSourceWgt)
-{
-	pDescWgt->CopyDynamicPro(pSourceWgt->CreateDynamicPro());
 }
 
 void CGraphView::InsertGroupMovePoints()
@@ -2437,6 +2395,11 @@ void CGraphView::SetGraphicItemAttrHidden()
 	for each (QtBrowserItem* var in m_pTreeProperty->items(m_mapIdToProperty[ITEM_DYNAMC_ATTR]))
 	{
 		m_pTreeProperty->setItemVisible(var, false);
+	}
+
+	for (auto item : m_pTreeProperty->items(m_mapIdToProperty[ITEM_PHSUBBUTTON_EXEC]))
+	{
+		m_pTreeProperty->setItemVisible(item, false);
 	}
 
 
@@ -2527,23 +2490,23 @@ void CGraphView::SetGraphicAttrHidden()
 
 
 		//按钮
-// 		if (m_pPorpWidget->GetWidgetType()>= DRAW_TOOLS_BTN_NORMAL && m_pPorpWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
-// 		{
-// 			//
-// 			for (auto item : m_pTreeProperty->items(m_mapIdToProperty[ITEM_PHSUBBUTTON_EXEC]))
-// 			{
-// 				m_pTreeProperty->setItemVisible(item, true);
-// 			}
-// 
-// 		}
-// 		else
-// 		{
-// 			//
-// 			for (auto item : m_pTreeProperty->items(m_mapIdToProperty[ITEM_PHSUBBUTTON_EXEC]))
-// 			{
-// 				m_pTreeProperty->setItemVisible(item, false);
-// 			}
-// 		}
+		if (m_pPorpWidget->GetWidgetType()>= DRAW_TOOLS_BTN_NORMAL && m_pPorpWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
+		{
+			//
+			for (auto item : m_pTreeProperty->items(m_mapIdToProperty[ITEM_PHSUBBUTTON_EXEC]))
+			{
+				m_pTreeProperty->setItemVisible(item, true);
+			}
+
+		}
+		else
+		{
+			//
+			for (auto item : m_pTreeProperty->items(m_mapIdToProperty[ITEM_PHSUBBUTTON_EXEC]))
+			{
+				m_pTreeProperty->setItemVisible(item, false);
+			}
+		}
 	}
 
 
@@ -3746,7 +3709,7 @@ void CGraphView::ShowPropertyBrowser(CBaseWidget *pWidget, QtTreePropertyBrowser
 	//鼠标release
 	QtProperty *pPushbuttonReleaseBind = m_pBindInfoManager->addProperty(ITEM_PUISHBUTTON_ORDER_CODE, ("ReleaseOrder"));
 	pPushBtnExecItem->addSubProperty(pPushbuttonReleaseBind);
-	AddPropertyToMap(pPushbuttonBind, ITEM_PUSHBUTTON_RELEASEORDER);
+	AddPropertyToMap(pPushbuttonReleaseBind, ITEM_PUSHBUTTON_RELEASEORDER);
 	//pushbutton执行属性  end
 
 	QtProperty *pStaticItem = m_pGroupManager->addProperty(QStringLiteral("StaticProperty"));
@@ -5590,6 +5553,24 @@ void CGraphView::valueChanged(QtProperty *pProperty, int nValue)
 
 		}
 	}
+	else if (szID == ITEM_PUSHBUTTON_TYPE)
+	{
+		if (m_pPorpWidget->GetWidgetType() >= DRAW_TOOLS_BTN_NORMAL && m_pPorpWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
+		{
+			//按钮绑定值
+			CPushBtnWidget *tPushBtnWgt = dynamic_cast<CPushBtnWidget*>(m_pPorpWidget);
+
+			Q_ASSERT(tPushBtnWgt);
+			if (tPushBtnWgt == nullptr)
+			{
+				return;
+			}
+
+			tPushBtnWgt->SetExecType(static_cast<CPushBtnWidget::BTN_EXEC_TYPE>(nValue));
+
+		}
+	}
+
 
 	invalidateScene();
 
@@ -5647,6 +5628,23 @@ void CGraphView::valueChanged(QtProperty *pProperty, const QString &szValue)
 	else if (szID == ITEM_DYNAMIC_ROTATE_BINDDATA)
 	{
 		m_pPorpWidget->CreateDynamicPro(CBaseDyncData::DYNC_ROTATION)->m_szTagName = szValue.toLocal8Bit().data();
+	}
+	else if (szID == TTEM_PUSHBUTTON_VAR)
+	{
+		if (m_pPorpWidget->GetWidgetType() >= DRAW_TOOLS_BTN_NORMAL && m_pPorpWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
+		{
+			//按钮绑定值
+			CPushBtnWidget *tPushBtnWgt = dynamic_cast<CPushBtnWidget*>(m_pPorpWidget);
+
+			Q_ASSERT(tPushBtnWgt);
+			if (tPushBtnWgt == nullptr)
+			{
+				return;
+			}
+
+			tPushBtnWgt->SetBtnBindData(szValue);
+
+		}
 	}
  
 	invalidateScene();
@@ -5812,6 +5810,23 @@ void CGraphView::valueChanged(QtProperty *pProperty, const QVariant &tValue)
 
 		}
 
+	}
+	else if (szID == TTEM_PUSHBUTTON_VAR)
+	{
+		if (m_pPorpWidget->GetWidgetType() >= DRAW_TOOLS_BTN_NORMAL && m_pPorpWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
+		{
+			//按钮绑定值
+			CPushBtnWidget *tPushBtnWgt = dynamic_cast<CPushBtnWidget*>(m_pPorpWidget);
+
+			Q_ASSERT(tPushBtnWgt);
+			if (tPushBtnWgt == nullptr)
+			{
+				return;
+			}
+
+			tPushBtnWgt->SetBtnBindData(tValue.toString());
+
+		}
 	}
 	invalidateScene();
 
@@ -6235,6 +6250,7 @@ void CGraphView::paintEvent(QPaintEvent *event)
         //当没有变化时
         setCacheMode(CacheBackground);
     }
+
     QGraphicsView::paintEvent(event);
 }
 
@@ -6708,12 +6724,21 @@ void CGraphView::ChangeProperty()
 
 	//按钮属性
 
-	if (pWidget->GetWidgetType() == DRAW_TOOLS_BTN_NORMAL)
+	if (pWidget->GetWidgetType() >= DRAW_TOOLS_BTN_NORMAL && pWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
 	{
 		CPushBtnWidget *pBtnWgt = dynamic_cast<CPushBtnWidget*>(pWidget);
 		if (pBtnWgt != nullptr)
 		{
-			m_pBindInfoManager->setValue(m_mapIdToProperty[ITEM_PUSHBUTTON_PRESSORDER], reinterpret_cast<long long>(pBtnWgt->GetEventIntent()));
+			//鼠标按下
+			m_pBindInfoManager->setValue(m_mapIdToProperty[ITEM_PUSHBUTTON_PRESSORDER], reinterpret_cast<long long>(pBtnWgt->GetEventActionData(CPushBtnWidget::ACTION_PRESSED)));
+			//鼠标释放
+			m_pBindInfoManager->setValue(m_mapIdToProperty[ITEM_PUSHBUTTON_RELEASEORDER], reinterpret_cast<long long>(pBtnWgt->GetEventActionData(CPushBtnWidget::ACTION_RELEASE)));
+
+			//按钮绑定值
+			m_pBindInfoManager->setValue(m_mapIdToProperty[TTEM_PUSHBUTTON_VAR], pBtnWgt->GetBtnBindData());
+			//按钮执行类型
+			m_pComBoProperty->setValue(m_mapIdToProperty[ITEM_PUSHBUTTON_TYPE], pBtnWgt->GeteExecType());
+
 		}
 	}
 	

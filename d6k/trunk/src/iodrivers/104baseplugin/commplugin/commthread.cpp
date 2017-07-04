@@ -123,6 +123,11 @@ void CCommThread::run()
 	//文件目录
 	connect(commPlugin.GetRecver(),SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)),this,SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)));
 
+	//连接
+	connect(this,SIGNAL(Signal_ConnectSocket()),&commPlugin,SLOT(Slot_TimeOutT1()));
+	//断连
+	connect(this, SIGNAL(Signal_DisConnectSocket()), &commPlugin, SLOT(Slot_DisConnect()));
+
 	this->exec();
 }
 
@@ -174,6 +179,8 @@ void CCommThread::ReadFixArea()
 	emit Signal_ReadFixArea();
 }
 
+
+
 void CCommThread::SendCatalogRequest(FILE_CATALOG_REQUEST_1 &catalogRequest)
 {
 	emit Signal_ReadCatalogRequest(catalogRequest);
@@ -188,6 +195,16 @@ void CCommThread::SendWriteActionRequest(FILE_ATTR_INFO &writeAction)
 void CCommThread::SendReadActionRequest(FILE_ATTR_INFO &ReadAction)
 {
 	emit Signal_ReadActionRequest(ReadAction);
+}
+
+void CCommThread::SendConnectRequest()
+{
+	emit Signal_ConnectSocket();
+}
+
+void CCommThread::SendDisConnectRequest()
+{
+	emit Signal_DisConnectSocket();
 }
 
 //开始运行

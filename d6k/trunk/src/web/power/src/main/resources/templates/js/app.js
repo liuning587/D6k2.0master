@@ -21,7 +21,7 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
             url:'/login',
             views:{
                 'content':{
-                    templateUrl:'html/00_login/login.html',
+                    templateUrl:'html/login/login.html',
                     controller:'loginCtrl'
                 }
             }
@@ -225,6 +225,10 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
                 },
                 'leftPredictionCurveMenu@predictionCurve':{
                     templateUrl:'html/predictionCurve/menu/predictionCurveMenu.html'
+                },
+                'midContent@predictionCurve':{
+                    templateUrl:'html/predictionCurve/content/shortManage.html',
+                    controller:'shortCurveCtrl'
                 }
             }
         })
@@ -240,7 +244,7 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
             }
         })
 
-        //预测曲线管理 ： 短期
+        //预测曲线管理 ： 超短期
         .state('predictionCurve.ultraShortCurve',{
             url:'/ultraShortCurve',
             views:{
@@ -251,6 +255,128 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
             }
         })
         /************ end:预测曲线每个menu对应的html **************/
+
+        //实时曲线
+        .state('realtimeCurve',{
+            url:'/realtimeCurve',
+            views:{
+                'header':{
+                    templateUrl:'html/header.html',
+                    controller:'headerCtrl'
+                },
+                'content':{
+                    templateUrl:'html/realtimeCurve/realtimeCurve.html',
+                    controller:'realtimeCurveCtrl'
+                },
+                'footer':{
+                    templateUrl:'html/footer.html'
+                },
+                'leftRealtimeCurveMenu@realtimeCurve':{
+                    templateUrl:'html/realtimeCurve/menu/realtimeCurveMenu.html'
+                }
+            }
+        })
+
+        //实时曲线内容
+        .state('realtimeCurve.realtimeCurveContent',{
+            url:'/realtimeCurveContent',
+            views:{
+                'midContent@realtimeCurve':{
+                    templateUrl:'html/realtimeCurve/content/realtimeCurveContent.html',
+                    controller:'realtimeCurveModalCtrl'
+                }
+            }
+        })
+
+        //报表
+        .state('report',{
+            url:'/report',
+            views:{
+                'header':{
+                    templateUrl:'html/header.html',
+                    controller:'headerCtrl'
+                },
+                'content':{
+                    templateUrl:'html/report/report.html',
+                    controller:'reportCtrl'
+                },
+                'footer':{
+                    templateUrl:'html/footer.html'
+                },
+                'leftReportMenu@report':{
+                    templateUrl:'html/report/menu/reportMenu.html'
+                }
+            }
+        })
+
+        /************ begin:报表的每个menu对应的html **************/
+        // 日报表
+        .state('report.reportOfDay',{
+            url:'/reportOfDay',
+            views:{
+                'midContent@report':{
+                    templateUrl:'html/report/content/reportOfDay.html',
+                    controller:'reportOfDayModalCtrl'
+                }
+            }
+        })
+
+        // 月报表
+        .state('report.reportOfMonth',{
+            url:'/reportOfMonth',
+            views:{
+                'midContent@report':{
+                    templateUrl:'html/report/content/reportOfMonth.html',
+                    controller:'reportOfMonthModalCtrl'
+                }
+            }
+        })
+
+        // 年报表
+        .state('report.reportOfYear',{
+            url:'/reportOfYear',
+            views:{
+                'midContent@report':{
+                    templateUrl:'html/report/content/reportOfYear.html',
+                    controller:'reportOfYearModalCtrl'
+                }
+            }
+        })
+        /************ end:报表的每个menu对应的html **************/
+
+        // 场站信息
+        .state('stationInfo',{
+            url:'/stationInfo',
+            views:{
+                'header':{
+                    templateUrl:'html/header.html',
+                    controller:'headerCtrl'
+                },
+                'content':{
+                    templateUrl:'html/station/stationInfo.html',
+                    controller:'stationInfoCtrl'
+                },
+                'footer':{
+                    templateUrl:'html/footer.html'
+                },
+                'leftStationInfoMenu@stationInfo':{
+                    templateUrl:'html/station/menu/stationInfoMenu.html'
+                }
+            }
+        })
+
+        /************ begin:场站信息的每个menu对应的html **************/
+        // 逆变器
+        .state('stationInfo.inverterContent',{
+            url:'/inverterContent',
+            views:{
+                'midContent@stationInfo':{
+                    templateUrl:'html/station/content/inverterContent.html',
+                    controller:'inverterModalCtrl'
+                }
+            }
+        })
+        /************ begin:场站信息的每个menu对应的html **************/
 
         //用户信息管理
         .state('userManage',{

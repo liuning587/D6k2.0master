@@ -49,6 +49,7 @@ public:
 
 	operator double() const;
 	operator unsigned char() const;
+	operator float() const;
 public:
 	CVariant& operator=(const IO_VARIANT& varSrc);
 	CVariant& operator=(const IO_VARIANT* pSrc);

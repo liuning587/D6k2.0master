@@ -73,8 +73,6 @@ bool CFesDB::Initialize(const char *pszDataPath, unsigned int nMode, int32u nOcc
 	
 	LogMsg(szLog.toStdString().c_str(), 0);
 
- 
-
 	return true;
 }
 
@@ -272,6 +270,25 @@ bool CFesDB::GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIA
 		}
 		break;
 	}
+	case IDD_USERVAR:
+	{
+		Q_ASSERT(m_arrGetUserVariablesFuncs[nFiledID]);
+		if (m_arrGetUserVariablesFuncs[nFiledID])
+		{
+			bRet = m_arrGetUserVariablesFuncs[nFiledID](nOccNo, RetData);
+		}
+		break;
+	}		
+	case IDD_SYSVAR:
+	{
+		Q_ASSERT(m_arrGetSystemVariablesFuncs[nFiledID]);
+		if (m_arrGetSystemVariablesFuncs[nFiledID])
+		{
+			bRet = m_arrGetSystemVariablesFuncs[nFiledID](nOccNo, RetData);
+		}
+		break;
+	}
+
 	default:
 		Q_ASSERT(false);
 		bRet = false;
@@ -328,7 +345,7 @@ bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIA
 		Q_ASSERT(m_arrAoutSetFunctions[nFiledID]);
 		if (m_arrAoutSetFunctions[nFiledID])
 		{
-			m_arrAoutSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+			bRet = m_arrAoutSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
 		}
 		break;
 	}
@@ -337,7 +354,7 @@ bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIA
 		Q_ASSERT(m_arrDoutSetFunctions[nFiledID]);
 		if (m_arrDoutSetFunctions[nFiledID])
 		{
-			m_arrDoutSetFunctions[nFiledID](nOccNo,pData,pExt,pSrc);
+			bRet = m_arrDoutSetFunctions[nFiledID](nOccNo,pData,pExt,pSrc);
 		}
 		break;
 	}
@@ -846,7 +863,7 @@ bool CFesDB::GetChannelQua(int32u nOccNo, IO_VARIANT &RetData) const
 	}
 	CHANNEL *pFB = &m_pChannels[nOccNo - 1];
 
-	S_BOOL(&RetData, &pFB->Quality);
+	S_BYTE(&RetData, &pFB->Quality);
 
 	return true;
 }
@@ -1469,11 +1486,11 @@ bool CFesDB::SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 
 	AOUT *pFB = &m_pAouts[nOccNo - 1];
 
-	if (pFB->Init != INITED)
+	//if (pFB->Init != INITED)
 	{
-		pFB->Init = INITED;
+		//pFB->Init = INITED;
 
-		return false;
+		//return false;
 	}
 
 	fp64 Value = CVariant(*pData).operator double();
@@ -1497,7 +1514,7 @@ bool CFesDB::SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 	pSetValeEvt->Att = ATTW_AOUT;
 	pSetValeEvt->NodeOccNo = pFB->NodeOccNo;
 	pSetValeEvt->Occno = nOccNo;
-	pSetValeEvt->Source1 = *((int8u*)(pSrc)); ;
+	//pSetValeEvt->Source1 = *((int8u*)(pSrc)); ;
 	pSetValeEvt->Datatype = DT_DOUBLE;
 
 	S_DOUBLE(&pSetValeEvt->Value[0], &Value);

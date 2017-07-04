@@ -215,6 +215,13 @@ bool CDyncClrData::CheckDyncData()
 	}
 	return true;
 }
+
+template<typename T>
+bool SortFuction(const T* T1, const T* T2)
+{
+	return T1->m_dValue < T2->m_dValue;
+}
+
 /*! \fn  CDyncClrValueInfo *CDyncClrData::CreateClrData( )
 *********************************************************************************************************
 ** \brief   CDyncClrData::CreateClrData
@@ -237,6 +244,8 @@ CDyncClrValueInfo * CDyncClrData::CreateClrData()
 	Q_ASSERT(pData);
 	m_arrColors.push_back(pData);
 	pData->m_nIndex = (int)m_arrColors.size();
+
+	std::sort(m_arrColors.begin(), m_arrColors.end(), SortFuction<CDyncClrValueInfo>);
 
 	return pData;
 }
@@ -288,6 +297,7 @@ CBaseDyncData *CDyncClrData::CloneDyncData()
 	*pNewDync = *this;
 	return dynamic_cast<CDyncClrData*> (pNewDync);
 }
+
 
 
 void CDyncClrData::PrepareWidgetDync(CBaseWidget *pWidget)
@@ -383,13 +393,8 @@ bool CDyncClrData::ProcessWidgetDync(CBaseWidget *pWidget)
 	}
 	else
 	{
-		//clrCur = GetColor(rtval);
-		//bRtn = GetColor(rtval, clrCur, bInvisible);
 		bRet = GetColor(var, *&pValInfo,bInvisible );
 	}
-
-//	if (bRtn == false)
-//		return false;
 
 	if (bInvisible)
 	{//不可见
@@ -426,10 +431,9 @@ bool CDyncClrData::ProcessWidgetDync(CBaseWidget *pWidget)
 		Q_ASSERT(pBrush);
 		if (pBrush == NULL)
 			return false;
-		//if (pBrush->GetType() == CBrushInfo::NOGRADIENT)
-		//{
-			pBrush->SetColor(pValInfo.m_dwColor) ;
-		//}
+	
+		pBrush->SetColor(pValInfo.m_dwColor) ;
+	
 		pBrush->SetTranspancy(m_nTransparency);
 	}
 	else if (m_nDyncClrType == DYNC_TEXT_CLR)
@@ -456,24 +460,75 @@ bool CDyncClrData::ProcessWidgetDync(CBaseWidget *pWidget)
 		return false;
 	}
 
-	//pWidget->scene()->update(pWidget->boundingRect());
-
 	return true;
 }
 
 bool CDyncClrData::GetColor(const CVariant &value, CDyncClrValueInfo &clrCur, bool &bInvisible) const
 {
-	Q_UNUSED(bInvisible);
-	auto  iter = m_arrColors.begin();
-	// 检查值部分是否为空
-	for (; iter != m_arrColors.end(); ++iter)
+	if (m_pTagInfo->IddType==IDD_AIN)
 	{
-		if (qAbs((*iter)->m_dValue-value.operator double()) <= COMPARE_EQUAL_VAL)
+		// 检查值部分是否为空
+		if (m_arrColors.size() == 0)
 		{
-			clrCur = (*iter);
+			return false;
+		}
+		if (m_arrColors.size() == 1)
+		{
+			if (m_arrColors.front()->m_dValue >= value.operator double())
+			{
+				clrCur = m_arrColors.front();
+				return true;
+			}
+			else
+			{
+				//默认颜色
+			}
+		}
+		//范围之外
+		if (m_arrColors.front()->m_dValue < value.operator double())
+		{
+			//默认颜色 灰色
+		}
+
+		if (m_arrColors.back()->m_dValue >= value.operator double())
+		{
+			clrCur = m_arrColors.back();
 			return true;
 		}
+
+		for (int i = 0; i < m_arrColors.size() - 1; ++i)
+		{
+			if (value.operator double() >= m_arrColors[i]->m_dValue)
+			{
+				if (value.operator double() < m_arrColors[i + 1]->m_dValue)
+				{
+					clrCur = m_arrColors[i];
+					return true;
+				}
+			}
+		}
 	}
+	Q_UNUSED(bInvisible);
+	
+	if (m_pTagInfo->IddType == IDD_DIN)
+	{
+		// 检查值部分是否为空
+		if (m_arrColors.size() == 0)
+		{
+			return false;
+		}
+	
+	
+		for (int i = 0; i < m_arrColors.size() ; ++i)
+		{
+			if ((int )value.operator unsigned char() == (int ) m_arrColors[i]->m_dValue)
+			{				
+					clrCur = m_arrColors[i];
+					return true;
+			}
+		}
+	}
+
 
 	return false;
 }

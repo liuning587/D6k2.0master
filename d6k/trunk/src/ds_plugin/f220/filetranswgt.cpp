@@ -17,6 +17,8 @@ CFileTransWgt::CFileTransWgt(CCommThread *pCommunicate, QWidget *parent)
 	connect(ui.pushButton_2, SIGNAL(clicked()), this, SLOT(Slot_DownLoadItems()));
 	connect(ui.pushButton_3, SIGNAL(clicked()), this, SLOT(Slot_upLoadItems()));
 
+	connect(ui.treeWidget,SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int )),this,SLOT(Slot_ItemDoubleClicke(QTreeWidgetItem *, int)));
+
 	connect(m_pCommuncate,SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)),this,SLOT(Slot_upDataITems(QList<Catalog_Info>&)));
 }
 
@@ -244,5 +246,56 @@ void CFileTransWgt::Slot_upDataITems(QList<Catalog_Info>& lstItems)
 		pItem->setText(0,fileInfo.m_strFileName);
 		pItem->setData(0,Qt::UserRole+1,fileInfo.m_cFileAttr);
 		ui.treeWidget->addTopLevelItem(pItem);
+	}
+}
+
+void CFileTransWgt::Slot_ItemDoubleClicke(QTreeWidgetItem * item, int column)
+{
+	//双击
+	if (item->data(0,Qt::UserRole+1) == 1)
+	{
+		//如果是目录就更新
+		//目录名称
+		QString strCatalogName = item->text(0);
+
+		ui.treeWidget->clear();
+
+		FILE_CATALOG_REQUEST_1 tCatalogRequest;
+
+		tCatalogRequest.asduAddr.SetAddr(1);    //装置地址
+		tCatalogRequest.cot.SetCot(COT_REQ);   //激活
+
+		tCatalogRequest.type = D_FILE_TRANSPORT;   //文件传输
+
+		tCatalogRequest.m_nOperatorType = 1;    //读目录
+		tCatalogRequest.m_nCatalogID.SetAddr(0);       //目录ID  暂时置为0
+
+		strcpy(tCatalogRequest.m_cCatalogName, strCatalogName.toStdString().c_str());    //目录
+		tCatalogRequest.m_uCatalogLength = strlen(tCatalogRequest.m_cCatalogName);   //目录长度
+
+		tCatalogRequest.m_nCallFlag = 0;   //目录下所有文件
+										   //默认时间为所有时间
+
+										   //发送数据
+
+
+		FILE_ATTR_INFO tReadAction;
+
+		tReadAction.asduAddr.SetAddr(1);    //装置地址
+		tReadAction.cot.SetCot(COT_ACT);   //激活
+
+		tReadAction.type = D_FILE_TRANSPORT;   //文件传输
+
+		tReadAction.m_strFileName = "";    //文件名称
+
+		tReadAction.m_nOperatorType = 8;    //召唤数据
+
+		tReadAction.m_cFileNameLength = tReadAction.m_strFileName.length();   //文件长度
+
+		tReadAction.m_cFileAttr = 0; //文件
+
+		tCatalogRequest.m_fileInfo = tReadAction;
+
+		m_pCommuncate->SendCatalogRequest(tCatalogRequest);
 	}
 }

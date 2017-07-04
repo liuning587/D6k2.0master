@@ -566,8 +566,8 @@ bool CDbSvc::LoadApps(QDomElement nEle, int32u nOccNo)
 			pAppInfo->nAppType = (AppType)pData.attribute("AppType").toInt();
 
 
-			strncpy(pAppInfo->ProgramName,pData.attribute("name").toLocal8Bit(),
-				qMin((size_t )MAX_NAME_LEN,(size_t) pData.attribute("name").length()));
+			strncpy(pAppInfo->ProgramName,pData.attribute("Name").toLocal8Bit(),
+				qMin((size_t )MAX_NAME_LEN,(size_t) pData.attribute("Name").length()));
 
 			//strncpy(pAppInfo->loadMode, pData.attribute("load").toLocal8Bit(),
 			//	qMin((size_t)MAX_NAME_LEN, (size_t)pData.attribute("load").length()));

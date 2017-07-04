@@ -44,6 +44,9 @@ public:
 		BOTTOMTOTOP,       //下到上
 	};
 
+	//复制对象
+	void CopyBackground(const CBackground *pBackGround);
+
 public:
 	void DrawBackground(QPainter *painter, const QRectF &rect);
 	QRectF &GetBackgroundRect() ;

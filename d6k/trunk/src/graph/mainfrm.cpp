@@ -138,13 +138,13 @@ void CMainFrame::resizeEvent(QResizeEvent *event)
 ** \date 2017Äê2ÔÂ9ÈÕ 
 ** \note 
 ********************************************************************************************************/
-void  CMainFrame::AddView(std::shared_ptr<CGraphFile> pGraphFile)
+void  CMainFrame::AddView(CGraphFile * pGraphFile)
 {
 	Q_ASSERT(pGraphFile);
 	if (pGraphFile == nullptr)
 		return;
 
-	CRealTimeView *pView = new CRealTimeView(pGraphFile->GetScene(), nullptr);
+	CRealTimeView *pView = new CRealTimeView(pGraphFile->GetScene(), this);
 
 	pView->setScene(pGraphFile->GetScene());
 
@@ -224,9 +224,24 @@ void CMainFrame::SetCurrentFile(const QString& szName)
 		return;
 	}
 
-	auto pGraphFile = std::make_shared<CGraphFile>();
+	CGraphFile* pGraphFile = new CGraphFile();
 
 	pGraphFile->LoadFile(szName);
+
+	if (pGraphFile->GetScene()==nullptr)
+	{
+		m_pCurScene = new CGraphScene(pGraphFile,nullptr);
+		pGraphFile->SetScene(m_pCurScene);
+	}
+	else
+	{
+	/*	auto pScene = std::make_shared<CGraphScene>(pGraphFile, nullptr);
+		pGraphFile->SetScene(m_pCurScene);*/
+		//pGraphFile->GetScene()->SetGrapFile(pGraphFile.get());
+		m_pCurScene = pGraphFile->GetScene();
+		m_pCurScene->setParent(this);
+	}
+	m_pGraphFile = pGraphFile;
 
 	AddView(pGraphFile);
 }

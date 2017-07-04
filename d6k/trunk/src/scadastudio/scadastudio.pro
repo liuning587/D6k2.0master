@@ -237,7 +237,8 @@ HEADERS += ../../include/scadastudio/define.h \
     feschannel_forwardingchannel_data.h \
     fesdo_blockingsignaltag_select_dialog.h \
     fes_do_blockingsignaltag_select_devicedi_model.h \
-    fes_do_blockingsignaletan_select_fesuservaraible_model.h
+    fes_do_blockingsignaletan_select_fesuservaraible_model.h \
+    log/log2file.h
 SOURCES += ./main.cpp \
     ./ccore.cpp \
     ./uimodule/imainwindow.cpp \
@@ -432,7 +433,8 @@ SOURCES += ./main.cpp \
     feschannel_forwardingchannel_data.cpp \
     fesdo_blockingsignaltag_select_dialog.cpp \
     fes_do_blockingsignaltag_select_devicedi_model.cpp \
-    fes_do_blockingsignaletan_select_fesuservaraible_model.cpp
+    fes_do_blockingsignaletan_select_fesuservaraible_model.cpp \
+    log/log2file.cpp
 FORMS += ./selectscaledialog.ui \
     ./setscaledialog.ui \
     ./selectalarmdialog.ui \

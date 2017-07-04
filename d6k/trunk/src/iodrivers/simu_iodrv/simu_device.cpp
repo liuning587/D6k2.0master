@@ -191,9 +191,9 @@ void  CSimuDevice::SimuData()
 		if (bRet)
 		{
 			//获取高值
-			GetRTData(IDD_AIN, nOccNo, ATT_HIGHOUTPUT, &nValHigh);
+			GetRTData(IDD_AIN, nOccNo, ATT_MAXOUTPUT, &nValHigh);
 			//获取低值
-			GetRTData(IDD_AIN, nOccNo, ATT_LOWOUTPUT, &nValLow);
+			GetRTData(IDD_AIN, nOccNo, ATT_MINOUTPUT, &nValLow);
 			//未到最大值
 
 			float nMaxVal = GetVariantValue(nValHigh);

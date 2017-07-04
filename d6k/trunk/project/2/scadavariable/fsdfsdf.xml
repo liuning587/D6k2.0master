@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scada Description="Scada0" DescriptionOccNo="26" TagName="fsdfsdf" version="1.0" ID="0" Extention="" GroupName="" OccNo="1">
+    <alarm>
+        <ain_alarm Count="0"/>
+        <din_alarm Count="0"/>
+    </alarm>
+    <scale>
+        <linear Count="0"/>
+        <nonlinear Count="0"/>
+    </scale>
+    <variable>
+        <scadasystem Count="3">
+            <s OccNo="1" TagName="$YEAR" ID="1" Description="system-year" DescriptionOccNo="19" DataType="5"/>
+            <s OccNo="2" TagName="$MONTH" ID="2" Description="system-month" DescriptionOccNo="20" DataType="5"/>
+            <s OccNo="3" TagName="$DAY" ID="3" Description="system-day" DescriptionOccNo="21" DataType="5"/>
+        </scadasystem>
+        <scadauser>
+            <group name="group0" count="1">
+                <u OccNo="1" TagName="scadauservariable1" ID="1" Description="scadauservariable1" DescriptionOccNo="27" DataType="11" InitValue="0" InitialQua="0" Address="" PinLabel="" SourceTagName="node0.AnalogInput0.ManSet" ScaleOccNo="0" ScaleType="0" ScaleTagName="" AlarmOccNo="0" AlarmType="0" AlarmTagName=""/>
+            </group>
+        </scadauser>
+    </variable>
+</scada>

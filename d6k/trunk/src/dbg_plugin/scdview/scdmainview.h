@@ -52,6 +52,9 @@ protected Q_SLOTS:
 	void slot_onTimer();
 	void slot_CloseTabWidget(int nIndex);
 	void slot_TabChanged(int nIndex);
+
+	void slot_on_DoutTabClieked(const QModelIndex& index);
+	void slot_On_AoutTabClicked(const QModelIndex& index);
 private:
 	IMainModule * m_pCore;
 	QString m_szDeviceName;

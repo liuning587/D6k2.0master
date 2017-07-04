@@ -20,8 +20,8 @@
         </g>
         <g stroke-opacity="1" fill="#ffffff" font-family="微软雅黑" stroke="#008000" stroke-linejoin="bevel" font-style="normal" fill-opacity="1" stroke-linecap="square" font-weight="400" stroke-width="1" transform="matrix(1,0,0,1,109,392.5)" font-size="15">
             <image width="200" x="-100" y="-84.5" preserveAspectRatio="none" height="146" xlink:href="./res/pvarray.png"/>
-            <text x="-52.5" y="81.5" fill="#008000" font-family="微软雅黑" stroke="none" font-style="normal" fill-opacity="1" font-weight="400" xml:space="preserve" font-size="15">长园集团光伏电站</text>
-            <a xlink:href="./长园集团光伏电站.svg">
+            <text x="-52.5" y="81.5" fill="#008000" font-family="微软雅黑" stroke="none" font-style="normal" fill-opacity="1" font-weight="400" xml:space="preserve" font-size="15">xx集团光伏电站</text>
+            <a xlink:href="./xx集团光伏电站.svg">
                 <rect width="200" x="-100" y="-84.5" stroke-opacity="0" height="146" fill-opacity="0"/>
             </a>
         </g>

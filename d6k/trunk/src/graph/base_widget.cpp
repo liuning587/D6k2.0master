@@ -294,6 +294,44 @@ CBaseDyncData * CBaseWidget::CreateDynamicPro(int nDyType)
 	return pFillData;
 }
 
+void CBaseWidget::CopyBaseProperty(CBaseWidget *pSourceWgt)
+{
+	Q_ASSERT(pSourceWgt);
+	if (pSourceWgt == nullptr)
+	{
+		return;
+	}
+
+	//Ðý×ª½Ç¶È
+	SetRotateAngle(pSourceWgt->GetRotateAngle());
+	SetEndAngle(pSourceWgt->GetEndAngle());
+	//penÊôÐÔ
+	GetPenInfo()->SetColor(pSourceWgt->GetPenInfo()->GetColor());
+	GetPenInfo()->SetWidth(pSourceWgt->GetPenInfo()->GetWidth());
+	GetPenInfo()->SetStyle(pSourceWgt->GetPenInfo()->GetStyle());
+	//brushÊôÐÔ
+	GetBrushInfo()->SetColor(pSourceWgt->GetBrushInfo()->GetColor());
+	GetBrushInfo()->SetStyle(pSourceWgt->GetBrushInfo()->GetStyle());
+	GetBrushInfo()->SetGradiendMode(pSourceWgt->GetBrushInfo()->GetGradiendMode());
+	GetBrushInfo()->SetEndColor(pSourceWgt->GetBrushInfo()->GetEndColor());
+
+	//textÊôÐÔ
+	GetFontInfo()->SetColor(pSourceWgt->GetFontInfo()->GetColor());
+	GetFontInfo()->SetFont(pSourceWgt->GetFontInfo()->GetFont());
+	GetFontInfo()->SetFontLayout(pSourceWgt->GetFontInfo()->GetFontLayout());
+	//
+	SetText(pSourceWgt->GetText());
+
+	//±³¾°Í¼Æ¬ÊôÐÔ
+	GetImageInfo()->SetBackgroundImage(pSourceWgt->GetImageInfo()->GetBackgroundImage());
+	GetImageInfo()->SetImageSize(pSourceWgt->GetImageInfo()->GetImageSize());
+	GetImageInfo()->SetImagePosition(pSourceWgt->GetImageInfo()->GetImagePosition());
+	GetImageInfo()->SetbTiling(pSourceWgt->GetImageInfo()->GetbTiling());
+	GetImageInfo()->SetStretch(pSourceWgt->GetImageInfo()->GetStretch());
+	//
+
+}
+
 void CBaseWidget::CopyDynamicPro(const std::vector<CBaseDyncData *> &arrDyncs)
 {
 	for each (CBaseDyncData *pDync in arrDyncs)

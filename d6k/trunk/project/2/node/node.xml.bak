@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node>
+    <nserver>
+        <group name="server" count="1">
+            <n TagName="node1" HostName="WIN-H7OD9596KPT" DescriptionOccNo="22" OccNo="1" BlockNo="1" NodeType="1" Network_IP_A="127.0.0.1" Network_IP_B="127.0.0.1" IsTimeSource="0" Program="" Config="fsdfsdf" GrpName="server" Service="ServiceConfig" SlaveOccNo="1">
+                <m index="1" OccNo="1" Name="scdsvc" AppType="0" LoadType="0" Argument="" Prority="0" Description="SCADA核心模块" DescriptionOccNo="23"/>
+                <m index="2" OccNo="2" Name="vmcs" AppType="0" LoadType="0" Argument="" Prority="0" Description="实时图形界面模块" DescriptionOccNo="24"/>
+                <m index="3" OccNo="3" Name="alarm" AppType="1" LoadType="0" Argument="" Prority="0" Description="告警模块" DescriptionOccNo="25"/>
+            </n>
+        </group>
+    </nserver>
+    <nfes>
+        <n TagName="node0" HostName="WIN-H7OD9596KPT" DescriptionOccNo="22" OccNo="2" BlockNo="0" NodeType="2" Network_IP_A="127.0.0.1" Network_IP_B="127.0.0.1" IsTimeSource="0" Program="" Config="fes0" GrpName="" SlaveOccNo="1"/>
+    </nfes>
+    <nworksstation>
+        <group name="nodegroup1" count="0">
+            <n TagName="node2" HostName="WIN-H7OD9596KPT" DescriptionOccNo="22" OccNo="3" BlockNo="0" NodeType="3" Network_IP_A="127.0.0.1" Network_IP_B="127.0.0.1" IsTimeSource="0" Program="" Config="fsdfsdf" GrpName="" SlaveOccNo="1" Service="ServiceConfig">
+                <m index="1" OccNo="1" Name="scdsvc" AppType="0" LoadType="0" Argument="" Prority="0" Description="SCADA核心模块" DescriptionOccNo="23"/>
+                <m index="2" OccNo="2" Name="vmcs" AppType="0" LoadType="0" Argument="" Prority="0" Description="实时图形界面模块" DescriptionOccNo="24"/>
+            </n>
+        </group>
+    </nworksstation>
+</node>

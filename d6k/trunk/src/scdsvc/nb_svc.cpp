@@ -167,6 +167,8 @@ void CNetbusSvc::Run()
 {
 	m_bQuit = false;
 	OpenPostOffice("SCADA");
+	int nID;
+	OpenMailBox("SCADA", "NB_SVC",&nID );
 	StartModule();
 
 }
@@ -203,11 +205,11 @@ void CNetbusSvc::TransScdEmails()
 		if (bRet)
 		{
 			memset(m_pBuf, 0, EMSG_BUF_SIZE);
-
 			m_pBuf->MsgPath = TO_FES;
 			m_pBuf->MsgType =  1;
 			m_pBuf->FuncCode = COT_SETVAL;
 			m_pBuf->SrcOccNo = m_pNetConfig->MyNodeOccNo;
+			m_pBuf->DestOccNo = msg.SenderID;
 
 			size_t nSize = EMSG_BUF_HEAD_SIZE + sizeof DMSG;
 			memcpy(m_pBuf->BuffData, &msg, qMin(sizeof DMSG, (size_t)EMSG_BUF_SIZE));
@@ -299,6 +301,24 @@ void CNetbusSvc::RecvNodeData()
 										memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
 										pSvr->GetDBSvc()->UpdateDinValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
 									}
+								}
+								else if (pBase->m_nType == USERVAR_TYPE)
+								{
+									for (int i = 0; i < pBase->m_nCount; ++i)
+									{
+										fp64 fVal;
+										memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
+										pSvr->GetDBSvc()->UpdateUserVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+									}
+								}
+								else if (pBase->m_nType == SYSVAR_TYPE)
+								{
+									for (int i = 0; i < pBase->m_nCount; ++i)
+									{
+										fp64 fVal;
+										memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
+										pSvr->GetDBSvc()->UpdateSysVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+									} 
 								}
 							}
 						}

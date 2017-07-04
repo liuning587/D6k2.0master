@@ -112,6 +112,10 @@ private slots:
     void Slot_SetSycsTime(QDateTime tSycsTime);
     //复位进程
     void Slot_ResetProcess();
+	//断连
+	void Slot_DisConnect();
+	//
+	void Slot_AllCallRespond();
 
 public slots:
 	// 遥控命令

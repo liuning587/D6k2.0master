@@ -10,11 +10,11 @@ class CRealTimeTask : public CBaseModule
 {
 public:
 	CRealTimeTask();
-	explicit CRealTimeTask(std::shared_ptr<CGraphFile>& pFile);
+	explicit CRealTimeTask(CGraphFile* pFile);
 	~CRealTimeTask();
  
 public:
-	bool Initialize(std::shared_ptr<CGraphFile>& pFile, unsigned int nMode);
+	bool Initialize(CGraphFile* pFile, unsigned int nMode);
 	virtual bool Initialize(const char*, unsigned int) { return true; }
 	virtual void Run() ;
 	virtual void Shutdown() ;
@@ -23,7 +23,7 @@ protected:
 	virtual void MainLoop(void *pImpl);
 
 private:
-	std::shared_ptr<CGraphFile> m_pGraphFile;
+	CGraphFile* m_pGraphFile;
 };
 
   

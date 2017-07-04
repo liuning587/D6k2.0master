@@ -5,23 +5,24 @@
 TEMPLATE = lib
 TARGET = vmcs
 DESTDIR = ../../bin
-QT += core network xml widgets gui
+QT += core network xml widgets gui charts
 CONFIG += debug
-DEFINES += _WINDOWS WIN64 _WINDOWS WIN64 USE_QT_SHM QT_DLL MODULE_LIB QT_WIDGETS_LIB QT_XML_LIB QT_NETWORK_LIB HMI_SDK_LIB QT_WIDGETS_LIB QT_NETWORK_LIB QT_XML_LIB
+DEFINES += _WINDOWS WIN64 _WINDOWS WIN64 _WINDOWS WIN64 USE_QT_SHM QT_DLL MODULE_LIB QT_WIDGETS_LIB QT_XML_LIB QT_NETWORK_LIB HMI_SDK_LIB QT_WIDGETS_LIB QT_NETWORK_LIB QT_XML_LIB QT_WIDGETS_LIB QT_NETWORK_LIB QT_XML_LIB
 INCLUDEPATH += . \
     ./GeneratedFiles \
     ./GeneratedFiles/Debug \
     ./../../include \
     ./../../thirdparty/ACE_wrappers \
     ./GeneratedFiles/debug \
-    $(QTDIR)/mkspecs/win32-msvc2015 
+    $(QTDIR)/mkspecs/win32-msvc2015 \
+    $(QTDIR)/mkspecs/win32-msvc2015
 LIBS += -L"./../../lib" \
     -L"./../../thirdparty/ACE_wrappers/lib" \
     -l../../lib/log \
     -l../../lib/mail \
     -l../../lib/ACEd \
     -l../../lib/scadaapi \
-    -l../../thirdparty/ACE_wrappers/lib/ACEd 
+    -l../../thirdparty/ACE_wrappers/lib/ACEd
 DEPENDPATH += .
 MOC_DIR += ./GeneratedFiles/debug
 OBJECTS_DIR += debug
@@ -55,6 +56,7 @@ HEADERS += ./background.h \
     ./xml_serializer.h \
     ./added_widget.h \
     ./base_widget.h \
+    ./curveplot_wgt.h \
     ./graph_file.h \
     ./group_widget.h \
     ./line_widget.h \
@@ -62,13 +64,17 @@ HEADERS += ./background.h \
     ./pushbtn_widget.h \
     ./realtime_scene.h \
     ./realtime_view.h \
-    ./shape_widget.h \
-    ./curveplot_wgt.h
+    ./shape_widget.h \   
+    ./base_dync_event_item.h  \ 
+    ./dync_sys_op_event.h  \ 
+    ./dync_event.h    \
+    ./dync_file_op_event.h
 SOURCES += ./added_widget.cpp \
     ./background.cpp \
     ./base_dync.cpp \
     ./base_module.cpp \
     ./base_widget.cpp \
+    ./curveplot_wgt.cpp \
     ./dynamic_factory.cpp \
     ./dync_color.cpp \
     ./dync_moving.cpp \
@@ -96,7 +102,10 @@ SOURCES += ./added_widget.cpp \
     ../scdpub/variant_data.cpp \
     ./vmcs_main.cpp \
     ./widget_factory.cpp \
-    ./xml_serializer.cpp  \
-    ./curveplot_wgt.cpp
+    ./xml_serializer.cpp \
+    ./dync_event.cpp  \
+    ./base_dync_event_item.cpp  \
+    ./dync_sys_op_event.cpp \
+    ./dync_file_op_event.cpp
 TRANSLATIONS += ./vmcs-zh-CN.ts
 RESOURCES += vmcs.qrc

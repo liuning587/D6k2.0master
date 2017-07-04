@@ -9,6 +9,7 @@
 #include "text_threshold.h"
 #include "graph_module.h"
 #include "orderlistwgt.h"
+#include "dync_event.h"
 
 #include <QHBoxLayout>
 #include <QToolButton>
@@ -281,8 +282,30 @@ void CBindDataWgt::Slot_ButtonClicked()
 	{
 		//按钮 命令
 		qDebug() << "enter order widget";
+
+		//数据信息
+		CDyncEventData *pEventInfo = reinterpret_cast<CDyncEventData*>(m_lDynamicBrush);
+
+		Q_ASSERT(pEventInfo);
+		if (pEventInfo == nullptr)
+		{
+			return;
+		}
+
 		COrderListWgt *pOrderLstwgt = new COrderListWgt;
-		pOrderLstwgt->exec();
+
+		CDyncEventData *pEventInfo2 = pOrderLstwgt->GetEventData();
+
+		*pEventInfo2 = *pEventInfo;
+
+		pOrderLstwgt->LoadData();
+
+		if (pOrderLstwgt->exec())
+		{
+			CDyncEventData *pEventInfo2 = pOrderLstwgt->GetEventData();
+
+			*pEventInfo = *pEventInfo2;
+		}
 
 		pOrderLstwgt->deleteLater();
 	}

@@ -64,6 +64,14 @@ public:
 		return true;
 	}
 
+	virtual QString GetOccNoFromScadaVariableUserSourceTagName(const QString &strFes, const QString &strRelatedTagName)
+	{
+		Q_UNUSED(strFes);
+		Q_UNUSED(strRelatedTagName);
+
+		return "";
+	}
+
 	// 特定模块实现的特定的接口
 	// 该接口由 前置配置 (CScadaVariableModule) 模块实现，可供其他模块调用，获取已配置的前置数据名称
 	virtual bool GetScadaConfigName(std::vector< std::string > & arrScadaNames)

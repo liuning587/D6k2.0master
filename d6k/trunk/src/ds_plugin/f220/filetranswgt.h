@@ -24,6 +24,8 @@ public slots:
 
 	//update items
 	void Slot_upDataITems(QList<Catalog_Info>& lstItems);
+	//Ë«»÷
+	void Slot_ItemDoubleClicke(QTreeWidgetItem *item, int column);
 
 
 private:

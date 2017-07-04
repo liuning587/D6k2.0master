@@ -25,6 +25,7 @@
  
 #include "base_widget.h"
 #include <vector>
+#include <QDebug>
   
 
 /*! \class CGroupWidget  group_widget.h  "group_widget.h"

@@ -61,11 +61,11 @@ CSysOutDock::CSysOutDock(QWidget *parent)
 
 	m_pTcpServer = new QTcpServer(this);
 
-	//!todo 此处需要注意，如果程序多开的话，可能会导致监听失败  LiJin 2017.6.14
-	bool bRet = m_pTcpServer->listen(QHostAddress::Any, 19999); //监听任何连上19999端口的ip  
-	Q_ASSERT(bRet);
+	////!todo 此处需要注意，如果程序多开的话，可能会导致监听失败  LiJin 2017.6.14
+	//bool bRet = m_pTcpServer->listen(QHostAddress::Any, 19999); //监听任何连上19999端口的ip  
+	//Q_ASSERT(bRet);
 
-	connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(newConnection())); //新连接信号触发，调用newConnect()槽函数，这个跟信号函数一样，其实你可以随便取。
+	//connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(newConnection())); //新连接信号触发，调用newConnect()槽函数，这个跟信号函数一样，其实你可以随便取。
 
 	//createCommandView();
 }

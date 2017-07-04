@@ -117,6 +117,32 @@ bool CFesDB::GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const
 	 
 	return true;
 }
+
+bool CFesDB::GetUserVarValue(int32u nOccNo, CVariant & val, int8u &nQuality) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO || nOccNo > m_nAinCount)
+		return false;
+
+	val = m_pUserVariable[nOccNo - 1].Value;
+	nQuality = m_pUserVariable[nOccNo - 1].Quality;
+
+	return true;
+}
+
+bool CFesDB::GetSysValValue(int32u nOccNo, CVariant & val, int8u &nQuality) const
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO || nOccNo > m_nAinCount)
+		return false;
+
+	val = m_pSystemVariable[nOccNo - 1].Value;
+
+	nQuality = m_pSystemVariable[nOccNo - 1].Quality;
+
+	return true;
+}
+
 /*! \fn bool CFesDB::UpdateAinValue(int32u nOccNo, const CVariant & val, int8u nQuality)
 ********************************************************************************************************* 
 ** \brief CFesDB::UpdateAinValue 
@@ -146,9 +172,44 @@ bool CFesDB::UpdateDinValue(int32u nOccNo, const CVariant & val, int8u nQuality)
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO || nOccNo > m_nAinCount)
 		return false;
-
+	 
 	m_pDins[nOccNo - 1].Value = val.operator int8u();
+
 	m_pDins[nOccNo - 1].Quality = nQuality;
+
+	return true;
+}
+
+bool CFesDB::UpdateUserVal(int32u nOccNo, const CVariant& val, int8u nQuality)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= m_nUserVariableCount);
+	if (nOccNo == INVALID_OCCNO || nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+	CVariant nVal = val;
+
+	m_pUserVariable[nOccNo - 1].Value = nVal.GetVariant();
+
+	m_pUserVariable[nOccNo - 1].Quality = nQuality;
+
+	return true;
+
+}
+
+bool CFesDB::UpdateSysVal(int32u nOccNo, const CVariant& val, int8u nQuality)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= m_nSystemVariableCount);
+	if (nOccNo == INVALID_OCCNO || nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+	CVariant nVal = val;
+
+	m_pSystemVariable[nOccNo - 1].Value = nVal.GetVariant();
+
+	m_pSystemVariable[nOccNo - 1].Quality = nQuality;
+
 	return true;
 }
 
@@ -217,6 +278,42 @@ bool CFesDB::GetDinAlarmLimitByOccNo(int32u nOccNo, DIN_ALARM_LIMIT** pDinAlarmL
 
 	Q_ASSERT(pDinAlarmLimit);
 	if (!pDinAlarmLimit)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool CFesDB::GetUserVarByOccNo(int32u nOccNo, VARDATA ** pData)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= m_nUserVariableCount);
+	if (nOccNo == INVALID_OCCNO || nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+	*pData = &m_pUserVariable[nOccNo - 1];
+
+	Q_ASSERT(pData);
+	if (!pData)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool CFesDB::GetSysVarByOccNo(int32u nOccNo, VARDATA ** pData)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= m_nSystemVariableCount);
+	if (nOccNo == INVALID_OCCNO || nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+	*pData = &m_pSystemVariable[nOccNo - 1];
+	  
+	Q_ASSERT(pData);
+	if (!pData)
 	{
 		return false;
 	}
@@ -885,12 +982,25 @@ void CFesDB::ReadAoutInfo(CDevicePtr pDev, CChannelPtr pChannel)
 				pAout->DataSource = m_XmlReader.attributes().value("DataSource").toInt();
 				pAout->TransformType = m_XmlReader.attributes().value("TransformType").toInt();
 
+
+				pAout->RangeL = m_XmlReader.attributes().value("RangeL").toDouble();
+				pAout->RangeH = m_XmlReader.attributes().value("RangeH").toDouble();
+				pAout->AlarmOccNo = m_XmlReader.attributes().value("AlarmOccNo").toInt();
+				pAout->HighQua = m_XmlReader.attributes().value("HighQua").toDouble();
+				pAout->LowQua = m_XmlReader.attributes().value("LowQua").toDouble();
+				pAout->MaxRaw = m_XmlReader.attributes().value("MaxRaw").toDouble();
+				pAout->MinRaw = m_XmlReader.attributes().value("MinRaw").toDouble();
+				pAout->MaxScale = m_XmlReader.attributes().value("MaxConvert").toDouble();
+				pAout->MinScale = m_XmlReader.attributes().value("MinConvert").toDouble();
+
+
 				pAoutOccNo->OccNo = pAout->OccNo;
 				std::memset(pAoutOccNo->TagName, 0, sizeof(pAoutOccNo->TagName));
 
 				strncpy(pAoutOccNo->TagName, m_XmlReader.attributes().value("TagName").toLocal8Bit().data(),
 					qMin(size_t(MAX_NAME_LENGTH), (size_t)m_XmlReader.attributes().value("TagName").length()));
-
+				pAout->Init = INITED;
+				pAout->ScanEnable = SCAN_IN;
 				m_arrTempAouts.push_back(pAout);
 
 				m_arrAoutOccNos.push_back(pAoutOccNo);
@@ -966,6 +1076,8 @@ void CFesDB::ReadDoutInfo(CDevicePtr pDev, CChannelPtr pChannel)
 				strncpy(pDoutOccNo->TagName, m_XmlReader.attributes().value("TagName").toLocal8Bit().data(),
 					qMin(size_t(MAX_NAME_LENGTH), (size_t)m_XmlReader.attributes().value("TagName").length()));
 
+				pDout->Init = INITED;
+				pDout->ScanEnable = SCAN_IN;
 
 				m_arrTempDouts.push_back(pDout);
 
