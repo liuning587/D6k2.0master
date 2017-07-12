@@ -73,6 +73,24 @@
     <ClCompile Include="predict_datainfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="aerograph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="station_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="predict_output.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="algorithm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_algorithm.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_algorithm.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\log\log.h">
@@ -114,6 +132,18 @@
     <ClInclude Include="predict_datainfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="aerograph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="station_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="predict_output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="predict_define.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="GeneratedFiles\debug\moc_predefs.h.cbt">
@@ -123,6 +153,9 @@
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="app_main.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="algorithm.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

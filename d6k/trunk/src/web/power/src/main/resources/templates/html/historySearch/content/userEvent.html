@@ -1,0 +1,92 @@
+
+<style>
+    body{ padding:50px 0 0 50px;}
+    .datainp{ width:150px; height:38px; border:1px #ccc solid;}
+    .floatLeft{ float:left}
+
+    .panel .slidedown .glyphicon,
+    .chat .glyphicon {
+        margin-right: 5px;
+    }
+
+    .table-menu > td
+    {
+        color: #b057f0;
+        width: 100px;
+        white-space: nowrap;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .table-data > td
+    {
+        color: #ed1e12;
+        width: 100px;
+        border-width: 1px;
+        white-space: nowrap;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .bottom{text-align:center; line-height:20px; bottom:0; right:10px;font-size:small; padding:6px; position:absolute;}
+
+    .Area table{border-right:1px solid #090408;border-bottom:1px solid #090408;margin-left:3%;margin-right:3%;line-height: 33px;}
+    .Area table td{border-left:1px solid #090408;border-top:1px solid #090408;font-size: 18px;line-height: 33px;}
+
+</style>
+
+<p style="background:#ffffff">
+
+<div style="font-size:16px;color:#281ef0;padding-top:1%;text-align: center;font-weight:bold;">用户事件</div>
+
+
+<p style="line-height:2em; margin-left:1%; padding-top:1%">
+    <span style="line-height:2em;">起始时间：</span>
+    <span>
+        <input class="datainp" id="userEventBeginTime" type="text" placeholder="起始时间"  readonly>
+        <input style="height:38px" type="button" onClick="jeDate({dateCell:'#userEventBeginTime',isTime:true,minDate:'2017-06-01 00:00:00',format:'YYYY-MM-DD hh:mm:ss'})" value=" ... ">
+    </span>
+
+
+    <span style="margin:10px"></span>
+
+    <span style="line-height:2em;">截止时间：</span>
+    <span>
+        <input class="datainp" id="userEventEndTime" type="text" placeholder="截止时间"  readonly>
+        <input style="height:38px" type="button" onClick="jeDate({dateCell:'#userEventEndTime',isTime:true,minDate:'2017-06-01 00:00:00',format:'YYYY-MM-DD hh:mm:00'})" value=" ... ">
+    </span>
+
+    <span style="margin:20px"></span>
+
+    <span role="group">
+        <button type="button" class="button yellow" ng-click="this.blur();userEventSearch()">查询</button>
+        <button type="button" class="button green round" ng-click="this.blur();exportUserEvent()">导出</button>
+    </span>
+
+    <span style="margin:20px"></span>
+
+    <!--var stationId = $("#pagerSize option:selected").val();-->
+    <!--var stationName = $("#pagerSize option:selected").text();-->
+    <span>
+        <label>
+            每页显示
+            <select name="pagerSize" id="pagerSize" aria-controls="example" class="">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+            </select>
+            条
+        </label>
+    </span>
+</p>
+
+<div style="float:none" align="center">
+    <div id="userEventTable">
+    </div>
+</div>
+
+<div class="bottom">
+    <div id="userEventPage" class="userEventPager">
+    </div>
+</div>
+

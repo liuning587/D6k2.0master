@@ -156,13 +156,41 @@ size_t CServerDB::LoadMem(unsigned char * pAddr)
 	return m_nEstimateSize;
 }
 
-bool CServerDB::GetUserVarByOccNo(int32u nOccNo, VARDATA **pAout)
+bool CServerDB::GetUserVarByOccNo(int32u nOccNo, VARDATA **pUserVar)
 {
+	Q_ASSERT(nOccNo !=INVALID_OCCNO && nOccNo <=MAX_OCCNO);
+	if (nOccNo ==INVALID_OCCNO || nOccNo >MAX_OCCNO)
+	{
+		return false;
+	}
+	Q_ASSERT(nOccNo <= m_nUserVariableCount);
+	if (nOccNo > m_nUserVariableCount)
+	{
+		return false;
+	}
+	Q_ASSERT(&m_pUserVariable[nOccNo]);
+
+	*pUserVar = &m_pUserVariable[nOccNo];
+
 	return true;
 }
 
-bool CServerDB::GetSysVarByOccNo(int32u nOccNo, VARDATA** pDout)
+bool CServerDB::GetSysVarByOccNo(int32u nOccNo, VARDATA** pSysVar)
 {
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+	{
+		return false;
+	}
+	Q_ASSERT(nOccNo <= m_nSystemVariableCount);
+	if (nOccNo > m_nSystemVariableCount)
+	{
+		return false;
+	}
+	Q_ASSERT(&m_pSystemVariable[nOccNo]);
+
+	*pSysVar = &m_pSystemVariable[nOccNo];
+
 	return true;
 }
 

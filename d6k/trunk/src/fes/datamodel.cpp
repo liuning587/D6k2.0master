@@ -75,7 +75,11 @@ QVariant CDataModel::data(const QModelIndex &index, int role /*= Qt::DisplayRole
 		case  AOUT_TYPE:
 			return ShowAoutData(nRow, nColumn);
 		case  DOUT_TYPE:
-			return ShowDoutData(nRow, nColumn);				
+			return ShowDoutData(nRow, nColumn);	
+		case USERVAR_TYPE:
+			return ShowUserVarData(nRow, nColumn);
+		case SYSVAR_TYPE:
+			return ShowSysVarData(nRow,nColumn);
 		default:
 			break;
 		}
@@ -166,6 +170,40 @@ Qt::ItemFlags CDataModel::flags(const QModelIndex &index) const
 		flags |= Qt::ItemIsUserCheckable;
 
 	return flags;
+}
+
+float CDataModel::GetVal(IO_VARIANT& val, int32u nIddType)const
+{
+	switch (nIddType)
+	{
+	case DT_BOOLEAN:
+		return V_BOOL(val);
+	case DT_CHAR:
+		return V_CHAR(val);
+	case DT_BYTE:
+		return V_BYTE(val);
+	case DT_SHORT:
+		return V_SHORT(val);
+	case DT_WORD:
+		return V_WORD(val);
+	case DT_INT:
+		return V_INT(val);
+	case DT_DWORD:
+		return V_WORD(val);
+	case DT_LLONG:
+		return V_LLONG(val);
+	case DT_LWORD:
+		return V_LWORD(val);
+	case DT_FLOAT:
+		return V_FLOAT(val);
+	case DT_DOUBLE:
+		return V_FLOAT(val);
+	//case DT_STRING:
+		//return V_STR(val);
+	default:
+		break;
+	}
+	return 0;
 }
 
 QVariant CDataModel::ShowChannelGernelData(int nRow, int nCol) const
@@ -676,6 +714,210 @@ QVariant CDataModel::ShowDoutData(int nRow, int nColumn) const
 	return QVariant();
 }
 
+QVariant CDataModel::ShowUserVarData(int nRow, int nColumn) const
+{
+	if (m_arrUserVars.size()==0)
+	{
+		return QVariant();
+	}
+	if (nRow >= m_arrUserVars.size())
+	{
+		return QVariant();
+	}
+	VARDATA * pData = m_arrUserVars[nRow];
+
+	switch (nColumn)
+	{
+	case VARDATA_OccNo:
+		return QString::number(pData->OccNo);
+	case VARDATA_BlockNo:
+		return QString::number(pData->BlockNo);
+	case VARDATA_NameOccNo:
+		return QString::number(pData->NameOccNo);
+	case VARDATA_NodeOccNo:
+		return QString::number(pData->NodeOccNo);
+	case VARDATA_AlarmOccNo:
+		return QString::number(pData->AlarmOccNo);
+	case VARDATA_ExpressOccNo:
+		return QString::number(pData->ExpressOccNo);
+	case VARDATA_DataType:
+		return QString::number(pData->DataType);
+	case VARDATA_IddType:
+		return QString::number(pData->IddType);
+	case VARDATA_SrcNodeOccNo:
+		return QString::number(pData->SrcNodeOccNo);
+	case VARDATA_SrcOccNo:
+		return QString::number(pData->SrcOccNo);
+	case VARDATA_SrcIddType:
+		return pData->SrcIddType;
+	case VARDATA_IsRefTag:
+		return pData->IsRefTag;
+	case VARDATA_State:
+		return QString::number(pData->State);
+	case VARDATA_IsDefined:
+		return pData->IsDefined;
+	case VARDATA_ScanEnable:
+		return pData->ScanEnable;
+	case VARDATA_Init:
+		return pData->Init;
+	case VARDATA_Quality:
+		return QString::number(pData->Quality);
+	case VARDATA_ManSet:
+		return pData->ManSet;
+	case VARDATA_Value:
+		return GetVal(pData->Value,pData->DataType);
+	case VARDATA_RawValue:
+		return GetVal(pData->RawValue, pData->DataType);
+	case VARDATA_NegValue:
+		return pData->NegValue;
+	case VARDATA_CtrlByte:
+		return pData->CtrlByte;
+	case VARDATA_IsSOE:
+		return pData->IsSOE;
+	case VARDATA_StartCtrl:
+		return pData->StartCtrl;
+	case VARDATA_SignalType:
+		return pData->SignalType;
+	case VARDATA_DataSource:
+		return QString::number(pData->DataSource);
+	case VARDATA_Desc0OccNo:
+		return QString::number(pData->Desc0OccNo);
+	case VARDATA_Desc1OccNo:
+		return QString::number(pData->Desc1OccNo);
+	case VARDATA_RangeL:
+		return pData->RangeL;
+	case VARDATA_RangeH:
+		return pData->RangeH;
+	case VARDATA_HighQua:
+		return pData->HighQua;
+	case VARDATA_LowQua:
+		return pData->LowQua;
+	case VARDATA_MaxRaw:
+		return pData->MaxRaw;
+	case VARDATA_MinRaw:
+		return pData->MinRaw;
+	case VARDATA_MaxScale:
+		return pData->MaxScale;
+	case VARDATA_MinScale:
+		return pData->MinScale;
+	case VARDATA_LastUpdateTime:
+		return QString("%1/%2/%3-%4:%5:%6:%7").
+			arg(pData->LastUpdateTime.Year).
+			arg(pData->LastUpdateTime.Month).
+			arg(pData->LastUpdateTime.Day).
+			arg(pData->LastUpdateTime.Hour).
+			arg(pData->LastUpdateTime.Minute).
+			arg(pData->LastUpdateTime.Second).
+			arg(pData->LastUpdateTime.Milliseconds);
+	default:
+		break;
+	}
+
+	return QVariant();
+}
+
+QVariant CDataModel::ShowSysVarData(int nRow, int nColumn) const
+{
+	if (m_arrSysVars.size() == 0)
+	{
+		return QVariant();
+	}
+	if (nRow >= m_arrSysVars.size())
+	{
+		return QVariant();
+	}
+	VARDATA * pData = m_arrSysVars[nRow];
+
+	switch (nColumn)
+	{
+	case VARDATA_OccNo:
+		return QString::number(pData->OccNo);
+	case VARDATA_BlockNo:
+		return QString::number(pData->BlockNo);
+	case VARDATA_NameOccNo:
+		return QString::number(pData->NameOccNo);
+	case VARDATA_NodeOccNo:
+		return QString::number(pData->NodeOccNo);
+	case VARDATA_AlarmOccNo:
+		return QString::number(pData->AlarmOccNo);
+	case VARDATA_ExpressOccNo:
+		return QString::number(pData->ExpressOccNo);
+	case VARDATA_DataType:
+		return QString::number(pData->DataType);
+	case VARDATA_IddType:
+		return QString::number(pData->IddType);
+	case VARDATA_SrcNodeOccNo:
+		return QString::number(pData->SrcNodeOccNo);
+	case VARDATA_SrcOccNo:
+		return QString::number(pData->SrcOccNo);
+	case VARDATA_SrcIddType:
+		return pData->SrcIddType;
+	case VARDATA_IsRefTag:
+		return pData->IsRefTag;
+	case VARDATA_State:
+		return QString::number(pData->State);
+	case VARDATA_IsDefined:
+		return pData->IsDefined;
+	case VARDATA_ScanEnable:
+		return pData->ScanEnable;
+	case VARDATA_Init:
+		return pData->Init;
+	case VARDATA_Quality:
+		return QString::number(pData->Quality);
+	case VARDATA_ManSet:
+		return pData->ManSet;
+	case VARDATA_Value:
+		return GetVal(pData->Value, pData->DataType);
+	case VARDATA_RawValue:
+		return GetVal(pData->RawValue, pData->DataType);
+	case VARDATA_NegValue:
+		return pData->NegValue;
+	case VARDATA_CtrlByte:
+		return pData->CtrlByte;
+	case VARDATA_IsSOE:
+		return pData->IsSOE;
+	case VARDATA_StartCtrl:
+		return pData->StartCtrl;
+	case VARDATA_SignalType:
+		return pData->SignalType;
+	case VARDATA_DataSource:
+		return QString::number(pData->DataSource);
+	case VARDATA_Desc0OccNo:
+		return QString::number(pData->Desc0OccNo);
+	case VARDATA_Desc1OccNo:
+		return QString::number(pData->Desc1OccNo);
+	case VARDATA_RangeL:
+		return pData->RangeL;
+	case VARDATA_RangeH:
+		return pData->RangeH;
+	case VARDATA_HighQua:
+		return pData->HighQua;
+	case VARDATA_LowQua:
+		return pData->LowQua;
+	case VARDATA_MaxRaw:
+		return pData->MaxRaw;
+	case VARDATA_MinRaw:
+		return pData->MinRaw;
+	case VARDATA_MaxScale:
+		return pData->MaxScale;
+	case VARDATA_MinScale:
+		return pData->MinScale;
+	case VARDATA_LastUpdateTime:
+		return QString("%1/%2/%3-%4:%5:%6:%7").
+			arg(pData->LastUpdateTime.Year).
+			arg(pData->LastUpdateTime.Month).
+			arg(pData->LastUpdateTime.Day).
+			arg(pData->LastUpdateTime.Hour).
+			arg(pData->LastUpdateTime.Minute).
+			arg(pData->LastUpdateTime.Second).
+			arg(pData->LastUpdateTime.Milliseconds);
+	default:
+		break;
+	}
+
+	return QVariant();
+}
+
 /*! \fn bool CDataModel::GetAllData()
 ********************************************************************************************************* 
 ** \brief CDataModel::GetAllData 
@@ -801,6 +1043,28 @@ bool CDataModel::GetTotalInfo()
 		{
 			DOUT_PTR pDout = pDev->GetDout(i);
 			m_VecDout.push_back(pDout);
+		}
+		break;
+	}
+	case USERVAR_TYPE:
+	{
+		int nCount = m_pMem->GetUserVarCount();
+		for (int i = 0; i < nCount;++i)
+		{
+			 VARDATA * pVardata =m_pMem->GetUserVarByIndex(i);
+			 Q_ASSERT(pVardata);
+			 m_arrUserVars.push_back(pVardata);
+		}
+		break; 
+	}		
+	case SYSVAR_TYPE:
+	{
+		int nCount = m_pMem->GetSysVarCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			VARDATA * pVardata = m_pMem->GetSysVarByIndex(i);
+			Q_ASSERT(pVardata);
+			m_arrSysVars.push_back(pVardata);
 		}
 		break;
 	}

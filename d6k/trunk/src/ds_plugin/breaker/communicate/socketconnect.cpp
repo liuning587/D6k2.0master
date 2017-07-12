@@ -56,14 +56,27 @@ CSocketConnect::~CSocketConnect()
 ********************************************************************************************************/
 void CSocketConnect::ConnectSocket(const QString &strIP, int iPort)
 {
+	m_strIp = strIP;
+	m_nPort = iPort;
+
 	m_pMutex->lock();
     m_pTcpScoket->abort();
     m_BtayRecvData.clear();
     m_pTcpScoket->connectToHost(strIP,iPort);
 	//qDebug() << m_pTcpScoket->localAddress().toString() + ":" + QString::number(m_pTcpScoket->localPort());
 	m_pMutex->unlock();
+	QString strValue = QStringLiteral("正在建立socket连接....");
+	GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(),1);
+}
 
-	GetBreakerModuleApi()->WriteRunLog("Breaker","Trying connect To Socket.....",1);
+void CSocketConnect::DisConnectSocket()
+{
+	m_pMutex->lock();
+	m_pTcpScoket->abort();
+	m_BtayRecvData.clear();
+	QString strValue = QStringLiteral("断开socket连接....");
+	GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+	m_pMutex->unlock();
 }
 
 /*********************************************************************************************************
@@ -198,7 +211,8 @@ void CSocketConnect::Slot_ConnectSuccess()
 {
 	QString strLocalInfo = m_pTcpScoket->localAddress().toString() + ":" + QString::number(m_pTcpScoket->localPort());
 	//记录日志
-	GetBreakerModuleApi()->WriteRunLog("Breaker", "Connect Success!", 1);
+	QString strValue = QStringLiteral("网络连接成功   ");
+	GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
 	//发送连接成功信号
 	emit Signal_ConnectSuccess();
 

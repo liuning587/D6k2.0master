@@ -20,6 +20,7 @@
 *  @date    2017.03.23
 *******************************************************************************/
 
+#include "scadaapi/scdsvcapi.h"
 #include "scadaapi/scdapp_api.h"
 #include "scadaapi/scdapp_def.h"
 #include "log/log.h"
@@ -46,7 +47,7 @@ extern "C"
 	** \date 2017年3月24日 
 	** \note 
 	********************************************************************************************************/
-	SCDAPP int StartScadaApp(const char * pszName, int32u nAppOccNo)
+	SCDAPP int StartScadaApp(const char * pszName, int32u nAppOccNo, int nExtraArgc, char *pszExtraArgv[])
 	{
 		Q_ASSERT(pszName);
 		if (pszName == nullptr)
@@ -112,14 +113,49 @@ bool CPpgf::Initalize(const char * pszProjectName)
 		return false;
 	}
 
+	::ConnectScada(pszProjectName, "PPGF", 1);
+
 	return true;
 
 }
 
 
+void CPpgf::Run()
+{
+	pPPSvc->Run();
+
+}
+
 void CPpgf::LogMsg(const char* logMsg, int nLevel)
 {
 	::LogMsg("PPGF", logMsg, nLevel, nullptr);
+}
+
+
+void CPpgf::Shutdown()
+{
+	::DisconnectScada("", "");
+}
+
+
+void CPpgf::GetDbData()
+{
+	//从历史库获取模拟量值
+
+}
+
+void CPpgf::GetRealData()
+{
+
+	pPvStation->GetRealTimeData();
+
+}
+
+void CPpgf::ReadXml(const QString& szFilePath)
+{
+	
+	pReadXml->ReadGroupInfo(szFilePath);
+	
 }
 
 

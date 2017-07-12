@@ -1,5 +1,6 @@
 ﻿#include "commthread.h"
 #include "commplugin.h"
+#include "apdusender.h"
 #include <QDateTime>
 
 CCommThread::CCommThread(QObject *parent)
@@ -21,6 +22,7 @@ CCommThread::CCommThread(QObject *parent)
 	qRegisterMetaType<FILE_ATTR_INFO>("FILE_ATTR_INFO&");
 	qRegisterMetaType<QList<Catalog_Info>>("QList<Catalog_Info>&");
 	qRegisterMetaType<ASDUGZ>("ASDUGZ");
+	qRegisterMetaType<ASDU211_UPDATE>("ASDU211_UPDATE&");
 }
 
 CCommThread::~CCommThread()
@@ -127,7 +129,10 @@ void CCommThread::run()
 	connect(this,SIGNAL(Signal_ConnectSocket()),&commPlugin,SLOT(Slot_TimeOutT1()));
 	//断连
 	connect(this, SIGNAL(Signal_DisConnectSocket()), &commPlugin, SLOT(Slot_DisConnect()));
+	//更新程序
+	connect(this, SIGNAL(Singal_updateProcess(ASDU211_UPDATE &)), commPlugin.getSender(), SLOT(OnSendUpdateRequest(ASDU211_UPDATE &)));
 
+	connect(commPlugin.GetRecver(),SIGNAL(Signal_UpdateConform(int)),this,SIGNAL(Signal_UpdateConform(int)));
 	this->exec();
 }
 
@@ -205,6 +210,12 @@ void CCommThread::SendConnectRequest()
 void CCommThread::SendDisConnectRequest()
 {
 	emit Signal_DisConnectSocket();
+}
+
+void CCommThread::SendUpdateRequest(ASDU211_UPDATE & updateData)
+{
+	//更新程序
+	emit Singal_updateProcess(updateData);
 }
 
 //开始运行

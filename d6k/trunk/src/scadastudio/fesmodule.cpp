@@ -128,7 +128,7 @@ CFesModule::CFesModule(IMainModuleInterface *pCore)
 
 	if (m_pHisSave == nullptr)
 	{
-		m_pHisSave = new CHisSave(m_pCore->GetUIMgr());
+		m_pHisSave = new CHisSave(m_pCore);
 	}
 	else
 	{
@@ -137,7 +137,7 @@ CFesModule::CFesModule(IMainModuleInterface *pCore)
 		delete m_pHisSave;
 		m_pHisSave = nullptr;
 
-		m_pHisSave = new CHisSave(m_pCore->GetUIMgr());
+		m_pHisSave = new CHisSave(m_pCore);
 	}
 
 	if (m_pPdr)
@@ -5579,7 +5579,7 @@ void CFesModule::CreateFesUi(Config::CFesConfigData *pConfig)
 
 	if (m_pHisSave == nullptr)
 	{
-		m_pHisSave = new CHisSave(m_pCore->GetUIMgr());
+		m_pHisSave = new CHisSave(m_pCore);
 	}
 
 	if (m_pPdr == nullptr)

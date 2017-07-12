@@ -1,6 +1,7 @@
 #include "breakrecver.h"
 #include "socketconnect.h"
 #include "breaker_data.h"
+#include "breaker_module.h"
 
 CBreakRecver::CBreakRecver(CSocketConnect *pSocket, QObject *parent)
 	: QObject(parent)
@@ -11,7 +12,8 @@ CBreakRecver::CBreakRecver(CSocketConnect *pSocket, QObject *parent)
 		return;
 	}
 	qRegisterMetaType<DBG_GET_SYS_INFO>("DBG_GET_SYS_INFO&");
-
+	qRegisterMetaType<DBG_GET_MEAS>("DBG_GET_MEAS&");
+	qRegisterMetaType<DEG_SOE_DETAIL>("DEG_SOE_DETAIL&");
 }
 
 CBreakRecver::~CBreakRecver()
@@ -24,8 +26,6 @@ bool CBreakRecver::OnReceive(char *pBuff, int nLen)
 	{
 		return false;
 	}
-
-	qDebug() << QByteArray(pBuff,nLen).toHex();
 
 	if (!m_dbgCache.IsEmpty())
 	{
@@ -117,6 +117,91 @@ bool CBreakRecver::AnalyseDbg(char *pBuff, int nLen)
 	{
 		//获取测量值信息
 		OnRecvAnalogInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_GET_DEBUG_DATA:
+	{
+		//获取调试信息
+		OnRecvDebugInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_GET_SETTING:
+	{
+		//获取保护定值
+		OnRecvProtectDevInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_GET_SYSCFG:
+	{
+		//获取系统参数
+		OnRecvSystemDevInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_GET_DICFG:
+	{
+		//开入量
+		OnRecvDiInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_GET_DOCFG:
+	{
+		//开出两
+		OnRecvDOInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_GET_SOFTSTRAP:
+	{
+		//软压板定值
+		OnRecvSoftDevInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_GET_SOE:
+	{
+		//soe解析
+		OnRecvSoeInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_SET_TIME:
+	{
+		//时间设置
+		OnRecvTimeInfo(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_SET_SETTING:
+	{
+		//保护定值
+		OnRecvProtectAck(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_SET_SYSCFG:
+	{
+		//保护定值
+		OnRcvSysAck(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_SET_DICFG:
+	{
+		//设置开入参数
+		OnRcvSysAck(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_SET_DOCFG:
+	{
+		//设置开出参数
+		OnRcvSysAck(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_RM_CTRL:
+	{
+		//设置开出参数
+		OnRecvRemoteContrlAck(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_SET_SOFTSTRAP:
+	{
+		//设置软压板定值
+		OnRcvSysAck(pBuff, nLen);
+		break;
 	}
 	default:
 		break;
@@ -133,7 +218,146 @@ void CBreakRecver::OnRecvSysInfo(char * pBuff, int nLen)
 	emit Signal_SysInfo(*pSysInfo);
 }
 
+//测量值信息
 void CBreakRecver::OnRecvAnalogInfo(char * pBuff, int nLen)
 {
+	Q_UNUSED(nLen);
 
+	DBG_GET_MEAS *pMeas = (DBG_GET_MEAS *)(pBuff);
+	emit Signal_Analog(*pMeas);
+}
+
+//调试信息
+void CBreakRecver::OnRecvDebugInfo(char * pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+
+	DBG_GET_MEAS *pMeas = (DBG_GET_MEAS *)(pBuff);
+	emit Signal_Debug(*pMeas);
+
+}
+
+void CBreakRecver::OnRecvProtectDevInfo(char * pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+	DBG_GET_MEAS *pMeas = (DBG_GET_MEAS *)(pBuff);
+	emit Signal_ProtectDev(*pMeas);
+
+}
+
+void CBreakRecver::OnRecvSystemDevInfo(char *pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+	DBG_GET_MEAS *pMeas = (DBG_GET_MEAS *)(pBuff);
+	emit Signal_SystemDev(*pMeas);
+}
+
+void CBreakRecver::OnRecvDiInfo(char *pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+	DBG_GET_MEAS *pMeas = (DBG_GET_MEAS *)(pBuff);
+	emit Signal_DiInfo(*pMeas);
+
+}
+
+void CBreakRecver::OnRecvDOInfo(char * pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+	DEG_GET_MSG2 *pMeas = (DEG_GET_MSG2 *)(pBuff);
+	emit Signal_DOInfo(*pMeas);
+
+}
+
+//软压板定值
+void CBreakRecver::OnRecvSoftDevInfo(char * pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+
+	DEG_SOFT_INFO *pMeas = (DEG_SOFT_INFO *)(pBuff);
+	emit Signal_SoftDev(*pMeas);
+}
+
+//soe处理
+void CBreakRecver::OnRecvSoeInfo(char * pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+
+	DEG_SOE_DETAIL *pSoe = (DEG_SOE_DETAIL *)(pBuff);
+
+	emit Signal_SoeDetailInfo(*pSoe);
+}
+
+//时间设置返回报文
+void CBreakRecver::OnRecvTimeInfo(char * pBuff, int nLen)
+{
+	//写日志
+	Q_UNUSED(nLen);
+	TIME_SET_ACK_INFO *pTimeAck = (TIME_SET_ACK_INFO*)(pBuff);
+	if (pTimeAck->m_Result == 0)
+	{
+		//成功
+		GetBreakerModuleApi()->WriteRunLog("Breaker","时间设置成功",1);
+	}
+	else
+	{
+		//失败
+		QString strValue = tr("时间设置失败,错误码:%1").arg(pTimeAck->m_AddResult);
+		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(),1 );
+	}
+	
+}
+
+void CBreakRecver::OnRecvProtectAck(char * pBuff, int nLen)
+{
+	//写日志
+	Q_UNUSED(nLen);
+	TIME_SET_ACK_INFO *pTimeAck = (TIME_SET_ACK_INFO*)(pBuff);
+	if (pTimeAck->m_Result == 0)
+	{
+		//成功
+		GetBreakerModuleApi()->WriteRunLog("Breaker", "定值设置成功", 1);
+	}
+	else
+	{
+		//失败
+		QString strValue = tr("定值设置失败,错误码:%1").arg(pTimeAck->m_AddResult);
+		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+	}
+}
+
+void CBreakRecver::OnRcvSysAck(char *pBuff, int nLen)
+{
+	//写日志
+	Q_UNUSED(nLen);
+	TIME_SET_ACK_INFO *pTimeAck = (TIME_SET_ACK_INFO*)(pBuff);
+	if (pTimeAck->m_Result == 0)
+	{
+		//成功
+		GetBreakerModuleApi()->WriteRunLog("Breaker", "定值设置成功", 1);
+	}
+	else
+	{
+		//失败
+		QString strValue = tr("定值设置失败,错误码:%1").arg(pTimeAck->m_AddResult);
+		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+	}
+}
+
+void CBreakRecver::OnRecvRemoteContrlAck(char * pBuff, int nLen)
+{
+	//
+	Q_UNUSED(nLen);
+	TIME_SET_ACK_INFO *pTimeAck = (TIME_SET_ACK_INFO*)(pBuff);
+	if (pTimeAck->m_Result == 0)
+	{
+		//成功
+		GetBreakerModuleApi()->WriteRunLog("Breaker", "操作成功", 1);
+		emit Signal_RemoteControlAck();;
+	}
+	else
+	{
+		//失败
+		QString strValue = tr("操作失败,错误码:%1").arg(pTimeAck->m_AddResult);
+		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+	}
 }

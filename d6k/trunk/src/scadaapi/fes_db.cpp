@@ -1486,14 +1486,14 @@ bool CFesDB::SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 
 	AOUT *pFB = &m_pAouts[nOccNo - 1];
 
-	//if (pFB->Init != INITED)
+	if (pFB->Init != INITED)
 	{
-		//pFB->Init = INITED;
+		pFB->Init = INITED;
 
-		//return false;
+		return false;
 	}
 
-	fp64 Value = CVariant(*pData).operator double();
+	float Value = CVariant(*pData).operator float();
 
 	//! 获取最大、最小范围，如果超过范围，则报警提示，并且不设值下去
 	if (Value < pFB->RangeL || Value > pFB->RangeH)
@@ -1579,6 +1579,7 @@ bool CFesDB::SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 	}
 
 	// 检查条件，如果控制闭锁没有通过，则告警
+/*
 	if (pFB->CheckOK == 0)
 	{
 		szLog = QObject::tr("Set dout [OccNo=%1] failed. Because the remotecontrol's bloking condition is't ready.").arg(nOccNo);
@@ -1586,7 +1587,7 @@ bool CFesDB::SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 		// 告警-提示运行人员： 遥控闭锁条件检查失败。
 
 		return false;
-	}
+	}*/
 	//! 如果是启动程序，则 转发消息到 顺控模块（支持异机）
 	if (pFB->StartProgramOccNo != INVALID_OCCNO)
 	{
@@ -1603,7 +1604,7 @@ bool CFesDB::SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 	pSetValeEvt->Att = ATTW_DOUT;
 	pSetValeEvt->NodeOccNo = pFB->NodeOccNo;
 	pSetValeEvt->Occno = nOccNo;
-	pSetValeEvt->Source1=*((int8u*)(pSrc));   //Todo :please notice!!!! 
+//	pSetValeEvt->Source1=*((int8u*)(pSrc));   //Todo :please notice!!!! 
 	pSetValeEvt->Datatype = DT_BOOLEAN;
 
 	S_BOOL(&pSetValeEvt->Value[0], &pData);

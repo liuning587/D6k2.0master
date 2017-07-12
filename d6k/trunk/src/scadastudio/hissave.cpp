@@ -22,6 +22,16 @@
 
 #include "hissave.h"
 #include "scadastudio/imainwindow.h"
+#include "scadastudio/icore.h"
+#include "scadastudiodefine.h"
+#include "aireportsaveview.h"
+#include "aicurvesaveview.h"
+#include "aimaxminstatisticsview.h"
+#include "ailimitstatisticsview.h"
+#include "scadastudio/tabwidget.h"
+
+#include <QObject>
+#include <QModelIndex>
 
 /*! \fn CHisSave::CHisSave(QObject *parent, CScadastudio *pUi, QModelIndex &index, int mouseClickType)
 ********************************************************************************************************* 
@@ -36,10 +46,25 @@
 ** \date 2015年11月26日 
 ** \note 
 ********************************************************************************************************/
-CHisSave::CHisSave(IMainWindow *pUi)
-	: QObject(pUi)
+CHisSave::CHisSave(IMainModuleInterface *pCore)
+	: QObject(pCore->GetUIMgr()), m_pCore(nullptr)
 {
+	Q_ASSERT(pCore);
+	if (!pCore)
+	{
+		return;
+	}
 
+	m_pCore = pCore;
+
+	m_pUi = pCore->GetUIMgr();
+	Q_ASSERT(m_pUi);
+	if (!m_pUi)
+	{
+		return;
+	}
+	
+	connect((QObject *)m_pUi->GetLeftTree(), SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(DoubleClicked(const QModelIndex &)));
 }
 
 /*! \fn CHisSave::~CHisSave()
@@ -54,4 +79,54 @@ CHisSave::CHisSave(IMainWindow *pUi)
 CHisSave::~CHisSave()
 {
 
+}
+
+void CHisSave::DoubleClicked(const QModelIndex &index)
+{
+	int nType = index.data(Qt::UserRole).toInt();
+
+	if (FES_TYPE_HIS_AI_REPORT_ITEM == nType)
+	{
+		//模拟量报表数据保存
+		//预留接口
+		CAIReportSaveView *pView = new CAIReportSaveView(nullptr);
+		
+		m_pCore->GetUIMgr()->GetTabWidget()->addTab(pView, "test");
+	}
+	else if (FES_TYPE_HIS_AI_CURVE_ITEM == nType)
+	{
+		//模拟量曲线数据保存
+		//预留接口
+		CAICurveSaveView *pView = new CAICurveSaveView(nullptr);
+		m_pCore->GetUIMgr()->GetTabWidget()->addTab(pView, "test");
+	}
+	else if (FES_TYPE_HIS_AI_MAX_MIN_ITEM == nType)
+	{
+		//模拟量最值统计
+		//预留接口
+		CAIMaxMinStatisticsView *pView = new CAIMaxMinStatisticsView(nullptr);
+		m_pCore->GetUIMgr()->GetTabWidget()->addTab(pView, "test");
+	}
+	else if (FES_TYPE_HIS_AI_LIMIT_ITEM == nType)
+	{
+		//模拟量越限值统计
+		//预留接口
+		CAILimitStatisticsView *pView = new CAILimitStatisticsView(nullptr);
+		m_pCore->GetUIMgr()->GetTabWidget()->addTab(pView, "test");
+	}
+	else if (FES_TYPE_HIS_AI_CUM_ITEM == nType)
+	{
+		//模拟量累计值统计
+		//预留接口
+	}
+	else if (FES_TYPE_HIS_DI_CUM_ITEM == nType)
+	{
+		//开关量累计值统计
+		//预留接口
+	}
+	else if (FES_TYPE_HIS_KWH_CUM_ITEM == nType)
+	{
+		//点度量累计值统计
+		//预留接口
+	}
 }

@@ -38,6 +38,7 @@ CCommPlugin::CCommPlugin(CFtuModule *pModule)
     m_pTimerSyncTimeMsg = new QTimer(this);
     m_pTimerKwhMsg = new QTimer(this);
 
+
     m_k  = 0;
     m_w = 0;
     m_bIsRunning = false;
@@ -115,7 +116,7 @@ CCommPlugin::CCommPlugin(CFtuModule *pModule)
 	//定时获取数据
 	//m_pTimer->setInterval(1);
 	//tcp断连后不断重连
-	m_pTimerOut0->setInterval(2000);
+	m_pTimerOut0->setInterval(5000);
 
     //m_thrdSocket.start();
 	//三个超时设置
@@ -135,6 +136,7 @@ CCommPlugin::CCommPlugin(CFtuModule *pModule)
 	m_pTimerOut1->setInterval(TIMER_INTERVAL_T1);
 	m_pTimerOut2->setInterval(TIMER_INTERVAL_T2);
 	m_pTimerOut3->setInterval(TIMER_INTERVAL_T3);
+
 // 	m_pTimeGeneralSendMsg->setInterval(TIMER_INTERVAL_TG);
 //     m_pTimerSyncTimeMsg->setInterval(TIMER_INTERVAL_TG);
 
@@ -313,6 +315,8 @@ void CCommPlugin::Slot_SocketError(QString error)
 	m_pTimeGeneralSendMsg->stop();
     m_pTimerSyncTimeMsg->stop();
     m_pTimerKwhMsg->stop();
+
+	m_pApduSender->ClearDataInfo();
 }
 
 /*********************************************************************************************************
@@ -336,6 +340,7 @@ void CCommPlugin::Slot_sockeConnectSuccess(QString strLocalInfo)
 	m_pTimeGeneralSendMsg->start();
     //m_pTimerSyncTimeMsg->start();
     //m_pTimerKwhMsg->start();
+	m_pApduSender->ClearDataInfo();
 }
 
 /*********************************************************************************************************
@@ -924,6 +929,8 @@ void CCommPlugin::Slot_ReadAction(FILE_ATTR_INFO &tFileInfo)
 {
 	m_pApduSender->OnSendReadFileAction(tFileInfo);
 }
+
+
 
 //总召超时
 void CCommPlugin::Slot_SendGeneralResquestMsg()

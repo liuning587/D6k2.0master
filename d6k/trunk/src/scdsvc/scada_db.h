@@ -25,6 +25,7 @@
 #include "mem_db.h"
 #include "qglobal.h"
 #include "scadaapi/scdapp_def.h"
+#include <QString>
 
 class CScadaApp;
 //struct APP_INFO;
@@ -41,6 +42,15 @@ public:
 	virtual void Shutdown();
 
 	bool InitMailBoxInfo(std::vector<std::shared_ptr<SAPP>>& arrApps);
+
+	void SetProjPath(const QString& pszPath)
+	{
+		m_szPathName = pszPath;
+	}
+	QString GetProjPath() const
+	{
+		return m_szPathName;
+	}
 public:
 	void CreateMailBoxs();
 	void DestroyMailBoxs();
@@ -48,12 +58,12 @@ protected:
 
 	// 基于SCADA的APP的管理
 	SAPP  * m_pScadaApps;
-	unsigned int m_nAppCount;
+	unsigned int m_nAppCount;	
 	std::vector<std::shared_ptr<CScadaApp>> m_arrApps;
 
 private:
+	QString m_szPathName;
 	std::vector<std::shared_ptr<SAPP>> m_arrAppInfos;
-	//std::vector<APP_INFO_DEF> m_arrAppInfos;
 };
 
 #endif // SCD_DB_MODULE_H

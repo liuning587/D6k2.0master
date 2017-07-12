@@ -24,6 +24,9 @@
 
 
 #include "datatypes.h"
+#include "predict_datainfo.h"
+#include "pv_station.h"
+#include "pp_svc.h"
 
 #include <QObject>
 #include <vector>
@@ -45,20 +48,26 @@ public:
 
 	virtual void Shutdown();
 
+
 private:
 
 	void GetDbData();
 
 	void GetRealData();
 
-	void ReadXml();
+	void ReadXml(const QString& szFilePath);
 
 	void LogMsg(const char* logMsg, int nLevel);
 
 private:
+	QString m_szFilePath;
 
-	
-	
+	CReadXml* pReadXml;
+
+	CPVStation* pPvStation;
+
+	CPowerPredictSvc* pPPSvc;
+
 
 };
 

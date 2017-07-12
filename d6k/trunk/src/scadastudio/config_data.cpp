@@ -438,7 +438,15 @@ namespace Config
 
 			writer.writeAttribute("IsTimeSource", QString("%1").arg(var->m_bIsTimeSource));
 			writer.writeAttribute("Program", QString("%1").arg(var->m_strProgram)); 
+			
 			writer.writeAttribute("Config", QString("%1").arg(var->m_strConfig));
+			if (var->m_strConfig.isEmpty())
+			{
+				auto strTmp = QObject::tr("Error-->Node Server TagName %1  Config is empty!!!").arg(var->m_szTagName).arg(var->m_strConfig);
+				MYLIB::Log2File(LOG_NODE_LOG, strTmp.toStdString().c_str(), true);
+				s_pGlobleCore->LogMsg(NODE_CONFIG_DESC, strTmp.toStdString().c_str(), LEVEL_1);
+			}
+
 			writer.writeAttribute("GrpName", QString("%1").arg(var->m_strGroup));
 			writer.writeAttribute("Service", QString("%1").arg(var->m_strService));
 			writer.writeAttribute("SlaveOccNo", QString("%1").arg(var->m_nSlaveOccNo));
@@ -2417,7 +2425,16 @@ namespace Config
 
 			writer.writeAttribute("IsTimeSource", QString("%1").arg(var->m_bIsTimeSource));
 			writer.writeAttribute("Program", QString("%1").arg(var->m_strProgram));
+
+
 			writer.writeAttribute("Config", QString("%1").arg(var->m_strConfig));
+			if (var->m_strConfig.isEmpty())
+			{
+				auto strTmp = QObject::tr("Error-->Node Fes Group %1  Node TagName %2  Config %3 is empty!!!").arg(pGroup->m_strGroup).arg(var->m_szTagName).arg(var->m_strConfig);
+				MYLIB::Log2File(LOG_NODE_LOG, strTmp.toStdString().c_str(), true);
+				s_pGlobleCore->LogMsg(NODE_CONFIG_DESC, strTmp.toStdString().c_str(), LEVEL_1);
+			}
+
 			writer.writeAttribute("GrpName", QString("%1").arg(var->m_strGroup));
 			//ÐÂ¼ÓSlaveOccNo
 			writer.writeAttribute("SlaveOccNo", QString("%1").arg(var->m_nSlaveOccNo));
@@ -2592,7 +2609,15 @@ namespace Config
 
 			writer.writeAttribute("IsTimeSource", QString("%1").arg(var->m_bIsTimeSource));
 			writer.writeAttribute("Program", QString("%1").arg(var->m_strProgram));
+			
 			writer.writeAttribute("Config", QString("%1").arg(var->m_strConfig));
+			if (var->m_strConfig.isEmpty())
+			{
+				auto strTmp = QObject::tr("Error-->Node Workstation Group %1  Node TagName %2  Config %3 is empty!!!").arg(pGroup->m_strGroup).arg(var->m_szTagName).arg(var->m_strConfig);
+				MYLIB::Log2File(LOG_NODE_LOG, strTmp.toStdString().c_str(), true);
+				s_pGlobleCore->LogMsg(NODE_CONFIG_DESC, strTmp.toStdString().c_str(), LEVEL_1);
+			}
+			
 			writer.writeAttribute("GrpName", QString("%1").arg(var->m_strGroup));
 
 			writer.writeAttribute("SlaveOccNo", QString("%1").arg(var->m_nSlaveOccNo));

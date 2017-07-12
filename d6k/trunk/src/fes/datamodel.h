@@ -14,7 +14,9 @@ enum DATAMODEL_TYPE
 	AIN_TYPE,                     //!<页面为AIN 
 	DIN_TYPE,                     //!<页面为DIN
 	AOUT_TYPE,                    //!<页面为Aout
-	DOUT_TYPE                     //!<页面为Dout
+	DOUT_TYPE,                    //!<页面为Dout
+	USERVAR_TYPE,                 //!<页面为uservar
+	SYSVAR_TYPE,                  //!<页面为sysvar
 };
 
 
@@ -177,6 +179,61 @@ enum DIN_HEADER
 	DIN_PinLabelOccNo,
 	DIN_LastUpdateTime,
 };
+enum  VARDATA_Attr
+{
+	VARDATA_OccNo,
+	VARDATA_BlockNo,
+	VARDATA_NameOccNo,
+	VARDATA_NodeOccNo,
+
+	VARDATA_AlarmOccNo,
+	VARDATA_ExpressOccNo,
+
+	VARDATA_DataType,
+	VARDATA_IddType,
+
+	VARDATA_SrcNodeOccNo,
+	VARDATA_SrcOccNo,
+	VARDATA_SrcIddType,
+	VARDATA_IsRefTag,
+
+	VARDATA_State,
+
+	VARDATA_IsDefined,
+	VARDATA_ScanEnable,
+	VARDATA_Init,
+	VARDATA_Quality,
+	VARDATA_ManSet,
+
+	VARDATA_Value,
+	VARDATA_RawValue,
+
+	VARDATA_NegValue,
+	VARDATA_CtrlByte,
+	VARDATA_IsSOE,
+
+	VARDATA_StartCtrl,
+	VARDATA_SignalType,
+
+	VARDATA_DataSource,
+
+	VARDATA_Desc0OccNo,
+	VARDATA_Desc1OccNo,
+
+	VARDATA_RangeL,
+	VARDATA_RangeH,
+	VARDATA_HighQua,
+	VARDATA_LowQua,
+
+	VARDATA_MaxRaw,
+	VARDATA_MinRaw,
+
+	VARDATA_MaxScale,
+	VARDATA_MinScale,
+
+	VARDATA_LastUpdateTime,
+};
+
 
 
 enum AOUT_HEADER
@@ -281,6 +338,7 @@ public:
 	{
 		m_nCurrentDeviceOccNo = OccNo;
 	}
+	float GetVal(IO_VARIANT& val,int32u nIddType)  const ;
 private:
 	QVariant ShowProjInfo(int nRow, int Col) const;
 	QVariant ShowChannelGernelData(int nRow,int Col) const;
@@ -291,6 +349,8 @@ private:
 	QVariant ShowDINData(int nRow, int nColumn) const;
 	QVariant ShowAoutData(int nRow, int nColumn) const;
 	QVariant ShowDoutData(int nRow, int nColumn) const;
+	QVariant ShowUserVarData(int nRow,int nColumn)const;
+	QVariant ShowSysVarData(int nRow, int nColumn)const;
 	//从内存加载数据直接初始化
 	bool GetTotalInfo();
 
@@ -315,6 +375,9 @@ private:
 	std::map < int, DIN* >  m_MapDin;
 	std::vector<AOUT_PTR>   m_VecAout;
 	std::vector<DOUT_PTR>   m_VecDout;
+
+	std::vector<VARDATA * > m_arrUserVars;
+	std::vector<VARDATA * > m_arrSysVars;
 	//当前通道号
 	int m_nCurrentChannelOccNo;
 	//当前设备号

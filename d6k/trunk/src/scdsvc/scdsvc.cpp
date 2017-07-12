@@ -140,6 +140,8 @@ void CScadaSvc::CreateMailBoxs()
 	std::vector<std::string> arrNames;
 	// ´´½¨ÓÊ¾Ö
 	size_t nMailBoxNum = 0;
+
+	nMailBoxNum += m_pDbSvc->GetNodeAppSize(arrNames);
 //	nMailBoxNum += m_pDbSvc->GetIoChannelNames(arrNames);
 
 	//std::copy(arrNames.cbegin(), arrNames.cend(), m_arrMailBoxNames.begin());

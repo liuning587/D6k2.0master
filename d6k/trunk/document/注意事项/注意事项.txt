@@ -1,0 +1,1 @@
+scadastudio qmake后可以解决重复编译的问题。

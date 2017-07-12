@@ -149,6 +149,33 @@ bool CDataView::InitView()
 		}
 	}
 
+	QTreeWidgetItem* pUserVarItem = new QTreeWidgetItem(pProjItem);
+
+	size_t nUserVarCount = m_pMemDB->GetUserVarCount();
+
+	szChannelName = QString("UserVarNum:%1").arg(nUserVarCount);
+
+	pUserVarItem->setText(0, szChannelName);
+
+	pUserVarItem->setData(0, DataType_ROLE, USERVAR_TYPE);
+
+	pProjItem->addChild(pUserVarItem);
+
+	
+	QTreeWidgetItem* pSysVarItem = new QTreeWidgetItem(pProjItem);
+
+	size_t nSysVarCount = m_pMemDB->GetSysVarCount();
+
+	szChannelName = QString("SysVarNum:%1").arg(nSysVarCount);
+
+	pSysVarItem->setText(0, szChannelName);
+
+	pSysVarItem->setData(0, DataType_ROLE, SYSVAR_TYPE);
+
+	pProjItem->addChild(pSysVarItem);
+
+
+
 	QSplitter* pSplitter = new QSplitter(Qt::Horizontal);
 	pSplitter->addWidget(m_pTree.get());
 
@@ -511,6 +538,77 @@ void CDataView::slot_on_dbClicked(QTreeWidgetItem* item, int col)
 
 		break;
 	}
+
+	case USERVAR_TYPE:
+	{
+		m_nDataType = USERVAR_TYPE;
+
+		QString szName;
+
+		szName = tr("UserVar");
+
+		if (IsFileOpen(szName))
+		{
+			return;
+		}
+
+		QTableView* pView = new QTableView(this);
+
+		pView->setAlternatingRowColors(true);
+
+		CDataModel* projModel = new CDataModel(m_pMemDB, pView);
+
+		m_VecDataModel.push_back(projModel);
+
+		m_VecDataView.push_back(pView);
+
+		projModel->SetDataType(USERVAR_TYPE);
+
+		ShowData(projModel, 0);
+
+		int nIndex = m_pTabWidget->addTab(pView, szName);
+
+		m_pTabWidget->setCurrentIndex(nIndex);
+
+		pView->setModel(projModel);
+
+		break;
+	}
+	case SYSVAR_TYPE:
+	{
+		m_nDataType = SYSVAR_TYPE;
+
+		QString szName;
+
+		szName = tr("SysVar");
+
+		if (IsFileOpen(szName))
+		{
+			return;
+		}
+
+		QTableView* pView = new QTableView(this);
+
+		pView->setAlternatingRowColors(true);
+
+		CDataModel* projModel = new CDataModel(m_pMemDB, pView);
+
+		m_VecDataModel.push_back(projModel);
+
+		m_VecDataView.push_back(pView);
+
+		projModel->SetDataType(SYSVAR_TYPE);
+
+		ShowData(projModel, 0);
+
+		int nIndex = m_pTabWidget->addTab(pView, szName);
+
+		m_pTabWidget->setCurrentIndex(nIndex);
+
+		pView->setModel(projModel);
+
+		break;
+	}
 	default:
 		break;
 	}
@@ -758,6 +856,52 @@ void CDataView::SetHeaderData(DataModel_PTR ptrData)
 		m_szHeaderList.push_back(tr("DOUT_ExpressionOccNo"));
 		m_szHeaderList.push_back(tr("DOUT_PinLabelOccNo"));
 		m_szHeaderList.push_back(tr("DOUT_LastUpdateTime"));
+		break;
+	}
+	case USERVAR_TYPE:
+	case SYSVAR_TYPE:
+	{
+		m_szHeaderList.push_back(tr("VARDATA_OccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_BlockNo"));
+		m_szHeaderList.push_back(tr("VARDATA_NameOccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_NodeOccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_AlarmOccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_ExpressOccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_DataType"));
+		m_szHeaderList.push_back(tr("VARDATA_IddType"));
+		m_szHeaderList.push_back(tr("VARDATA_SrcNodeOccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_SrcOccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_SrcIddType"));
+		m_szHeaderList.push_back(tr("VARDATA_IsRefTag"));
+		m_szHeaderList.push_back(tr("VARDATA_State"));
+		m_szHeaderList.push_back(tr("VARDATA_IsDefined"));
+		m_szHeaderList.push_back(tr("VARDATA_ScanEnable"));
+		m_szHeaderList.push_back(tr("VARDATA_Init"));
+		m_szHeaderList.push_back(tr("VARDATA_Quality"));
+
+		m_szHeaderList.push_back(tr("VARDATA_ManSet"));
+		m_szHeaderList.push_back(tr("VARDATA_Value"));
+		m_szHeaderList.push_back(tr("VARDATA_RawValue"));
+		m_szHeaderList.push_back(tr("VARDATA_NegValue"));
+		m_szHeaderList.push_back(tr("VARDATA_CtrlByte"));
+		m_szHeaderList.push_back(tr("VARDATA_IsSOE"));
+		m_szHeaderList.push_back(tr("VARDATA_StartCtrl"));
+		m_szHeaderList.push_back(tr("VARDATA_SignalType"));
+		m_szHeaderList.push_back(tr("VARDATA_DataSource"));
+		m_szHeaderList.push_back(tr("VARDATA_Desc0OccNo"));
+		m_szHeaderList.push_back(tr("VARDATA_Desc1OccNo"));
+
+		m_szHeaderList.push_back(tr("VARDATA_RangeL"));
+		m_szHeaderList.push_back(tr("VARDATA_RangeH"));
+
+		m_szHeaderList.push_back(tr("VARDATA_HighQua"));
+		m_szHeaderList.push_back(tr("VARDATA_LowQua"));
+		m_szHeaderList.push_back(tr("VARDATA_MaxRaw"));
+		m_szHeaderList.push_back(tr("VARDATA_MinRaw"));
+
+		m_szHeaderList.push_back(tr("VARDATA_MaxScale"));
+		m_szHeaderList.push_back(tr("VARDATA_MinScale"));
+		m_szHeaderList.push_back(tr("VARDATA_LastUpdateTime"));
 
 		break;
 	}
@@ -845,6 +989,13 @@ void CDataView::SetGridData(DataModel_PTR ptrData, int nOccNo)
 		ptrData->SetColumnCount(m_szHeaderList.size());
 		break;
 	}
+	case USERVAR_TYPE:
+		ptrData->SetRowCount(m_pMemDB->GetUserVarCount());
+		ptrData->SetColumnCount(m_szHeaderList.size());
+		break;
+	case SYSVAR_TYPE:
+		ptrData->SetRowCount(m_pMemDB->GetSysVarCount());
+		ptrData->SetColumnCount(m_szHeaderList.size());
 	default:
 		break;
 	}

@@ -10,7 +10,7 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
-
+#include <functional>
 class CMemDB;
 class CTagNamePool;
 class CServerDB;
@@ -26,7 +26,7 @@ public:
     CScadaApi();
 	~CScadaApi();
 public:
-	bool Initialize(const char *pszDataPath, unsigned int nMode);
+	bool Initialize(const char *pszDataPath, const char * szAppName, unsigned int nMode);
 	void Run();
 	void Shutdown();
 public:
@@ -37,6 +37,13 @@ public:
 	 
 	NODE_TYPE GetNodeType(int32u nNodeOccNo);
 
+	SAPP* GetNodeAppInfoByName(int32u nNodeOccNo,char* pszAppName);
+	bool  GetNodeAppInfoByOccNo(int32u nNodeOccNo, int32u nProOccNo, SAPP** pApp) const;
+
+private:
+	bool GetAppState(int32u nNodeOccNo, int32u nOccNo, IO_VARIANT& pData)  const ;
+	bool GetAppQuality(int32u nNodeOccNo, int32u nOccNo, IO_VARIANT& pData)  const ;
+	bool GetAppHeatbeat(int32u nNodeOccNo, int32u nOccNo, IO_VARIANT& pData) const ;
 protected:
 	bool   GetNodeTagNameByOccNo(int32u nOccNo, std::string& tagName);
 	int32u GetNodeOccNoByTagName(const std::string& tagName);
@@ -89,9 +96,6 @@ private:
 	NODE_MEM       * m_pNodeGIHead;
 	CFesDB         * m_pFesHead;
 	NODE* m_pNodes;
-
-
-
 protected:
 	bool   CreateScdAndClientDB(const char* pszFilePath);
 	size_t CreateMemDB(unsigned char* pAddr);
@@ -118,6 +122,9 @@ private:
 
 	std::map<int32u, SAPP*> m_mapAppAddr;
 	std::map < int32u, std::vector <SAPP* > > m_arrAppInfos;
+
+private:
+	std::array< std::function<bool(int32u,int32u,IO_VARIANT&)  >, ATT_MAX> m_arrGetSappRTDataFuncs;
 };
 
 #endif // SCADAAPI_H

@@ -18,32 +18,37 @@
     <widget class="QTableWidget" name="tableWidget">
      <column>
       <property name="text">
-       <string>Num</string>
+       <string>序号</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>AnalogID</string>
+       <string>测值序号</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Type</string>
+       <string>分类</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Name</string>
+       <string>侧值名称</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Value</string>
+       <string>单位</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Time</string>
+       <string>值</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>时间</string>
       </property>
      </column>
     </widget>

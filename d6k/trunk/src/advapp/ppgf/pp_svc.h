@@ -28,7 +28,6 @@ protected:
 
 	virtual void MainLoop();
 
-
 };
 
 

@@ -50,11 +50,9 @@ void CInverter::LogMsg(const char *szLogTxt, int nLevel)
 bool CInverter::GetRealTimeData()
 {
 	bool bRet = false;
-
 	bRet |= m_IsOpen.GetRealTimeData();
 	bRet |= m_ActivePower.GetRealTimeData();
 	bRet |= m_ReactivePower.GetRealTimeData();
-
 	return bRet;
 }
 

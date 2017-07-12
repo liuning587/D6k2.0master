@@ -149,7 +149,8 @@ private:
 	
 	//写文件传输确认
 	void OnRecvWriteConform(char *pBuff, int nLength);
-
+	//升级激活确认
+	void OnRecvUpdateActionAck(char *pBuff, int nLength);
 
 signals:
     //单点连续遥信数据
@@ -214,6 +215,8 @@ signals:
 	void Signal_ReadFixData(DEV_BASE &devData);
 	//文件目录
 	void Signal_FIleCatalogINfo(QList<Catalog_Info>& lstFileInfo);
+	//升级确认
+	void Signal_UpdateConform(int nFloag);
 
 private:
     //104数据
@@ -240,6 +243,8 @@ private:
 public:
 	//自定义文件名称
 	QString m_strFileNmae;
+	//updata falg
+	int m_nUpdateFlag;
 };
 
 #endif // CAPDURECVER_H

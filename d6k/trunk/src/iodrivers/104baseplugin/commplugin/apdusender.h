@@ -25,6 +25,7 @@
 #endif
 
 class CCommPlugin;
+class QTimer;
 
 class CApduSender: public QObject
 {
@@ -64,6 +65,8 @@ public:
 
 	//定值获取
 	bool OnSendDevDataRequest(DEV_BASE *pRequestDz);
+	//定值写入确认
+	bool OnSendDevWriteConform();
     //死区设置
     bool OnSendZoomDataRequest(ZOOM_BASE *pZoomData);
 	//录波文件获取
@@ -96,6 +99,7 @@ public:
 	//写文件
 	bool OnSendWriteFileData();
 
+
 	//和校验
 	unsigned char checkAllData(const char *data, int length);
 
@@ -116,6 +120,16 @@ public:
 		m_strFilePath = strFilePath;
 	}
 
+	void ClearDataInfo();
+public slots:
+    //文件传输
+    void Slot_FileTransPort();
+
+	//
+	void Slot_OnSendMidDevData();
+	//发送升级指令
+	void OnSendUpdateRequest(ASDU211_UPDATE & pUpdate);
+
 public:
     enum { MAX_SERIAL_NUMBER = 32767};//序列号15位，最大值
 
@@ -132,6 +146,15 @@ public:
 	QString m_strFilePath;
 	//写出的文件内容
 	QByteArray m_btWriteData;
+	//文件传输
+	QTimer *m_pFileTransfor;
+	//
+	DEV_BASE m_WriteDevInfo;
+	//dev index
+	int m_nDevIndex;
+	//
+	QTimer *m_pDevTimer;
+
 };
 
 #endif // CAPDUSENDER_H

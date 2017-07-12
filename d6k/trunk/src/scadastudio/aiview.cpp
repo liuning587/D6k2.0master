@@ -4,7 +4,7 @@
 
 CAIView::CAIView(QWidget *parent, IMainModuleInterface *pCore, Config::CDevice *pDeviceData, QString &strTag,
 	CQuoteItem *pItem, CChannel *pModule, Config::CFesData *pFes)
-	: QMainWindow(parent)
+	: QMainWindow(parent), m_pTable(nullptr)
 {
 	Q_UNUSED(strTag);
 	

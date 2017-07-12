@@ -58,6 +58,8 @@ bool CScadaDB::Initialize(const char *pszDataPath, unsigned int nMode)
 		szLog = QObject::tr("Start project...");
 	}
 	
+	m_szPathName =QString::fromLocal8Bit(pszDataPath) ;
+
 	LogMsg(szLog.toStdString().c_str(), 0);
 
 	return true;
@@ -83,12 +85,23 @@ bool CScadaDB::InitMailBoxInfo(std::vector<std::shared_ptr<SAPP>>& arrApps)
 
 	m_nAppCount = m_arrApps.size();
 
+	for (auto iter : m_arrApps)
+	{
+		if (iter)
+		{
+			iter->Load();
+		}
+	}
+
 
 	return  true;
 }
 void CScadaDB::Run()
 {
- 
+	for (auto iter:m_arrApps)
+	{
+		iter->Start(m_szPathName.toStdString().c_str());
+	}
 }
 
 void CScadaDB::Shutdown()

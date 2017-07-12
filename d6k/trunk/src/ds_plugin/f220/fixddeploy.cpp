@@ -718,7 +718,7 @@ void CFixdDeploy::Slot_SendCurrentAllPoints()
 			m_pCommunicate->SendDevOrder(devBaseData);
 			m_lstBaseInfo.append(devBaseData);
 			//启动定时器
-			m_pFixTimeOut->start(5000);
+			m_pFixTimeOut->start(9000);
 			m_pMainModule->LogString(m_strDeviceName.toLocal8Bit().data(), tr("Send Param Write Request").toLocal8Bit().data(), 1);
 		}
 	}

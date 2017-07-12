@@ -39,7 +39,7 @@
        <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Port:</string>
+          <string>端口:</string>
          </property>
         </widget>
        </item>
@@ -70,14 +70,14 @@
        <item>
         <widget class="QPushButton" name="pushButton">
          <property name="text">
-          <string>Conform</string>
+          <string>确认</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="text">
-          <string>Cancel</string>
+          <string>取消</string>
          </property>
         </widget>
        </item>

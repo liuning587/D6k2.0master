@@ -95,7 +95,7 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
                 S_Binary.zoom = 0;
 				m_lstBinary.append(S_Binary);
 
-                m_mapBinaryDeviceIdGroup.insert(m_lstBinary.count(), S_Binary);
+                m_mapBinaryDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
                 //插入数据
                 m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
                 if (!m_lstBinaryCodes.contains(lstData.at(1).simplified()))
@@ -131,7 +131,7 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
 
 				m_lstAnalog.append(S_Binary);
 
-                m_mapAnalogDeviceIdGroup.insert(m_lstAnalog.count(), S_Binary);
+                m_mapAnalogDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
                 m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
 
                 if (!m_lstAnalogCodes.contains(lstData.at(1).simplified()))
@@ -156,7 +156,7 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
                 S_Binary.zoom = 0;
 				m_lstKWH.append(S_Binary);
 
-                m_mapKwhDeviceIdGroup.insert(m_lstKWH.count(), S_Binary);
+                m_mapKwhDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
 
                 m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
 
@@ -183,7 +183,7 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
                 S_Binary.zoom = 0;
 				m_lstControl.append(S_Binary);
 
-                m_mapControlDeviceIdGroup.insert(m_lstControl.count(), S_Binary);
+                m_mapControlDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
                 m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
                 //m_lstControlCodes.append(lstData.at(1).simplified());
 

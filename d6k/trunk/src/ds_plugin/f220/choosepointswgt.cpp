@@ -378,7 +378,7 @@ bool CChoosePointsWgt::GetBinaryPoints()
 	for (int i = 0; i < lstBinaryRpt.count(); i++)
 	{
 		QTableWidgetItem *item0 = new QTableWidgetItem;
-		item0->setText(QString::number(i+1));
+		item0->setText(QString::number(lstBinaryRpt.at(i).NUM));
 
 		QTableWidgetItem *item1 = new QTableWidgetItem;
 		item1->setText(tr("Binary"));
@@ -435,7 +435,7 @@ bool CChoosePointsWgt::GetAnalogPoints()
 	for (int i = 0; i < lstAnalogRpt.count(); i++)
 	{
 		QTableWidgetItem *item0 = new QTableWidgetItem;
-		item0->setText(QString::number(i+1));
+		item0->setText(QString::number(lstAnalogRpt.at(i).NUM));
 
 		QTableWidgetItem *item1 = new QTableWidgetItem;
 		item1->setText(tr("Analog"));
@@ -496,7 +496,7 @@ bool CChoosePointsWgt::GetKwhPoints()
 	for (int i = 0; i < lstKwhRpt.count(); i++)
 	{
 		QTableWidgetItem *item0 = new QTableWidgetItem;
-		item0->setText(QString::number(i+1));
+		item0->setText(QString::number(lstKwhRpt.at(i).NUM));
 
 		QTableWidgetItem *item1 = new QTableWidgetItem;
 		item1->setText(tr("Kwh"));
@@ -536,7 +536,7 @@ bool CChoosePointsWgt::GetControlPoints()
 	for (int i = 0; i < lstControlRpt.count(); i++)
 	{
 		QTableWidgetItem *item0 = new QTableWidgetItem;
-		item0->setText(QString::number(i+1));
+		item0->setText(QString::number(lstControlRpt.at(i).NUM));
 
 		QTableWidgetItem *item1 = new QTableWidgetItem;
 		item1->setText(tr("Control"));
@@ -791,7 +791,7 @@ void CChoosePointsWgt::UpdateToDesTables(RPT rptInfo, CDragTableWgt *pDesTableWg
     
 
     QTableWidgetItem *item1 = new QTableWidgetItem;
-    item1->setText(QString::number(rptInfo.NUM2));
+    item1->setText(QString::number(rptInfo.NUM));
 
     QTableWidgetItem *item2 = new QTableWidgetItem;
     QString strGroupName;
@@ -851,7 +851,7 @@ void CChoosePointsWgt::UpdateAnalogToDesTables(RPT rptInfo, CAnalogDragTableWgt 
 
 
 	QTableWidgetItem *item1 = new QTableWidgetItem;
-	item1->setText(QString::number(rptInfo.NUM2));
+	item1->setText(QString::number(rptInfo.NUM));
 
 	QTableWidgetItem *item2 = new QTableWidgetItem;
 	QString strGroupName = tr("Analog");

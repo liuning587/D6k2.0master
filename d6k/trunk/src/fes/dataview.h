@@ -72,7 +72,7 @@ private:
 	bool IsDataViewOpen(const QString& szName);
 	void closeEvent(QCloseEvent *);
 private:
-	Ui::CGridView ui;
+	Ui::CGridView ui; 
 	QString m_szRdbName;
 	//! 此处引用 内存数据库
 	std::shared_ptr<CDbSvc> & m_pMemDB;

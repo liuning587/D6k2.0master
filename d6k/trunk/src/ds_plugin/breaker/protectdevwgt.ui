@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CProtectDevWgt</class>
+ <widget class="QWidget" name="CProtectDevWgt">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>734</width>
+    <height>472</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CProtectDevWgt</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QTableWidget" name="tableWidget">
+     <column>
+      <property name="text">
+       <string>序号</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>定值序号</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>定值组</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>定值名称</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>单位</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>定值范围</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>定值区1</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>时间</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

@@ -612,13 +612,24 @@ bool CDIModel::setData(const QModelIndex &index, const QVariant &value, int role
 					m_arrDIs[nRow]->m_strBitOpenString = strDesc;
 				}
 			}
-			//else if (index.column() == AlarmTagName)
-			//{
-			//	if (m_arrDIs[nRow]->m_strAlarmTag != value.toString())
-			//	{
-			//		m_arrDIs[nRow]->m_strAlarmTag = value.toString();
-			//	}
-			//}
+			else if (index.column() == AlarmTagName)
+			{
+				if (m_arrDIs[nRow]->m_strAlarmTag.isEmpty())
+				{
+					return true;
+				}
+				
+				//删除关联关系
+				if (!m_pFes->DeleteDIsRelationAlarmArr(m_arrDIs[nRow]->m_strAlarmTag.toStdString(), m_arrDIs[nRow]))
+				{
+					auto strTmp = QObject::tr("[Fes %1]  Delete AI TagName %2 Relation Alarm failed!!!").arg(m_pFes->m_szTagName).arg(m_arrDIs[nRow]->m_szTagName);
+					m_pCore->LogMsg(FES_DESC, strTmp.toStdString().c_str(), LEVEL_1);
+
+					return false;
+				}
+
+				m_arrDIs[nRow]->m_strAlarmTag.clear();
+			}
 			//else if (index.column() == AlarmType)
 			//{
 			//	if (m_arrDIs[nRow]->m_nAlarmType != value.toInt())

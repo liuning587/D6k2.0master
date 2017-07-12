@@ -19,7 +19,7 @@ extern "C"
 {
 	struct TIMEPAK;
 	// 连接SCADA 库
-	SCADA_API bool ConnectScada(const char * pszProjectName, const char * szAppName);
+	SCADA_API bool ConnectScada(const char * pszProjectName, const char * szAppName,int nMode);
 	// 关闭
 	SCADA_API bool DisconnectScada(const char * pszProjectName, const char * szAppName);
 	// 判断SCADA服务是否退出

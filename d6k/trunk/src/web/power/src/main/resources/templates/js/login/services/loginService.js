@@ -5,8 +5,8 @@ DaQOCloud.factory('loginService',['$http',function ($http) {
     return {
         loginMessage: function (userName,passWord) {
 
-           /*return $.ajax({
-                url : "http://172.16.42.37:8080/DaQOCloudSystem/Login101/login?username="+userName+"&password="+passWord,
+           return $.ajax({
+                url : "/userLogin/Login?username="+userName+"&password="+passWord,
                 type: "post",
                 async: false,
                 success:function(result){
@@ -15,7 +15,7 @@ DaQOCloud.factory('loginService',['$http',function ($http) {
                 {
                     alert('登录失败，用户名或密码错误！');
                 }
-            });*/
+            });
         }
     }
 }])

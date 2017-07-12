@@ -1,14 +1,13 @@
 #pragma once
-//#include " .h"
-//#include "fesconfig.h"
 #include "scd_data.h"
+#include <string>
 #include <unordered_map>
 #include <QObject>
 #include <QString>
-#include <string>
+
 
 struct  HEAD_MEM;
-
+struct  VARDATA;
 class CFesDBR//:public CMemDB
 {
 public:
@@ -35,6 +34,21 @@ public:
 	DIN* GetDinByOccNo(int32u nOccNo);
 	AOUT * GetAoutByOccNo(int32u nOccNo);
 	DOUT* GetDoutByOccNo(int32u nOccNo);
+
+	size_t GetUserVarCount() const
+	{
+		return m_nUserVarCount;
+	}
+
+	size_t GetSysVarCount() const
+	{
+		return m_nSysVarCount;
+	}
+
+	VARDATA * GetUserVarByIndex(int nIndex);
+	
+	VARDATA * GetSysVarByIndex(int nIndex);
+	
 protected:
 	size_t CreateChannel(unsigned char* pAddr);
 	size_t CreateDevice(unsigned char* pAddr);
@@ -42,6 +56,14 @@ protected:
 	size_t CreateDin(unsigned char* pAddr);
 	size_t CreateAout(unsigned char* pAddr);
 	size_t CreateDout(unsigned char* pAddr);
+
+	size_t CreateAinAlarm(unsigned char* pAddr);
+	size_t CreateAinLimitAlarm(unsigned char* pAddr);
+	size_t CreateDinAlarm(unsigned char* pAddr);
+	size_t CreateDinLimitAlarm(unsigned char* pAddr);
+
+	size_t CreateUserVars(unsigned char* pAddr);
+	size_t CreateSysVars(unsigned char* pAddr);
 protected:
 	void LogMsg(const char * pszText, int nLevel);
 private:
@@ -81,5 +103,35 @@ private:
 	unsigned int m_nAoutCount;
 	std::vector<AOUT*> m_arrAouts;
 	std::unordered_map<int32u, AOUT*> m_mapAouts;
+	
+	AIN_ALARM  *m_pAinAlarm;
+	unsigned int m_nAinAlarmCount;
+	std::vector<AIN_ALARM*> m_arrAinAlarms;
+	std::unordered_map<int32u, AIN_ALARM*> m_mapAinAlarms;
+
+	AIN_ALARM_LIMIT *m_pAinAlarmLimit;
+	unsigned int m_nAinAlarmLimitCount;
+	std::vector<AIN_ALARM_LIMIT*> m_arrAinAlarmLimits;
+	std::unordered_map<int32u, AIN_ALARM_LIMIT*> m_mapAinAlarmLimits;
+
+	DIN_ALARM *m_pDinAlarm;
+	unsigned int m_nDinAlarmCount;
+	std::vector<DIN_ALARM*> m_arrDinAlarms;
+	std::unordered_map<int32u, DIN_ALARM*> m_mapDinAlarms;
+
+	DIN_ALARM_LIMIT *m_pDinAlarmLimit;
+	unsigned int m_nDinAlarmLimitCount;
+	std::vector<DIN_ALARM_LIMIT*> m_arrDinAlarmLimits;
+	std::unordered_map<int32u, DIN_ALARM_LIMIT*> m_mapDinAlarmLimits;
+
+	VARDATA * m_pUserVars;
+	unsigned int m_nUserVarCount;
+	std::vector<VARDATA*> m_arrUserVars;
+	std::unordered_map<int32u, VARDATA*> m_mapUserVars;
+
+	VARDATA* m_pSysVars;
+	unsigned int m_nSysVarCount;
+	std::vector<VARDATA*> m_arrSysVars;
+	std::unordered_map<int32u, VARDATA*> m_mapSysVars;
 };
 

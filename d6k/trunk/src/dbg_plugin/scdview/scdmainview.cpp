@@ -183,6 +183,19 @@ void CScdMainView::InitNode(QStandardItem* pItem, int32u nNodeOccNo)
 			}
 		}
 	}
+
+	QStandardItem * pUserVarItem = new QStandardItem(tr("UserVar"));
+	pUserVarItem->setData(QString::number(nNodeOccNo), Qt::UserRole + 1);
+	pUserVarItem->setData(E_USERVAR, Qt::UserRole + 2);
+	pUserVarItem->setIcon(QIcon(":/Resources/channel.png"));
+	pItem->appendRow(pUserVarItem);
+
+	QStandardItem * pSysVarItem = new QStandardItem(tr("SysVar"));
+	pSysVarItem->setData(QString::number(nNodeOccNo), Qt::UserRole + 1);
+	pSysVarItem->setData(E_SYSVAR, Qt::UserRole + 2);
+	pSysVarItem->setIcon(QIcon(":/Resources/channel.png"));
+	pItem->appendRow(pSysVarItem);
+
 }
 
 void CScdMainView::InitChannel(QStandardItem* pItem, CFesDBR *pFes, int32u nChannelOccNo)
@@ -295,6 +308,13 @@ void CScdMainView::slot_TreeDbClicked(const QModelIndex& index)
 			{
 				emit sig_DataView(nType, pDev->NodeOccNo, pDev->ChannelOccNo, pDev->OccNo);
 			}
+			break;
+		}
+		case E_USERVAR:
+		case E_SYSVAR:
+		{
+			int32u nNodeOccNo = pItem->data(Qt::UserRole + 1).toUInt();
+			emit sig_DataView(nType, nNodeOccNo ,0,0);
 			break;
 		}
 		default:
@@ -590,6 +610,52 @@ void CScdMainView::SetHeaderList(CScdDataModel* pModel,int nType)
 
 			break;
 		}
+		case E_USERVAR:
+		case E_SYSVAR:
+		{
+			m_szHeaderList.push_back(tr("VARDATA_OccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_BlockNo"));
+			m_szHeaderList.push_back(tr("VARDATA_NameOccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_NodeOccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_AlarmOccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_ExpressOccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_DataType"));
+			m_szHeaderList.push_back(tr("VARDATA_IddType"));
+			m_szHeaderList.push_back(tr("VARDATA_SrcNodeOccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_SrcOccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_SrcIddType"));
+			m_szHeaderList.push_back(tr("VARDATA_IsRefTag"));
+			m_szHeaderList.push_back(tr("VARDATA_State"));
+			m_szHeaderList.push_back(tr("VARDATA_IsDefined"));
+			m_szHeaderList.push_back(tr("VARDATA_ScanEnable"));
+			m_szHeaderList.push_back(tr("VARDATA_Init"));
+			m_szHeaderList.push_back(tr("VARDATA_Quality"));
+
+			m_szHeaderList.push_back(tr("VARDATA_ManSet"));
+			m_szHeaderList.push_back(tr("VARDATA_Value"));
+			m_szHeaderList.push_back(tr("VARDATA_RawValue"));
+			m_szHeaderList.push_back(tr("VARDATA_NegValue"));
+			m_szHeaderList.push_back(tr("VARDATA_CtrlByte"));
+			m_szHeaderList.push_back(tr("VARDATA_IsSOE"));
+			m_szHeaderList.push_back(tr("VARDATA_StartCtrl"));
+			m_szHeaderList.push_back(tr("VARDATA_SignalType"));
+			m_szHeaderList.push_back(tr("VARDATA_DataSource"));
+			m_szHeaderList.push_back(tr("VARDATA_Desc0OccNo"));
+			m_szHeaderList.push_back(tr("VARDATA_Desc1OccNo"));
+
+			m_szHeaderList.push_back(tr("VARDATA_RangeL"));
+			m_szHeaderList.push_back(tr("VARDATA_RangeH"));
+
+			m_szHeaderList.push_back(tr("VARDATA_HighQua"));
+			m_szHeaderList.push_back(tr("VARDATA_LowQua"));
+			m_szHeaderList.push_back(tr("VARDATA_MaxRaw"));
+			m_szHeaderList.push_back(tr("VARDATA_MinRaw"));
+
+			m_szHeaderList.push_back(tr("VARDATA_MaxScale"));
+			m_szHeaderList.push_back(tr("VARDATA_MinScale"));
+			m_szHeaderList.push_back(tr("VARDATA_LastUpdateTime"));
+			break;
+		}
 		default:
 		{
 			m_szHeaderList.clear();
@@ -657,6 +723,20 @@ void CScdMainView::SetModelData(CScdDataModel* pModel, const int& nType, const i
 	{
 		pModel->SetColCount(m_szHeaderList.size());
 		int nSize = m_pMem->GetFesByOccNo(nNodeOccNo)->GetScdMemRel()->GetChannelByOccNo(nChannelOccNo)->GetDeviceByOccNo(nDevOccNo)->GetDoutSize();
+		pModel->SetRowCount(nSize);
+		break;
+	}
+	case E_USERVAR:
+	{
+		pModel->SetColCount(m_szHeaderList.size());
+		int nSize = m_pMem->GetFesByOccNo(nNodeOccNo)->GetUserVarCount();
+		pModel->SetRowCount(nSize);
+		break;
+	}
+	case E_SYSVAR:
+	{
+		pModel->SetColCount(m_szHeaderList.size());
+		int nSize = m_pMem->GetFesByOccNo(nNodeOccNo)->GetSysVarCount();
 		pModel->SetRowCount(nSize);
 		break;
 	}
@@ -779,6 +859,16 @@ void CScdMainView::FormatNameString(int nType, const int32u& nNodeOccNo, const i
 	case E_DOUT:
 	{
 		szName = QString("node:%1_channel:%2_device:%3_dout").arg(nNodeOccNo).arg(nChannelOccNo).arg(nDevOccNo);
+		break;
+	}
+	case E_USERVAR:
+	{
+		szName = QString("node:%1_uservar").arg(nNodeOccNo);
+		break;
+	}
+	case E_SYSVAR:
+	{
+		szName = QString("node:%1_sysvar").arg(nNodeOccNo);
 		break;
 	}
 	default:

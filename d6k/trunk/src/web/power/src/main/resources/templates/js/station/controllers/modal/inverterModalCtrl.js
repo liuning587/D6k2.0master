@@ -5,7 +5,6 @@
 
 DaQOCloud.controller('inverterModalCtrl',['$scope','$http','$rootScope','$filter','stationInfoService',function($scope, $http, $rootScope,$filter,stationInfoService) {
 
-
     $scope.loadInverterInfo = function () {
 
         var stationId = $("#station option:selected").val();
@@ -27,7 +26,6 @@ DaQOCloud.controller('inverterModalCtrl',['$scope','$http','$rootScope','$filter
             alert("loadInverterInfo error");
         })
     };
-
 
     stationInfoService.getStationInfo().then(function (result) {
         $scope.stationInfoList = result;

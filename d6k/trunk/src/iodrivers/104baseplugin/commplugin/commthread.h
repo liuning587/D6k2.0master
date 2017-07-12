@@ -50,6 +50,8 @@ public:
 	void SendConnectRequest();
 	//断连
 	void SendDisConnectRequest();
+	//更新
+	void SendUpdateRequest(ASDU211_UPDATE &updateData);
 signals:
 	//连接
 	void Signal_ConnectSocket();
@@ -147,9 +149,12 @@ signals:
 	void Signal_ReadActionRequest(FILE_ATTR_INFO &readAction);
 	//定值读取
 	void Signal_ReadFixData(DEV_BASE &);
+	//更新程序
+	void Singal_updateProcess(ASDU211_UPDATE &);
 	//文件目录
 	void Signal_FIleCatalogINfo(QList<Catalog_Info>& lstFileInfo);
-
+	//升级确认
+	void Signal_UpdateConform(int);
 public slots:
     void Slot_ConnectSuccess(QString strLocalInfo);
 

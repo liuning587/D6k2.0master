@@ -212,8 +212,11 @@ void CNetbusSvc::TransScdEmails()
 			m_pBuf->DestOccNo = msg.SenderID;
 
 			size_t nSize = EMSG_BUF_HEAD_SIZE + sizeof DMSG;
-			memcpy(m_pBuf->BuffData, &msg, qMin(sizeof DMSG, (size_t)EMSG_BUF_SIZE));
+			
+			m_pBuf->MsgDataSize = nSize;
 
+			memcpy(m_pBuf->BuffData, &msg, qMin(sizeof DMSG, (size_t)EMSG_BUF_SIZE));
+						
 			int nRet = NBSendData("SCADA", reinterpret_cast<int8u*>(m_pBuf), nSize);
 
 			nCount = 0;

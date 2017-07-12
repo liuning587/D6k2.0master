@@ -34,18 +34,18 @@ bool CScdDataModel::Initalize(int nType, int32u nNodeOccNo, int32u nChannelOccNo
 	}
 	m_nNodeOccNo = nNodeOccNo;
 
-	Q_ASSERT(nChannelOccNo!=INVALID_OCCNO && nChannelOccNo<MAX_CHANNEL_OCCNO);
+	/*Q_ASSERT(nChannelOccNo!=INVALID_OCCNO && nChannelOccNo<MAX_CHANNEL_OCCNO);
 	if (nChannelOccNo==INVALID_OCCNO || nChannelOccNo>MAX_CHANNEL_OCCNO)
 	{
 		return false;
-	}
+	}*/
 	m_nChannelOccNo = nChannelOccNo;
 
-	Q_ASSERT(nDevOccNo!=INVALID_OCCNO && nDevOccNo<MAX_DEVICE_OCCNO);
+	/*Q_ASSERT(nDevOccNo!=INVALID_OCCNO && nDevOccNo<MAX_DEVICE_OCCNO);
 	if (nDevOccNo==INVALID_OCCNO || nDevOccNo>MAX_DEVICE_OCCNO)
 	{
 		return false;
-	}
+	}*/
 	m_nDeviceOccNo = nDevOccNo;
 
 	switch (m_nType)
@@ -75,6 +75,22 @@ bool CScdDataModel::Initalize(int nType, int32u nNodeOccNo, int32u nChannelOccNo
 	{
 		m_arrDouts = m_pMem->GetFesByOccNo(nNodeOccNo)->GetScdMemRel()->GetChannelByOccNo(nChannelOccNo)->GetDeviceByOccNo(nDevOccNo)->GetArrDouts();
 		break;
+	}
+	case E_USERVAR:
+	{
+		size_t nCount = m_pMem->GetFesByOccNo(nNodeOccNo)->GetUserVarCount();
+		for (int i = 0; i < nCount;++i)
+		{
+			m_arrUserVars.push_back(m_pMem->GetFesByOccNo(nNodeOccNo)->GetUserVarByIndex(i));
+		}
+	}
+	case E_SYSVAR:
+	{
+		size_t nCount = m_pMem->GetFesByOccNo(nNodeOccNo)->GetSysVarCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			m_arrSysVars.push_back(m_pMem->GetFesByOccNo(nNodeOccNo)->GetSysVarByIndex(i));
+		}
 	}
 	default:
 		break;
@@ -123,6 +139,10 @@ QVariant CScdDataModel::data(const QModelIndex &index, int role /*= Qt::DisplayR
 			return ShowAoutData(nRow, nColumn);
 		case E_DOUT:
 			return ShowDoutData(nRow, nColumn);
+		case E_USERVAR:
+			return ShowUserVarData(nRow, nColumn);
+		case E_SYSVAR:
+			return ShowSysVarData(nRow, nColumn);
 		default:
 			break;
 		}
@@ -170,6 +190,38 @@ QVariant CScdDataModel::headerData(int section, Qt::Orientation orientation, int
 		}
 	}
 	return QVariant();
+}
+
+float CScdDataModel::GetVal(IO_VARIANT& val, int32u nIddType) const
+{
+	switch (nIddType)
+	{
+	case DT_BOOLEAN:
+		return V_BOOL(val);
+	case DT_CHAR:
+		return V_CHAR(val);
+	case DT_BYTE:
+		return V_BYTE(val);
+	case DT_SHORT:
+		return V_SHORT(val);
+	case DT_WORD:
+		return V_WORD(val);
+	case DT_INT:
+		return V_INT(val);
+	case DT_DWORD:
+		return V_WORD(val);
+	case DT_LLONG:
+		return V_LLONG(val);
+	case DT_LWORD:
+		return V_LWORD(val);
+	case DT_FLOAT:
+		return V_FLOAT(val);
+	case DT_DOUBLE:
+		return V_FLOAT(val);
+	default:
+		break;
+	}
+	return 0;
 }
 
 QVariant CScdDataModel::ShowChannelInfo(int nRow, int Col) const
@@ -649,6 +701,210 @@ QVariant CScdDataModel::ShowDoutData(int nRow, int nColumn) const
 		break;
 	}
 
+
+	return QVariant();
+}
+
+QVariant CScdDataModel::ShowUserVarData(int nRow, int nColumn) const
+{
+	if (m_arrUserVars.size() == 0)
+	{
+		return QVariant();
+	}
+	if (nRow >= m_arrUserVars.size())
+	{
+		return QVariant();
+	}
+	VARDATA * pData = m_arrUserVars[nRow];
+
+	switch (nColumn)
+	{
+	case VARDATA_OccNo:
+		return QString::number(pData->OccNo);
+	case VARDATA_BlockNo:
+		return QString::number(pData->BlockNo);
+	case VARDATA_NameOccNo:
+		return QString::number(pData->NameOccNo);
+	case VARDATA_NodeOccNo:
+		return QString::number(pData->NodeOccNo);
+	case VARDATA_AlarmOccNo:
+		return QString::number(pData->AlarmOccNo);
+	case VARDATA_ExpressOccNo:
+		return QString::number(pData->ExpressOccNo);
+	case VARDATA_DataType:
+		return QString::number(pData->DataType);
+	case VARDATA_IddType:
+		return QString::number(pData->IddType);
+	case VARDATA_SrcNodeOccNo:
+		return QString::number(pData->SrcNodeOccNo);
+	case VARDATA_SrcOccNo:
+		return QString::number(pData->SrcOccNo);
+	case VARDATA_SrcIddType:
+		return pData->SrcIddType;
+	case VARDATA_IsRefTag:
+		return pData->IsRefTag;
+	case VARDATA_State:
+		return QString::number(pData->State);
+	case VARDATA_IsDefined:
+		return pData->IsDefined;
+	case VARDATA_ScanEnable:
+		return pData->ScanEnable;
+	case VARDATA_Init:
+		return pData->Init;
+	case VARDATA_Quality:
+		return QString::number(pData->Quality);
+	case VARDATA_ManSet:
+		return pData->ManSet;
+	case VARDATA_Value:
+		return GetVal(pData->Value, pData->DataType);
+	case VARDATA_RawValue:
+		return GetVal(pData->RawValue, pData->DataType);
+	case VARDATA_NegValue:
+		return pData->NegValue;
+	case VARDATA_CtrlByte:
+		return pData->CtrlByte;
+	case VARDATA_IsSOE:
+		return pData->IsSOE;
+	case VARDATA_StartCtrl:
+		return pData->StartCtrl;
+	case VARDATA_SignalType:
+		return pData->SignalType;
+	case VARDATA_DataSource:
+		return QString::number(pData->DataSource);
+	case VARDATA_Desc0OccNo:
+		return QString::number(pData->Desc0OccNo);
+	case VARDATA_Desc1OccNo:
+		return QString::number(pData->Desc1OccNo);
+	case VARDATA_RangeL:
+		return pData->RangeL;
+	case VARDATA_RangeH:
+		return pData->RangeH;
+	case VARDATA_HighQua:
+		return pData->HighQua;
+	case VARDATA_LowQua:
+		return pData->LowQua;
+	case VARDATA_MaxRaw:
+		return pData->MaxRaw;
+	case VARDATA_MinRaw:
+		return pData->MinRaw;
+	case VARDATA_MaxScale:
+		return pData->MaxScale;
+	case VARDATA_MinScale:
+		return pData->MinScale;
+	case VARDATA_LastUpdateTime:
+		return QString("%1/%2/%3-%4:%5:%6:%7").
+			arg(pData->LastUpdateTime.Year).
+			arg(pData->LastUpdateTime.Month).
+			arg(pData->LastUpdateTime.Day).
+			arg(pData->LastUpdateTime.Hour).
+			arg(pData->LastUpdateTime.Minute).
+			arg(pData->LastUpdateTime.Second).
+			arg(pData->LastUpdateTime.Milliseconds);
+	default:
+		break;
+	}
+
+	return QVariant();
+}
+
+QVariant CScdDataModel::ShowSysVarData(int nRow, int nColumn) const
+{
+	if (m_arrSysVars.size() == 0)
+	{
+		return QVariant();
+	}
+	if (nRow >= m_arrSysVars.size())
+	{
+		return QVariant();
+	}
+	VARDATA * pData = m_arrSysVars[nRow];
+
+	switch (nColumn)
+	{
+	case VARDATA_OccNo:
+		return QString::number(pData->OccNo);
+	case VARDATA_BlockNo:
+		return QString::number(pData->BlockNo);
+	case VARDATA_NameOccNo:
+		return QString::number(pData->NameOccNo);
+	case VARDATA_NodeOccNo:
+		return QString::number(pData->NodeOccNo);
+	case VARDATA_AlarmOccNo:
+		return QString::number(pData->AlarmOccNo);
+	case VARDATA_ExpressOccNo:
+		return QString::number(pData->ExpressOccNo);
+	case VARDATA_DataType:
+		return QString::number(pData->DataType);
+	case VARDATA_IddType:
+		return QString::number(pData->IddType);
+	case VARDATA_SrcNodeOccNo:
+		return QString::number(pData->SrcNodeOccNo);
+	case VARDATA_SrcOccNo:
+		return QString::number(pData->SrcOccNo);
+	case VARDATA_SrcIddType:
+		return pData->SrcIddType;
+	case VARDATA_IsRefTag:
+		return pData->IsRefTag;
+	case VARDATA_State:
+		return QString::number(pData->State);
+	case VARDATA_IsDefined:
+		return pData->IsDefined;
+	case VARDATA_ScanEnable:
+		return pData->ScanEnable;
+	case VARDATA_Init:
+		return pData->Init;
+	case VARDATA_Quality:
+		return QString::number(pData->Quality);
+	case VARDATA_ManSet:
+		return pData->ManSet;
+	case VARDATA_Value:
+		return GetVal(pData->Value, pData->DataType);
+	case VARDATA_RawValue:
+		return GetVal(pData->RawValue, pData->DataType);
+	case VARDATA_NegValue:
+		return pData->NegValue;
+	case VARDATA_CtrlByte:
+		return pData->CtrlByte;
+	case VARDATA_IsSOE:
+		return pData->IsSOE;
+	case VARDATA_StartCtrl:
+		return pData->StartCtrl;
+	case VARDATA_SignalType:
+		return pData->SignalType;
+	case VARDATA_DataSource:
+		return QString::number(pData->DataSource);
+	case VARDATA_Desc0OccNo:
+		return QString::number(pData->Desc0OccNo);
+	case VARDATA_Desc1OccNo:
+		return QString::number(pData->Desc1OccNo);
+	case VARDATA_RangeL:
+		return pData->RangeL;
+	case VARDATA_RangeH:
+		return pData->RangeH;
+	case VARDATA_HighQua:
+		return pData->HighQua;
+	case VARDATA_LowQua:
+		return pData->LowQua;
+	case VARDATA_MaxRaw:
+		return pData->MaxRaw;
+	case VARDATA_MinRaw:
+		return pData->MinRaw;
+	case VARDATA_MaxScale:
+		return pData->MaxScale;
+	case VARDATA_MinScale:
+		return pData->MinScale;
+	case VARDATA_LastUpdateTime:
+		return QString("%1/%2/%3-%4:%5:%6:%7").
+			arg(pData->LastUpdateTime.Year).
+			arg(pData->LastUpdateTime.Month).
+			arg(pData->LastUpdateTime.Day).
+			arg(pData->LastUpdateTime.Hour).
+			arg(pData->LastUpdateTime.Minute).
+			arg(pData->LastUpdateTime.Second).
+			arg(pData->LastUpdateTime.Milliseconds);
+	default:
+		break;
+	}
 
 	return QVariant();
 }

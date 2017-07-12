@@ -20,6 +20,12 @@ DaQOCloud.controller('headerCtrl',['$scope','$stateParams','$state',function ($s
         });
     }
 
+    $scope.gotoShortCurve = function () {
+        $state.go('predictionCurve').then(function () {
+            $state.go("predictionCurve.shortCurve");
+        })
+    }
+
     $scope.gotoUserManagePage = function () {
         $state.go('userManage').then(function () {
             $state.go("userManage.padChange");

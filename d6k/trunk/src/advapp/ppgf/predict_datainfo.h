@@ -20,7 +20,7 @@ public:
 	CReadXml();
 	~CReadXml();
 
-private:
+public:
 
 	bool ReadGroupInfo(const QString& szPath);
 	bool ReadPredictNodeInfo();
@@ -69,8 +69,6 @@ private:
 	QMap<QString, QMap<QString, QMap<int, PPoint> > > map_StnYCInfo;
 
 	QMap<QString, QString>  map_TagName;
-
-	
 
 };
 

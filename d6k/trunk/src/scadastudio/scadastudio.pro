@@ -238,7 +238,26 @@ HEADERS += ../../include/scadastudio/define.h \
     fesdo_blockingsignaltag_select_dialog.h \
     fes_do_blockingsignaltag_select_devicedi_model.h \
     fes_do_blockingsignaletan_select_fesuservaraible_model.h \
-    log/log2file.h
+    log/log2file.h \
+    aireportsaveview.h \
+    aireportsavetable.h \
+    aireportsavemodel.h \
+    aicurvesaveview.h \
+    aicurvesavetable.h \
+    aicurvesavemodel.h \
+    aimaxminstatisticsview.h \
+    ailimitstatisticsview.h \
+    ailimitstatisticstable.h \
+    ailimitstatisticsmodel.h \
+    aicumulativestatisticsview.h \
+    aicumulativestatisticstable.h \
+    aicumulativestatisticsmodel.h \
+    dicumulativestatisticsview.h \
+    dicumulativestatisticstable.h \
+    dicumulativestatisticsmodel.h \
+    kwhcumulativestatisticsview.h \
+    kwhcumulativestatisticstable.h \
+    kwhcumulativestatisticsmodel.h
 SOURCES += ./main.cpp \
     ./ccore.cpp \
     ./uimodule/imainwindow.cpp \
@@ -434,7 +453,26 @@ SOURCES += ./main.cpp \
     fesdo_blockingsignaltag_select_dialog.cpp \
     fes_do_blockingsignaltag_select_devicedi_model.cpp \
     fes_do_blockingsignaletan_select_fesuservaraible_model.cpp \
-    log/log2file.cpp
+    log/log2file.cpp \
+    aireportsaveview.cpp \
+    aireportsavetable.cpp \
+    aireportsavemodel.cpp \
+    aicurvesaveview.cpp \
+    aicurvesavetable.cpp \
+    aicurvesavemodel.cpp \
+    aimaxminstatisticsview.cpp \
+    ailimitstatisticsview.cpp \
+    ailimitstatisticstable.cpp \
+    ailimitstatisticsmodel.cpp \
+    aicumulativestatisticsview.cpp \
+    aicumulativestatisticstable.cpp \
+    aicumulativestatisticsmodel.cpp \
+    dicumulativestatisticsview.cpp \
+    dicumulativestatisticstable.cpp \
+    dicumulativestatisticsmodel.cpp \
+    kwhcumulativestatisticsview.cpp \
+    kwhcumulativestatisticstable.cpp \
+    kwhcumulativestatisticsmodel.cpp
 FORMS += ./selectscaledialog.ui \
     ./setscaledialog.ui \
     ./selectalarmdialog.ui \

@@ -95,7 +95,7 @@ bool CServerDB::Initialize(const char *pszDataPath, unsigned int nMode,int32u nO
 
 void CServerDB::Run()
 {
- 
+	CScadaDB::Run();
 }
 
 void CServerDB::Shutdown()

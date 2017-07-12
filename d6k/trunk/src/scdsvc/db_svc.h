@@ -62,6 +62,7 @@ public:
 
 	void CreateMailBoxs();
 	void DestroyMailBoxs();
+	bool LoadApplications();
 
 	// 获取本机的节点
 	CServerDB * GetMyNodeDB();
@@ -78,6 +79,8 @@ public:
 	{
 		return std::make_pair(m_nNodeCount, m_pNodes);
 	}
+
+	size_t GetNodeAppSize(std::vector<std::string > & arrNames);
 
 	bool  GetNodeTagNameByOccNo(int32u nOccNo,std::string& tagName) const;
 	int32u GetNodeOccNoByTagName(const std::string& tagName) const;

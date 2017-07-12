@@ -160,6 +160,7 @@ void CNetbusSvc::Shutdown()
 ********************************************************************************************************/
 void  CNetbusSvc::MainLoop()
 {
+	RecvSvcInfo();
 //!<1>先检测邮件
 	TransEmails();
 //!<2>数据同步，策略待定，当前是全库同步
@@ -236,7 +237,7 @@ void CNetbusSvc::RecvSvcInfo()
 
 	int32u nCopySize = 0;
 
-	bool bRet = NBRecvData("SCADA", cMsg, MAX_EMSG_L, &nCopySize, 0);
+	bool bRet = NBRecvData("FES", cMsg, MAX_EMSG_L, &nCopySize, 0);
 
 	if (bRet)
 	{
@@ -247,8 +248,32 @@ void CNetbusSvc::RecvSvcInfo()
 			switch (msg->FuncCode)
 			{
 			case  COT_SETVAL:
-				break;
+			{
+				DMSG * pMailMsg = (DMSG*)(msg->BuffData);
 
+				SETVAL_MSG * pMsg = (SETVAL_MSG*)(pMailMsg->Buff);
+
+				switch (pMsg->IddType)
+				{
+				case IDD_AIN:
+					break;
+				case IDD_DIN:
+					break;
+				case IDD_AOUT:
+				{
+					GetFesSvc()->GetDBSvc()->FesSetAoutValue(pMsg->Occno,V_FLOAT(pMsg->Value[0]),0);
+					break;
+				}
+				case IDD_DOUT:		
+				{
+					GetFesSvc()->GetDBSvc()->FesSetAoutValue(pMsg->Occno, V_CHAR(pMsg->Value[0]), 0);
+					break;
+				}
+				default:
+					break;
+				}
+				break;
+			}
 			default: 
 				break;
 			}

@@ -135,7 +135,7 @@ bool CDbSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 
 void CDbSvc::Run()
 {
-
+	LoadApplications();
 }
 
 void CDbSvc::Shutdown()
@@ -158,6 +158,25 @@ bool CDbSvc::IsDBAlive(unsigned  int nTimeout)
 	int nRet = m_pDBAliveFlag->wait(&tm_val, 0);
 
 	return (nRet == 0) ? true : false;
+}
+
+size_t CDbSvc::GetNodeAppSize(std::vector<std::string > & arrNames)
+{
+	arrNames.clear();
+	std::string szTagName;
+	for ( auto iter:m_mapApps)
+	{
+		for (auto iter_second:iter.second)
+		{
+			szTagName = iter_second->ProgramName;
+			Q_ASSERT(szTagName.empty()==false);
+			if (szTagName.empty()==false)
+			{
+				arrNames.push_back(szTagName);
+			}		
+		}
+	}
+	return arrNames.size();
 }
 
 /*! \fn bool  CDbSvc::GetNodeTagNameByOccNo(int32u nOccNo, std::string& tagName) const
@@ -237,10 +256,14 @@ bool CDbSvc::GetAinAlarmByOccNo(int32u nNodeOccNo, int32u nOccNo, AIN_ALARM** pA
 	}
 	else
 	{
-		return pNodeIter->second->GetAinAlarmByOccNo(nOccNo,pAin);
+		Q_ASSERT(pNodeIter->second);
+		if (pNodeIter->second)
+		{
+			return pNodeIter->second->GetAinAlarmByOccNo(nOccNo, pAin);
+		}
 	}
 
-	return true;
+	return false;
 }
 
 bool CDbSvc::GetAinAlarmLimitByOccNo(int32u nNodeOccNo, int32u nOccNo, AIN_ALARM_LIMIT** pAinLimit)
@@ -250,8 +273,8 @@ bool CDbSvc::GetAinAlarmLimitByOccNo(int32u nNodeOccNo, int32u nOccNo, AIN_ALARM
 	{
 		return false;
 	}
-	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_ALARM_OCCNO);
-	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_ALARM_OCCNO)
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_AIN_ALARM_LIMIT_COUNT);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_AIN_ALARM_LIMIT_COUNT)
 	{
 		return false;
 	}
@@ -263,10 +286,14 @@ bool CDbSvc::GetAinAlarmLimitByOccNo(int32u nNodeOccNo, int32u nOccNo, AIN_ALARM
 	}
 	else
 	{
-		return pNodeIter->second->GetAinAlarmLimitByOcNo(nOccNo, pAinLimit);
+		Q_ASSERT(pNodeIter->second);
+		if (pNodeIter->second)
+		{
+			return pNodeIter->second->GetAinAlarmLimitByOcNo(nOccNo, pAinLimit);
+		}
 	}
 
-	return true;
+	return false;
 }
 
 bool CDbSvc::GetDinAlarmByOccNo(int32u nNodeOccNo, int32u nOccNo, DIN_ALARM** pDin)
@@ -289,10 +316,14 @@ bool CDbSvc::GetDinAlarmByOccNo(int32u nNodeOccNo, int32u nOccNo, DIN_ALARM** pD
 	}
 	else
 	{
-		return pNodeIter->second->GetDinAlarmByOccNo(nOccNo, pDin);
+		Q_ASSERT(pNodeIter->second);
+		if (pNodeIter->second)
+		{
+			return pNodeIter->second->GetDinAlarmByOccNo(nOccNo, pDin);
+		}		
 	}
 
-	return true;
+	return false;
 }
 
 bool CDbSvc::GetDinAlarmLimitByOccNo(int32u nNodeOccNo, int32u nOccNo, DIN_ALARM_LIMIT** pDinLimit)
@@ -302,8 +333,8 @@ bool CDbSvc::GetDinAlarmLimitByOccNo(int32u nNodeOccNo, int32u nOccNo, DIN_ALARM
 	{
 		return false;
 	}
-	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_ALARM_OCCNO);
-	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_ALARM_OCCNO)
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_DIN_ALARM_LIMIT_COUNT);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_DIN_ALARM_LIMIT_COUNT)
 	{
 		return false;
 	}
@@ -315,10 +346,14 @@ bool CDbSvc::GetDinAlarmLimitByOccNo(int32u nNodeOccNo, int32u nOccNo, DIN_ALARM
 	}
 	else
 	{
-		return pNodeIter->second->GetDinAlarmLimitByOccNo(nOccNo, pDinLimit);
+		Q_ASSERT(pNodeIter->second);
+		if (pNodeIter->second)
+		{
+			return pNodeIter->second->GetDinAlarmLimitByOccNo(nOccNo, pDinLimit);
+		}		
 	}
 
-	return true;
+	return false;
 }
 
 int CDbSvc::GetNodeAppCount(int nOccNo)
@@ -735,6 +770,17 @@ void  CDbSvc::DestroyMailBoxs()
 // 			DestroyMailBox("FES", szTagName.c_str());
 // 		}
 // 	}
+}
+
+bool CDbSvc::LoadApplications()
+{
+	CServerDB *pScd = GetMyNodeDB();
+	Q_ASSERT(pScd);
+	if (pScd)
+	{
+		pScd->Run();
+	}
+	return true;
 }
 
 CServerDB * CDbSvc::GetMyNodeDB()

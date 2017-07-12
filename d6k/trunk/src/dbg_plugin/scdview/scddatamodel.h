@@ -1,6 +1,6 @@
 #ifndef SCDDATAMODEL_H
 #define SCDDATAMODEL_H
-
+#include "variant.h"
 #include "datatypes.h"
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -13,9 +13,8 @@ struct AIN;
 struct DIN;
 struct AOUT;
 struct DOUT;
-
+struct VARDATA;
 typedef std::shared_ptr<CViewMemDB> CViewMemDB_DEF;
-
 
 
 enum CHANNEL_HEADER
@@ -57,7 +56,6 @@ enum CHANNEL_HEADER
 
 };
 
-
 enum DEVICE_HEADER
 {
 	DEVICE_OccNo,
@@ -75,7 +73,6 @@ enum DEVICE_HEADER
 	DEVICE_Init,
 	DEVICE_Quality,
 };
-
 
 enum AIN_HEADER
 {
@@ -119,7 +116,6 @@ enum AIN_HEADER
 	AIN_UnitNameOccNo,
 	AIN_LastUpdateTime,
 };
-
 
 enum DIN_HEADER
 {
@@ -177,7 +173,6 @@ enum DIN_HEADER
 	DIN_PinLabelOccNo,
 	DIN_LastUpdateTime,
 };
-
 
 enum AOUT_HEADER
 {
@@ -238,6 +233,60 @@ enum DOUT_HEADER
 	DOUT_LastUpdateTime,
 };
 
+enum  VARDATA_Attr
+{
+	VARDATA_OccNo,
+	VARDATA_BlockNo,
+	VARDATA_NameOccNo,
+	VARDATA_NodeOccNo,
+
+	VARDATA_AlarmOccNo,
+	VARDATA_ExpressOccNo,
+
+	VARDATA_DataType,
+	VARDATA_IddType,
+
+	VARDATA_SrcNodeOccNo,
+	VARDATA_SrcOccNo,
+	VARDATA_SrcIddType,
+	VARDATA_IsRefTag,
+
+	VARDATA_State,
+
+	VARDATA_IsDefined,
+	VARDATA_ScanEnable,
+	VARDATA_Init,
+	VARDATA_Quality,
+	VARDATA_ManSet,
+
+	VARDATA_Value,
+	VARDATA_RawValue,
+
+	VARDATA_NegValue,
+	VARDATA_CtrlByte,
+	VARDATA_IsSOE,
+
+	VARDATA_StartCtrl,
+	VARDATA_SignalType,
+
+	VARDATA_DataSource,
+
+	VARDATA_Desc0OccNo,
+	VARDATA_Desc1OccNo,
+
+	VARDATA_RangeL,
+	VARDATA_RangeH,
+	VARDATA_HighQua,
+	VARDATA_LowQua,
+
+	VARDATA_MaxRaw,
+	VARDATA_MinRaw,
+
+	VARDATA_MaxScale,
+	VARDATA_MinScale,
+
+	VARDATA_LastUpdateTime,
+};
 
 class CScdDataModel : public QAbstractTableModel
 {
@@ -268,12 +317,15 @@ public:
 	}
 
 private:
+	float GetVal(IO_VARIANT& val, int32u nIddType)  const;
 	QVariant ShowChannelInfo(int nRow, int Col) const;
 	QVariant ShowDeviceInfo(int nRow, int Col) const;
 	QVariant ShowAINData(int nRow, int nColumn) const;
 	QVariant ShowDINData(int nRow, int nColumn) const;
 	QVariant ShowAoutData(int nRow, int nColumn) const;
 	QVariant ShowDoutData(int nRow, int nColumn) const;
+	QVariant ShowUserVarData(int nRow, int nColumn) const;
+	QVariant ShowSysVarData(int nRow, int nColumn) const;
 private:
 	int m_nType;
 	int m_nNodeOccNo;
@@ -291,7 +343,8 @@ private:
 	std::vector<DIN*>m_arrDins;
 	std::vector<AOUT*>m_arrAouts;
 	std::vector<DOUT*>m_arrDouts;
-
+	std::vector<VARDATA* > m_arrUserVars;
+	std::vector<VARDATA*> m_arrSysVars;
 };
 
 #endif // SCDDATAMODEL_H

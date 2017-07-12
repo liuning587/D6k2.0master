@@ -19,6 +19,9 @@
     <!-- realdate -->
     <link rel="stylesheet" type="text/css" href="css/realdata.css"/>
 
+    <!-- page css -->
+    <link rel="stylesheet" type="text/css" href="mycss/pager/msdn.css"/>
+
     <!-- 高德地图 -->
     <script src="http://webapi.amap.com/maps?v=1.3&key=47b6897d7df4f6f6355dca21b92f735f"></script>
 
@@ -57,7 +60,6 @@
 
     <!--量测-->
     <script src="js/getData/generalMeasurement.js"></script>
-    <script src="js/04_userManage/controllers/userMangeCtrl.js"></script>
 
     <script src="myjs/date/jedate.min.js"></script>
     <!--<script src="myjs/date/jedate.js"></script>-->
@@ -77,35 +79,7 @@
 
 <script src="js/home/controllers/homeCtrl.js"></script>
 
-<script src="js/03_project/controllers/projectCtrl.js"></script>
-<script src="js/03_project/controllers/projectMenuCtrl.js"></script>
-<script src="js/03_project/controllers/projectTabs_StatusCtrl.js"></script>
-<script src="js/03_project/controllers/projectInfoCtrl.js"></script>
-<script src="js/03_project/controllers/breakerTabCtrl.js"></script>
-<script src="js/03_project/controllers/breakerInfoCtrl.js"></script>
-<script src="js/03_project/controllers/breakerRunCtrl.js"></script>
-<script src="js/03_project/controllers/breakerRealDataCtrl.js"></script>
-<script src="js/03_project/controllers/breakerWarningCtrl.js"></script>
-<script src="js/03_project/controllers/breakerFormCtrl.js"></script>
-
-
 <script src="myjs/jquery.table2excel.js"></script>
-
-<script src="js/04_userManage/controllers/userMangeCtrl.js"></script>
-<script src="js/04_userManage/controllers/userInfoMangeCtrl.js"></script>
-<script src="js/04_userManage/controllers/userPwdCtrl.js"></script>
-<script src="js/04_userManage/controllers/proManageCtrl.js"></script>
-<script src="js/04_userManage/controllers/macManageCtrl.js"></script>
-<script src="js/04_userManage/controllers/unitManageCtrl.js"></script>
-
-<script src="js/04_userManage/controllers/modal/userInfoModalCtrl.js"></script>
-<script src="js/04_userManage/controllers/modal/pjInfoModalCtrl.js"></script>
-<script src="js/04_userManage/controllers/modal/macInfoModalCtrl.js"></script>
-<script src="js/04_userManage/controllers/modal/unitInfoModalCtrl.js"></script>
-
-<script src="js/06_macTypeModel/controllers/vendorConfigureCtrl.js"></script>
-
-<script src="js/07_proConfigure/controllers/workProConfigureCtrl.js"></script>
 
 <!--login-->
 <script src="js/login/services/loginService.js"></script>
@@ -138,15 +112,25 @@
 <script src="js/station/controllers/modal/inverterModalCtrl.js"></script>
 <script src="js/station/services/stationInfoService.js"></script>
 
-<script src="js/03_project/services/projectService.js"></script>
-<script src="js/03_project/services/projectMenuService.js"></script>
-<script src="js/03_project/services/breakerWarningService.js"></script>
+<!-- 历史查询 -->
+<script src="js/historySearch/controllers/historySearch.js"></script>
+<script src="js/historySearch/controllers/modal/userEventModalCtrl.js"></script>
+<script src="js/historySearch/controllers/modal/weatherForecastModalCtrl.js"></script>
+<script src="js/historySearch/controllers/modal/weatherStationModalCtrl.js"></script>
+<script src="js/historySearch/controllers/modal/stationDataModalCtrl.js"></script>
+<script src="js/historySearch/controllers/modal/fileDeliveryModalCtrl.js"></script>
+<script src="js/historySearch/controllers/modal/sixEventModalCtrl.js"></script>
 
-<script src="js/04_userManage/services/userInfoMangeService.js"></script>
-<script src="js/04_userManage/services/proManageService.js"></script>
-<script src="js/04_userManage/services/unitManageService.js"></script>
-<script src="js/04_userManage/services/macManageService.js"></script>
+<!--page js -->
+<script src="myjs/pager/jquery.pagination.js"></script>
 
+<!-- user manager -->
+<script src="js/userManage/controllers/userMangeCtrl.js"></script>
+<script src="js/userManage/controllers/userInfoMangeCtrl.js"></script>
 
-
+<script src="js/userManage/controllers/userPwdCtrl.js"></script>
+<script src="js/userManage/controllers/modal/userInfoModalCtrl.js"></script>
+<script src="js/userManage/controllers/modal/unitInfoModalCtrl.js"></script>
+<script src="js/userManage/services/userInfoMangeService.js"></script>
+<script src="js/userManage/services/unitManageService.js"></script>
 </html>

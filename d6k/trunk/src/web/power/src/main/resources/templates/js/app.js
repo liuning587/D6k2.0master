@@ -27,7 +27,7 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
             }
         })
 
-        //登录页面
+        // home页面
         .state('home',{
             url:'/home',
             views:{
@@ -344,6 +344,96 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
         })
         /************ end:报表的每个menu对应的html **************/
 
+
+        // 历史查询
+        .state('historySearch',{
+            url:'/historySearch',
+            views:{
+                'header':{
+                    templateUrl:'html/header.html',
+                    controller:'headerCtrl'
+                },
+                'content':{
+                    templateUrl:'html/historySearch/historySearch.html',
+                    controller:'historySearchCtrl'
+                },
+                'footer':{
+                    templateUrl:'html/footer.html'
+                },
+                'leftHistorySearchMenu@historySearch':{
+                    templateUrl:'html/historySearch/menu/historySearchMenu.html'
+                }
+            }
+        })
+
+        /************ begin:历史查询的每个menu对应的html **************/
+        // 六遥事件
+        .state('historySearch.sixEvent',{
+            url:'/sixEvent',
+            views:{
+                'midContent@historySearch':{
+                    templateUrl:'html/historySearch/content/sixEvent.html',
+                    controller:'sixEventModalCtrl'
+                }
+            }
+        })
+
+        // 用户事件
+        .state('historySearch.userEvent',{
+            url:'/userEvent',
+            views:{
+                'midContent@historySearch':{
+                    templateUrl:'html/historySearch/content/userEvent.html',
+                    controller:'userEventModalCtrl'
+                }
+            }
+        })
+
+        // 文件上送事件
+        .state('historySearch.fileDelivery',{
+            url:'/fileDelivery',
+            views:{
+                'midContent@historySearch':{
+                    templateUrl:'html/historySearch/content/fileDelivery.html',
+                    controller:'fileDeliveryModalCtrl'
+                }
+            }
+        })
+
+        // 气象站数据
+        .state('historySearch.weatherStation',{
+            url:'/weatherStation',
+            views:{
+                'midContent@historySearch':{
+                    templateUrl:'html/historySearch/content/weatherStation.html',
+                    controller:'weatherStationModalCtrl'
+                }
+            }
+        })
+
+        // 天气预报数据
+        .state('historySearch.weatherForecast',{
+            url:'/weatherForecast',
+            views:{
+                'midContent@historySearch':{
+                    templateUrl:'html/historySearch/content/weatherForecast.html',
+                    controller:'weatherForecastModalCtrl'
+                }
+            }
+        })
+
+        // 站内数据
+        .state('historySearch.stationData',{
+            url:'/stationData',
+            views:{
+                'midContent@historySearch':{
+                    templateUrl:'html/historySearch/content/stationData.html',
+                    controller:'stationDataModalCtrl'
+                }
+            }
+        })
+        /************ end:历史查询的每个menu对应的html **************/
+
         // 场站信息
         .state('stationInfo',{
             url:'/stationInfo',
@@ -387,32 +477,14 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
                     controller:'headerCtrl'
                 },
                 'content':{
-                    templateUrl:'html/04_userManage/userManage.html',
+                    templateUrl:'html/userManage/userManage.html',
                     controller:'userMangeCtrl'
                 },
                 'footer':{
                     templateUrl:'html/footer.html'
                 },
                 'leftMenu@userManage':{
-                    templateUrl:'html/04_userManage/menu/userInfoMenu.html'
-                }
-            }
-        })
-        //用户信息管理 ： 功能列表
-        .state('userManage.menu',{
-           views:{
-                'leftMenu@userManage':{
-                    templateUrl:'resources/html/04_userManage/menu/userInfoMenu.html'
-                }
-            }
-        })
-        //用户信息管理 ： 密码修改
-        .state('userManage.padChange',{
-            url:'/padChange',
-            views:{
-                'midContent@userManage':{
-                    templateUrl:'resources/html/04_userManage/tabs/user/passwordChange.html',
-                    controller:'userPwdCtrl'
+                    templateUrl:'html/userManage/menu/userInfoMenu.html'
                 }
             }
         })
@@ -421,75 +493,21 @@ DaQOCloud.run(['$rootScope','$state','$stateParams',function ($rootScope,$state,
             url:'/userInfoManage',
             views:{
                 'midContent@userManage':{
-                    templateUrl:'resources/html/04_userManage/tabs/admin/userInfoManage.html',
+                    templateUrl:'html/userManage/tabs/admin/userInfoManage.html',
                     controller:'userInfoMangeCtrl'
                 }
             }
         })
-        //用户信息管理 ： 工程管理
-        .state('userManage.proManage',{
-            url:'/proManage',
+        //用户信息管理 ： 密码修改
+        .state('userManage.padChange',{
+            url:'/padChange',
             views:{
                 'midContent@userManage':{
-                    templateUrl:'resources/html/04_userManage/tabs/admin/proManage.html',
-                    controller:'proManageCtrl'
-                }
-            }
-        })
-        //用户信息管理 ： 设备信息管理
-        .state('userManage.macManage',{
-            url:'/macManage',
-            views:{
-                'midContent@userManage':{
-                    templateUrl:'resources/html/04_userManage/tabs/admin/macManage.html',
-                    controller:'macManageCtrl'
-                }
-            }
-        })
-        //用户信息管理 ： 设备信息管理   unitInfoModal.html
-        .state('userManage.unitManage',{
-            url:'/unitManage',
-            views:{
-                'midContent@userManage':{
-                    templateUrl:'resources/html/04_userManage/tabs/admin/unitManage.html',
-                    controller:'unitManageCtrl'
+                    templateUrl:'html/userManage/tabs/user/passwordChange.html',
+                    controller:'userPwdCtrl'
                 }
             }
         })
 
-        //设备类型建模
-        .state('macModel',{
-            url:'/macModel',
-            views:{
-                'header':{
-                    templateUrl:'resources/html/header.html',
-                    controller:'headerCtrl'
-                },
-                'content':{
-                    templateUrl:'resources/html/06_macTypeModel/vendorConfigure.html',
-                    controller:'vendorConfigureCtrl'
-                },
-                'footer':{
-                    templateUrl:'resources/html/footer.html'
-                }
-            }
-        })
 
-        //工程配置
-        .state('proConfig',{
-            url:'/proConfig',
-            views:{
-                'header':{
-                    templateUrl:'resources/html/header.html',
-                    controller:'headerCtrl'
-                },
-                'content':{
-                    templateUrl:'resources/html/07_proConfigure/workProConfigure.html',
-                    controller:'workProConfigureCtrl'
-                },
-                'footer':{
-                    templateUrl:'resources/html/footer.html'
-                }
-            }
-        })
 });

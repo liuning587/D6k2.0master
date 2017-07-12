@@ -29,6 +29,13 @@ bool CFesDBR::LoadFesMemDB(const char* pAddr,int nSize1)
 	m_nDinCount = m_pMagicMem->DinCount;
 	m_nAoutCount = m_pMagicMem->AoutCount;
 	m_nDoutCount = m_pMagicMem->DoutCount;
+	m_nAinAlarmCount = m_pMagicMem->AinAlarmCount;
+	m_nAinAlarmLimitCount = m_pMagicMem->AinAlarmLimitCount;
+	m_nDinAlarmCount = m_pMagicMem->DinAlarmCount;
+	m_nDinAlarmLimitCount = m_pMagicMem->DinAlarmLimitCount;
+	m_nUserVarCount = m_pMagicMem->UserVariableCount;
+	m_nSysVarCount = m_pMagicMem->SystemVariableCount;
+
 
 	pAddr += sizeof HEAD_MEM;
 
@@ -50,6 +57,26 @@ bool CFesDBR::LoadFesMemDB(const char* pAddr,int nSize1)
 
 	nSize = CreateDout((unsigned char* )pAddr);
 	pAddr += nSize;
+
+	nSize = CreateAinAlarm((unsigned char*)pAddr);
+	pAddr += nSize;
+
+	nSize = CreateAinLimitAlarm((unsigned char*)pAddr);
+	pAddr += nSize;
+
+	nSize = CreateDinAlarm((unsigned char*)pAddr);
+	pAddr += nSize;
+
+	nSize = CreateDinLimitAlarm((unsigned char*)pAddr);
+	pAddr += nSize;
+
+	nSize = CreateSysVars((unsigned char*)pAddr);
+	pAddr += nSize;
+
+	nSize = CreateUserVars((unsigned char*)pAddr);
+	pAddr += nSize;
+
+	
 
 	//数据读完之后，形成关系表
 	for (auto i:m_arrChannels)
@@ -280,6 +307,58 @@ size_t CFesDBR::CreateDout(unsigned char* pAddr)
 }
 
 
+size_t CFesDBR::CreateUserVars(unsigned char* pAddr)
+{
+	Q_ASSERT(pAddr);
+	if (!pAddr)
+	{
+		return 0;
+	}
+	m_pUserVars = reinterpret_cast<VARDATA*>(pAddr);
+
+	QString szLog;
+
+	for (int i = 0; i < m_nUserVarCount; ++i)
+	{
+		Q_ASSERT(m_pUserVars[i].OccNo != INVALID_OCCNO && m_pUserVars[i].OccNo < MAX_OCCNO);
+		if (m_pUserVars[i].OccNo == INVALID_OCCNO || m_pUserVars[i].OccNo > MAX_OCCNO)
+		{
+			szLog = QString(QObject::tr("[%1] uservar's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pUserVars[i].OccNo);
+			LogMsg(szLog.toStdString().c_str(), 0);
+			continue;
+		}
+		m_arrUserVars.push_back(&m_pUserVars[i]);
+		m_mapUserVars.insert(std::make_pair(m_pUserVars[i].OccNo, &m_pUserVars[i]));
+	}
+	return m_nUserVarCount* sizeof VARDATA;
+}
+
+size_t CFesDBR::CreateSysVars(unsigned char* pAddr)
+{
+	Q_ASSERT(pAddr);
+	if (!pAddr)
+	{
+		return 0;
+	}
+	m_pSysVars = reinterpret_cast<VARDATA*>(pAddr);
+
+	QString szLog;
+
+	for (int i = 0; i < m_nSysVarCount; ++i)
+	{
+		Q_ASSERT(m_pSysVars[i].OccNo != INVALID_OCCNO && m_pSysVars[i].OccNo < MAX_OCCNO);
+		if (m_pSysVars[i].OccNo == INVALID_OCCNO || m_pSysVars[i].OccNo > MAX_OCCNO)
+		{
+			szLog = QString(QObject::tr("[%1] sysvar's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pSysVars[i].OccNo);
+			LogMsg(szLog.toStdString().c_str(), 0);
+			continue;
+		}
+		m_arrSysVars.push_back(&m_pSysVars[i]);
+		m_mapSysVars.insert(std::make_pair(m_pSysVars[i].OccNo, &m_pSysVars[i]));
+	}
+	return m_nSysVarCount* sizeof VARDATA;
+}
+
 void CFesDBR::LogMsg(const char * pszText, int nLevel)
 {
 	::LogMsg("scdview_fesdb", pszText, nLevel,nullptr);
@@ -392,3 +471,134 @@ DOUT* CFesDBR::GetDoutByOccNo(int32u nOccNo)
 		return it->second;
 	}
 }
+
+size_t CFesDBR::CreateAinAlarm(unsigned char* pAddr)
+{
+	Q_ASSERT(pAddr);
+	if (!pAddr)
+	{
+		return 0;
+	}
+	m_pAinAlarm = reinterpret_cast<AIN_ALARM*>(pAddr);
+
+	QString szLog;
+
+	for (int32u i = 0; i < m_nAinAlarmCount; i++)
+	{
+		Q_ASSERT(m_pAinAlarm[i].OccNo != INVALID_OCCNO && m_pAinAlarm[i].OccNo <= MAX_OCCNO);
+		if (m_pAinAlarm[i].OccNo == INVALID_OCCNO || m_pAinAlarm[i].OccNo > MAX_OCCNO)
+		{
+			szLog = QString(QObject::tr("[%1] ain_alarm's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pAinAlarm[i].OccNo);
+			LogMsg(szLog.toStdString().c_str(), 0);
+
+			m_arrAinAlarms.push_back(&m_pAinAlarm[i]);
+			continue;
+		}
+		m_arrAinAlarms.push_back(&m_pAinAlarm[i]);
+		m_mapAinAlarms.insert(std::make_pair(m_pAinAlarm[i].OccNo ,&m_pAinAlarm[i]));
+	}
+	return m_nAinAlarmCount * sizeof AIN_ALARM;
+}
+
+size_t CFesDBR::CreateAinLimitAlarm(unsigned char* pAddr)
+{
+	Q_ASSERT(pAddr);
+	if (!pAddr)
+	{
+		return 0;
+	}
+	m_pAinAlarmLimit = reinterpret_cast<AIN_ALARM_LIMIT*>(pAddr);
+
+	QString szLog;
+
+	for (int32u i = 0; i < m_nAinAlarmLimitCount; i++)
+	{
+		Q_ASSERT(m_pAinAlarmLimit[i].OccNo != INVALID_OCCNO && m_pAinAlarmLimit[i].OccNo <= MAX_OCCNO);
+		if (m_pAinAlarmLimit[i].OccNo == INVALID_OCCNO || m_pAinAlarmLimit[i].OccNo > MAX_OCCNO)
+		{
+			szLog = QString(QObject::tr("[%1] ain_alarm_limit's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pAinAlarmLimit[i].OccNo);
+			LogMsg(szLog.toStdString().c_str(), 0);
+
+			m_arrAinAlarmLimits.push_back(&m_pAinAlarmLimit[i]);
+			continue;
+		}
+		m_arrAinAlarmLimits.push_back(&m_pAinAlarmLimit[i]);
+		m_mapAinAlarmLimits.insert(std::make_pair(m_pAinAlarmLimit[i].OccNo, &m_pAinAlarmLimit[i]));
+	}
+	return m_nAinAlarmLimitCount * sizeof AIN_ALARM_LIMIT;
+}
+
+size_t CFesDBR::CreateDinAlarm(unsigned char* pAddr)
+{
+	Q_ASSERT(pAddr);
+	if (!pAddr)
+	{
+		return 0;
+	}
+	m_pDinAlarm = reinterpret_cast<DIN_ALARM*>(pAddr);
+
+	QString szLog;
+
+	for (int32u i = 0; i < m_nDinAlarmCount; i++)
+	{
+		Q_ASSERT(m_pDinAlarm[i].OccNo != INVALID_OCCNO && m_pDinAlarm[i].OccNo <= MAX_OCCNO);
+		if (m_pDinAlarm[i].OccNo == INVALID_OCCNO || m_pDinAlarm[i].OccNo > MAX_OCCNO)
+		{
+			szLog = QString(QObject::tr("[%1] din_alarm's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pDinAlarm[i].OccNo);
+			LogMsg(szLog.toStdString().c_str(), 0);
+
+			m_arrDinAlarms.push_back(&m_pDinAlarm[i]);
+			continue;
+		}
+		m_arrDinAlarms.push_back(&m_pDinAlarm[i]);
+		m_mapDinAlarms.insert(std::make_pair(m_pDinAlarm[i].OccNo, &m_pDinAlarm[i]));
+	}
+	return m_nDinAlarmCount * sizeof DIN_ALARM;
+}
+
+size_t CFesDBR::CreateDinLimitAlarm(unsigned char* pAddr)
+{
+	Q_ASSERT(pAddr);
+	if (!pAddr)
+	{
+		return 0;
+	}
+	m_pDinAlarmLimit = reinterpret_cast<DIN_ALARM_LIMIT*>(pAddr);
+
+	QString szLog;
+
+	for (int32u i = 0; i < m_nDinAlarmLimitCount; i++)
+	{
+		Q_ASSERT(m_pDinAlarmLimit[i].OccNo != INVALID_OCCNO && m_pDinAlarmLimit[i].OccNo <= MAX_OCCNO);
+		if (m_pDinAlarmLimit[i].OccNo == INVALID_OCCNO || m_pDinAlarmLimit[i].OccNo > MAX_OCCNO)
+		{
+			szLog = QString(QObject::tr("[%1] din_alarm_limit's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pDinAlarmLimit[i].OccNo);
+			LogMsg(szLog.toStdString().c_str(), 0);
+
+			m_arrDinAlarmLimits.push_back(&m_pDinAlarmLimit[i]);
+			continue;
+		}
+		m_arrDinAlarmLimits.push_back(&m_pDinAlarmLimit[i]);
+		m_mapDinAlarmLimits.insert(std::make_pair(m_pDinAlarmLimit[i].OccNo, &m_pDinAlarmLimit[i]));
+	}
+	return m_nDinAlarmLimitCount* sizeof DIN_ALARM_LIMIT;
+}
+
+VARDATA * CFesDBR::GetUserVarByIndex(int nIndex)
+{
+	if (nIndex >= m_nUserVarCount || nIndex < 0)
+	{
+		return nullptr;
+	}
+	return &m_pUserVars[nIndex];
+}
+
+VARDATA * CFesDBR::GetSysVarByIndex(int nIndex)
+{
+	if (nIndex >= m_nSysVarCount || nIndex < 0)
+	{
+		return nullptr;
+	}
+	return &m_pSysVars[nIndex];
+}
+

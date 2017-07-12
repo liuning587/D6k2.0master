@@ -50,10 +50,10 @@ void CPVStation::LogMsg(const char *szLogTxt, int nLevel)
 bool CPVStation::GetRealTimeData()
 {
 	bool bRet = false;
-
- 
- 
-
+	bRet |= m_stnData.GetRealTimeData();
+	bRet |= m_aerograph.GetRealTimeData();
+	bRet |= m_inverter.GetRealTimeData();
+	bRet |= m_prdtOutput.GetRealTimeData();
 	return bRet;
 }
 

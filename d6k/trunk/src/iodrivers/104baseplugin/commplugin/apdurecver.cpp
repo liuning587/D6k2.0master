@@ -30,6 +30,7 @@ CApduRecver::CApduRecver(QObject *parent):
     Q_ASSERT(m_pComm104Pln);
     m_pFileLoad = new CLoadFileThread;
     m_pFileLoad->moveToThread(&m_LoadThread);
+	m_nUpdateFlag = 0;
 
 	m_LoadThread.start();
 
@@ -293,12 +294,18 @@ void CApduRecver::AnalyseAsdu(char *pBuff, int nLength)
 	case M_IT_TB_1: //带长时标的累计量 ASDU37
 	{
 		OnRecvKwhLongTime(pBuff, nLength);
+		
 		break;
 	}
     case C_IC_NA_1:// 总召唤命令 ASDU100
     {
         //qDebug()<<"总召唤成功w";
-        emit Signal_AllCallRespond();
+		ASDU_BASE *pAsduBase = (ASDU_BASE*)pBuff;
+		if (pAsduBase->cot.GetCot() == COT_ACTTERM)
+		{
+			emit Signal_AllCallRespond();
+		}
+        
         break;
     }
     case C_RP_NA_1:  //复位进程
@@ -403,6 +410,11 @@ void CApduRecver::AnalyseAsdu(char *pBuff, int nLength)
 	case D_FIX_WRITE:
 	{
 		OnRecvDevWriteRequestAck(pBuff, nLength);
+		break;
+	}
+	case D_UPDATE_PROCESS:
+	{
+		OnRecvUpdateActionAck(pBuff, nLength);
 		break;
 	}
 
@@ -663,6 +675,48 @@ void CApduRecver::OnRecvWriteConform(char *pBuff, int nLength)
 
 }
 
+//升级激活确认
+void CApduRecver::OnRecvUpdateActionAck(char * pBuff, int nLength)
+{
+	if (nLength <= 0)
+	{
+		return;
+	}
+
+	ASDU211_UPDATE *pbase = (ASDU211_UPDATE*)pBuff;
+
+	QString strlog;
+	QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
+
+	if (pbase->cot.GetCot() == 7)
+	{
+		if (pbase->m_qds.OV == 1)
+		{
+			strlog = tr("Update Action Success!");
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+			emit Signal_UpdateConform(pbase->cot.GetCot());
+			m_nUpdateFlag = 1;
+
+		}
+		else if (pbase->m_qds.OV == 0)
+		{
+			strlog = tr("Update  Success!");
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+
+		}
+		
+	}
+	else
+	{
+		if (pbase->cot.GetCot() != 10)
+		{
+			strlog = tr("Update Action Error,error Code%1").arg(pbase->cot.GetCot());;
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+
+		}
+	}
+}
+
 //收到单点命令确认
 void CApduRecver::OnRecvSetBinarySPAck(char* pBuff, int nLength)
 {
@@ -900,9 +954,9 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 		{
 			//float
 			 char *pfStart = pBuff + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2;
-			 float tt;
 
-			 *(uint32_t *)(&tt) = pfStart[0] + pfStart[1] * 0x100 + pfStart[2] * 0x10000 + pfStart[3] * 0x1000000;
+			 float tt = 0.0;
+			 *(uint32_t *)(&tt) = (unsigned char)pfStart[0] + (unsigned char)pfStart[1] * 0x100 + (unsigned char)pfStart[2] * 0x10000 + (unsigned char)pfStart[3] * 0x1000000;
 
 			tDevData.strValue = QString::number(tt);
 		}
@@ -944,6 +998,15 @@ void CApduRecver::OnRecvDevWriteRequestAck(char *pBuff, int nLength)
 
 		emit Signal_devWriteBack(pAsdudz->type, pAsdudz->cot.GetCot(), 0);
 
+
+	}
+	else
+	{
+		ASDU_BASE* pAsdudz = (ASDU_BASE*)pBuff;
+		if (pAsdudz->cot.GetCot() == 7)
+		{
+			m_pComm104Pln->getSender()->OnSendDevWriteConform();
+		}
 	}
 }
 
@@ -2324,6 +2387,16 @@ void CApduRecver::OnRecvFileAnalyseInfo(char *pBuff, int nLength)
 		QByteArray byDestr = tr("Write Success!").toLocal8Bit();
 		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
 
+		if (m_nUpdateFlag == 1)
+		{
+			ASDU211_UPDATE pUpateInfo;
+			pUpateInfo.asduAddr.SetAddr(m_pComm104Pln->GetFtpModule()->GetDeviceAddr());
+			pUpateInfo.m_qds.OV = 0;
+
+			m_pComm104Pln->getSender()->OnSendUpdateRequest(pUpateInfo);;
+
+			m_nUpdateFlag = 0;
+		}
 		break;
 	}
 	default:

@@ -230,6 +230,9 @@ void CFtuModule::Init(IMainModule *pMainModule)
 	//文件传输
 	m_pFileTransWgt = new CFileTransWgt(m_pCommThread);
 
+	connect(m_pCommThread, SIGNAL(Signal_UpdateConform(int)), m_pFileTransWgt, SLOT(Slot_UpdateConform(int)));
+
+
     m_pFixDeploy->SetPorjectName(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName());
 
     m_pFixDeploy->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
@@ -897,6 +900,11 @@ void CFtuModule::InitCallZt()
 	//读取定值区号
 	QAction *pFixReadArea = new QAction(tr("Read Fix Area"),pPlcMenu);
 	pPlcMenu->addAction(pFixReadArea);
+
+	//升级
+	QAction *pUpdatAct = new QAction(tr("Update"), pPlcMenu);
+	pPlcMenu->addAction(pUpdatAct);
+
 	//连接
 	QAction *pConnect = new QAction(tr("Connect"), pPlcMenu);
 	pPlcMenu->addAction(pConnect);
@@ -904,7 +912,7 @@ void CFtuModule::InitCallZt()
 	QAction *pDisConnect = new QAction(tr("DisConnect"), pPlcMenu);
 	pPlcMenu->addAction(pDisConnect);
 
-
+	connect(pUpdatAct, SIGNAL(triggered()), this, SLOT(Slot_UpdateProcess()));
 
     connect(pCommAct, SIGNAL(triggered()), this, SLOT(Slot_CallCommConfig()));
     connect(pGeneralAct, SIGNAL(triggered()), this, SLOT(Slot_GeneralCall()));
@@ -999,6 +1007,21 @@ void CFtuModule::Slot_DisConnect()
 	m_pMainModule->LogString(m_strDeviceName.toLocal8Bit().data(), byDestr.data(), 1);
 
 	
+}
+
+//升级
+void CFtuModule::Slot_UpdateProcess()
+{
+	ASDU211_UPDATE pUpateInfo;
+	pUpateInfo.asduAddr.SetAddr(m_pConfigWgt->GetDeviceAddr());
+	pUpateInfo.m_qds.OV = 1;
+
+	m_pCommThread->SendUpdateRequest(pUpateInfo);
+
+	QByteArray byDestr = tr("Send Update Request").toLocal8Bit();
+
+	m_pMainModule->LogString(m_strDeviceName.toLocal8Bit().data(), byDestr.data(), 1);
+
 }
 
 

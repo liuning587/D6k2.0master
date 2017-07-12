@@ -11,23 +11,25 @@ DaQOCloud.controller('loginCtrl',['$scope','$stateParams','$state','loginService
     })
 
     $scope.login = function() {
-        /*var userName = $('#userIdInput').val(),
+        var userName = $('#userIdInput').val(),
             passWord = $('#passwordInput').val();
+
+        if (userName === null || userName === undefined || userName ==='' ||
+            passWord === null || passWord === undefined || passWord ==='') {
+            alert('用户名和密码不能为空！');
+            return;
+        }
+
         loginService.loginMessage(userName,passWord).then(function (result) {
-            if(result.intStatus == 0){
-                $scope.logininfo.pjID =result.lstPjInfo;
-                $scope.logininfo.userInfoID =result.userInfo;
-                $state.go('run');
-            }else if(result.intStatus == 1){
+            if(result.nStatus == 0){
+                $scope.logininfo.userInfo =result.userInfo;
+                $state.go('home');
+            }else if(result.nStatus == 1){
                 alert('登录失败，用户名错误！');
             }else{
                 alert('登录失败，密码错误！');
             }
-            $state.go('run');
-        });*/
-
-        console.info('home prev');
-        $state.go('home');
+        });
     }
 
     $scope.rememberPassWord = function () {

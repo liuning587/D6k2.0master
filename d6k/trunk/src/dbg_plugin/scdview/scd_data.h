@@ -20,15 +20,21 @@ enum
 	E_DIN,
 	E_AOUT,
 	E_DOUT,
+	E_USERVAR,
+	E_SYSVAR,
 	MAX_TYPE=500,
 };
-
+struct VARDATA;
 struct AIN;
 struct DIN;
 struct AOUT;
 struct DOUT;
 struct CHANNEL;
 struct DEVICE;
+struct AIN_ALARM;
+struct AIN_ALARM_LIMIT;
+struct DIN_ALARM;
+struct DIN_ALARM_LIMIT;
 
 class CScdDevice
 {

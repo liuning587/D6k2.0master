@@ -23,6 +23,10 @@
 #define PV_STATION_DEF_H
 
 #include "tag.h"
+#include "station_data.h"
+#include "aerograph.h"
+#include "inverter.h"
+#include "predict_output.h"
 
 /*! \struct  CPVStation
 *   \brief   一个光伏电站 */
@@ -36,7 +40,11 @@ public:
 protected:
 	void LogMsg(const char *szLogTxt, int nLevel);
 private:
-	 
+	CStationTotalData m_stnData;
+	CAerograph        m_aerograph;
+	CInverter         m_inverter;
+	CPRredictOutput   m_prdtOutput;
+
 };
 
 

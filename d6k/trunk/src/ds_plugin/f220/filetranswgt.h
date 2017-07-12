@@ -14,6 +14,8 @@ class CFileTransWgt : public QWidget
 public:
 	CFileTransWgt(CCommThread *pCommunicate,QWidget *parent = Q_NULLPTR);
 	~CFileTransWgt();
+	//发送指定文件  升级
+	void SendUpdateFile(const QString &strFileName, const QString &Dir);
 public slots:
     //refresh
     void Slot_RefreshItems();
@@ -26,6 +28,8 @@ public slots:
 	void Slot_upDataITems(QList<Catalog_Info>& lstItems);
 	//双击
 	void Slot_ItemDoubleClicke(QTreeWidgetItem *item, int column);
+	//
+	void Slot_UpdateConform(int nFlag);
 
 
 private:

@@ -39,9 +39,9 @@ static CScadaApi s_ScdApi;
 ** \date 2017年1月14日 
 ** \note  所有的应用程序在启动之初，需要先调用这个接口
 ********************************************************************************************************/
-SCADA_API bool ConnectScada(const char * pszProjectName, const char * szAppName)
+SCADA_API bool ConnectScada(const char * pszProjectName, const char * szAppName, int nMode)
 {
-	bool bRet=s_ScdApi.Initialize(pszProjectName,1);
+	bool bRet=s_ScdApi.Initialize(pszProjectName, szAppName,nMode);
 	return true;
 } 
 /*! \fn SCADA_API bool DisconnectScada(const char * pszProjectName, const char * szAppName)

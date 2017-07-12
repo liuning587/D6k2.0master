@@ -94,7 +94,7 @@ body{
 .menu_dl{
 	width:100%;
 	height:50px;
-	background: #281ef0;
+	background: rgba(58, 62, 50, 0.44);
 	position:fixed;
 	top:40px;
 	left:0;
@@ -603,6 +603,15 @@ body{
 	background:#cc3f1a;
 }
 
+.over_left{
+	display:block;
+	height:2em;
+	line-height:2em;
+	color:#ff0000;
+	text-align:center;
+	cursor:pointer;
+	border-radius:3px;
+}
 
 .chart_f{
 	width:90%;

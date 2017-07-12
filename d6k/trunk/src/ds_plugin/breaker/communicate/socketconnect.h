@@ -14,6 +14,8 @@ public:
     ~CSocketConnect();
     //初始化socket
     void  ConnectSocket(const QString &strIP, int iPort);
+	//断连
+	void DisConnectSocket();
     //关闭socket
     void CloseSocket();
     //获取数据
@@ -21,6 +23,16 @@ public:
     //写入数据
     bool WriteSocketData(const char *pSendData, int iLength);
 	void SetBreakerRecver(CBreakRecver *pRecver);
+
+	const QString &GetIpAddress()
+	{
+		return m_strIp;
+	}
+
+	int GetPort()
+	{
+		return m_nPort;
+	}
 
 signals:
     //错误信号
@@ -37,6 +49,9 @@ private slots:
 	void Slot_ConnectSuccess();
 
 private:
+	QString m_strIp;
+	int m_nPort;
+
     QTcpSocket *m_pTcpScoket;
     //接收到的数据
     QByteArray m_BtayRecvData;

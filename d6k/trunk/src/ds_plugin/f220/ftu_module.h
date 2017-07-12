@@ -106,6 +106,8 @@ public slots:
 	void Slot_ConnectDevice();
 	//断连
 	void Slot_DisConnect();
+	//升级
+	void Slot_UpdateProcess();
 private:
 	//模块加载工具
 	IMainModule *m_pMainModule;

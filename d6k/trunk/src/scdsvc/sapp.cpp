@@ -87,8 +87,8 @@ bool CScadaApp::Load()
 		QLibrary dlllib(szDllName);
 		if (dlllib.load())
 		{
-			m_fnStartApp = (StartApp)dlllib.resolve("StartIoDriver");
-			m_fnStopApp = (StopApp)dlllib.resolve("StopIoDriver");
+			m_fnStartApp = (StartApp)dlllib.resolve("StartScadaApp");
+			m_fnStopApp = (StopApp)dlllib.resolve("StopScadaApp");
 			Q_ASSERT(m_fnStartApp);
 			Q_ASSERT(m_fnStopApp);
 
@@ -132,19 +132,11 @@ bool CScadaApp::Start(const char * pszName)
 
 		if (m_fnStartApp)
 		{
-			//m_fnStopIoDriver(pszName, m_pData->NodeOccNo, m_pData->OccNo);
+			m_fnStartApp(pszName, m_pData->OccNo,0,nullptr);
 		}
 		else
 		{
-			if (strlen(m_pData->ProgramName))
-			{
-				szLog = "Start [ " + QString(m_pData->ProgramName) + " ] failed.";
-			}
-			else
-			{
-				szLog = "Start [ " + QString("Programme:%1").arg(m_pData->ProgramName) + " ] failed.";
-			}
-
+			szLog = "Start [ " + QString("Programme:%1").arg(m_pData->ProgramName) + " ] failed.";
 			LogString(szLog.toStdString().c_str(), 1);
 		}
 	}

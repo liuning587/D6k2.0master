@@ -21,7 +21,7 @@ bool CPowerPredictSvc::Initialize()
 
 void CPowerPredictSvc::Run()
 {
-
+	
 
 }
 

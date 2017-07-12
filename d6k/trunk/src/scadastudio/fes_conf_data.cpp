@@ -3197,14 +3197,17 @@ namespace Config
 		auto strTmp = QString("-->Fes %1  Variable log start!!!").arg(m_szTagName);
 		MYLIB::Log2File(LOG_FES_LOG, strTmp.toStdString().c_str(), true);
 
-		int nCount = m_arrMaps[HASHID::USERVIRIABLEID].size();
+		int nCount = m_arrMaps[HASHID::SYSTEMVARIABLEID].size();
+		strTmp = QString("-->Fes %1 System Variable count is %2!!!").arg(m_szTagName).arg(nCount);
+		MYLIB::Log2File(LOG_FES_LOG, strTmp.toStdString().c_str(), true);
+		SaveSystemVariable(writer, pHash, pStringPoolVec, pDescStringPoolOccNo);
+
+		nCount = m_arrMaps[HASHID::USERVIRIABLEID].size();
 		strTmp = QString("-->Fes %1 User Variable count is %2!!!").arg(m_szTagName).arg(nCount);
 		MYLIB::Log2File(LOG_FES_LOG, strTmp.toStdString().c_str(), true);
 		SaveUserVariable(writer, pHash, pStringPoolVec, pDescStringPoolOccNo);
 
-		strTmp = QString("-->Fes %1 System Variable count is %2!!!").arg(m_szTagName).arg(nCount);
-		MYLIB::Log2File(LOG_FES_LOG, strTmp.toStdString().c_str(), true);
-		SaveSystemVariable(writer, pHash, pStringPoolVec, pDescStringPoolOccNo);
+
 
 		writer.writeEndElement();
 
@@ -3531,48 +3534,41 @@ namespace Config
 
 			if (reader.isStartElement())
 			{
-				//QString strTmp = reader.name().toString();
+				QString strTmp = reader.name().toString();
 
-				//if (strTmp == "system")
-				//{
+				if (strTmp == "system")
+				{
 
-				//}
-				//else if (strTmp == "s")
-				//{
-				//	auto pSystem = new CSystemVariable();
+				}
+				else if (strTmp == "s")
+				{
+					auto pSystem = new CSystemVariable();
 
-				//	pSystem->SetOccNo(reader.attributes().value("OccNo").toInt());
-				//	pSystem->m_nID = reader.attributes().value("ID").toInt();
+					pSystem->SetOccNo(reader.attributes().value("OccNo").toInt());
+					pSystem->m_nID = reader.attributes().value("ID").toInt();
 
-				//	memset(pSystem->m_szTagName, 0, sizeof(pSystem->m_szTagName));
-				//	QString strTagName = reader.attributes().value("TagName").toString();
-				//	int nSize = strTagName.size();
-				//	strncpy(pSystem->m_szTagName, strTagName.toStdString().c_str(), qMin(MAX_NAME_LENGTH_SCADASTUDIO, nSize));
+					memset(pSystem->m_szTagName, 0, sizeof(pSystem->m_szTagName));
+					QString strTagName = reader.attributes().value("TagName").toString();
+					int nSize = strTagName.size();
+					strncpy(pSystem->m_szTagName, strTagName.toStdString().c_str(), qMin(MAX_NAME_LENGTH_SCADASTUDIO, nSize));
 
-				//	pSystem->m_strDescription = reader.attributes().value("Description").toString();
-				//	pSystem->m_nType = reader.attributes().value("DataType").toInt();
+					pSystem->m_strDescription = reader.attributes().value("Description").toString();
+					pSystem->m_nType = reader.attributes().value("DataType").toInt();
 
 
-				//	if (!CheckTagNameIsExist(strTagName))
-				//	{
-				//		if (!PushFesTagNameHashMap(HASHID::SYSTEMVARIABLEID, strTagName, pSystem))
-				//		{
-				//			auto strError = QObject::tr("system variable read error!!!");
-				//			s_pGlobleCore->LogMsg(FES_DESC, strError.toStdString().c_str(), LEVEL_1);
+					if (!CheckTagNameIsExist(strTagName))
+					{
+						if (!PushFesTagNameHashMap(HASHID::SYSTEMVARIABLEID, strTagName, pSystem))
+						{
+							auto strError = QObject::tr("system variable read error!!!");
+							s_pGlobleCore->LogMsg(FES_DESC, strError.toStdString().c_str(), LEVEL_1);
 
-				//			continue;
-				//		}
+							continue;
+						}
 
-				//		m_arrSystemVariable.push_back(pSystem);
-				//	}
-				//	else
-				//	{
-				//		auto strError = QObject::tr("system variable read error!!!");
-				//		s_pGlobleCore->LogMsg(FES_DESC, strError.toStdString().c_str(), LEVEL_1);
-
-				//		continue;
-				//	}
-				//}
+						//m_arrSystemVariable.push_back(pSystem);
+					}
+				}
 
 			}
 			else if (reader.isEndElement() && strTmp == "system")

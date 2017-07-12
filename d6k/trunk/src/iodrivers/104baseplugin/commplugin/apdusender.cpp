@@ -5,6 +5,8 @@
 #include "commplugin.h"
 #include "devicestudio/main_module.h"
 
+#include <QTimer>
+
 /*********************************************************************************************************
 ** \brief CApduSender(QObject *parent)
 ** \details 发送类构造函数
@@ -25,6 +27,16 @@ CApduSender::CApduSender(QObject *parent):
     m_k  = 0;
     m_w = 0;
     m_nSendNum = 0;
+
+	m_pFileTransfor = new QTimer(this);
+	//
+	connect(m_pFileTransfor, SIGNAL(timeout()), this, SLOT(Slot_FileTransPort()));
+	m_pFileTransfor->setInterval(1000);
+	m_nDevIndex = 0;
+	m_pDevTimer = new QTimer(this);
+	m_pDevTimer->setInterval(1000);
+
+	connect(m_pDevTimer, SIGNAL(timeout()), this, SLOT(Slot_OnSendMidDevData()));
 }
 
 CApduSender::~CApduSender()
@@ -609,6 +621,28 @@ bool CApduSender::OnSendSetResetProcessRequest(NBM_TELECTRL* pTelectrl)
     return true;
 }
 
+void CApduSender::OnSendUpdateRequest(ASDU211_UPDATE & pUpdate)
+{
+	char buf[255];
+
+	//组织ASDU211
+	ASDU211_UPDATE* pAsdu211 = (ASDU211_UPDATE*)(buf + sizeof(APCI));
+
+	pAsdu211->type = D_UPDATE_PROCESS;
+	pAsdu211->vsq = 0x01;
+
+	pAsdu211->cot.SetCot(COT_ACT);
+
+	pAsdu211->asduAddr.SetAddr(pUpdate.asduAddr.GetAddr());
+
+	pAsdu211->infoaddr.SetAddr(0x00);
+
+	pAsdu211->m_qds.OV = pUpdate.m_qds.OV;   //第一个位
+
+	int nResult = Send_I(buf, sizeof(ASDU211_UPDATE));
+
+}
+
 
 //定值获取
 bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
@@ -673,15 +707,18 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 	}
 	else if (pRequestDz->m_nCommandType == D_FIX_WRITE)
 	{
+		m_nDevIndex = 0;
+		m_WriteDevInfo.m_lstData.clear();
+		m_WriteDevInfo = *pRequestDz;
 		//定值写入
 		char buf[255] = { 0 };
-
+		
 		//定值写入
 		ASDU_BASE* pAsdudz = (ASDU_BASE*)(buf + sizeof(APCI));
 
 		pAsdudz->type = pRequestDz->m_nCommandType;
 
-		pAsdudz->vsq = 0x01;
+		pAsdudz->vsq = pRequestDz->m_lstData.count();
 
 		//asdu公共地址
 		pAsdudz->asduAddr.SetAddr(pRequestDz->m_nAsduID);
@@ -704,9 +741,20 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 
 		//数据长度
 		int nPagLength = sizeof(APCI) + sizeof(ASDU_BASE) + sizeof(ASDUADDR2) + sizeof(unsigned char);
+		
 
 		for (int i = 0; i < pRequestDz->m_lstData.count(); i++)
 		{
+
+			if (nPagLength + nSetIndex + sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength >= 255)
+			{
+				m_nDevIndex = i;
+				Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
+				//memset(buf, 0, 255);
+				nSetIndex = 0;
+				m_pDevTimer->start();
+				return true;
+			}
 			//信息体地址
 			INFOADDR3 *pAddr = (INFOADDR3*)(buf+nPagLength+nSetIndex);
 
@@ -718,6 +766,7 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 			//数据长度
 			buf[nPagLength + nSetIndex + sizeof(INFOADDR3)+1] = pRequestDz->m_lstData.at(i).nLength;
 			//数据值
+			
 			if (pRequestDz->m_lstData.at(i).nTagType == 2)
 			{
 				//int
@@ -744,23 +793,30 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 			else if (pRequestDz->m_lstData.at(i).nTagType == 38)
 			{
 				//float
-				char *pp = (buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+				unsigned char *pp = (unsigned char*)(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
 
 				float tt = pRequestDz->m_lstData.at(i).strValue.toFloat();
+
 				pp[0] = LSB(LSW(*(uint32_t *)(&tt)));
 				pp[1] = MSB(LSW(*(uint32_t *)(&tt)));
 				pp[2] = LSB(MSW(*(uint32_t *)(&tt)));
 				pp[3] = MSB(MSW(*(uint32_t *)(&tt)));
 
-				*pp = pRequestDz->m_lstData.at(i).strValue.toFloat();
+				//*pp = pRequestDz->m_lstData.at(i).strValue.toFloat();
 
+			}
+			else
+			{
+				char *ppp = (char*)(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+				memset(ppp,0, pRequestDz->m_lstData.at(i).nLength);;
 			}
 
 
-
+			
 			nSetIndex += sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength;
 		}
-
+		
+		m_nDevIndex = pRequestDz->m_lstData.count();
 		int nResult = Send_I(buf, nSetIndex + nPagLength  - sizeof(APCI)) ;
 
 		if (nResult != SEND_OK)
@@ -770,37 +826,7 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 
 
 
-		//发送确认消息
-		char bufg[255];
 
-		//组织ASDU100
-		ASDU203_GH* pAsduGh = (ASDU203_GH*)(bufg + sizeof(APCI));
-
-
-		pAsduGh->type = pRequestDz->m_nCommandType;
-
-		pAsduGh->vsq = 0x01;
-
-
-		pAsduGh->asduAddr.SetAddr(pRequestDz->m_nAsduID);
-		//传送原因
-		pAsduGh->cot.SetCot(pRequestDz->m_nCto);
-
-		//定值区号
-		pAsduGh->m_infoFixCode.SetAddr(m_pComm104Pln->GetFtpModule()->GetFixCode());
-		//TODO
-
-		pAsduGh->m_featureCode.CONT = 0;
-		pAsduGh->m_featureCode.RES = 0;
-		pAsduGh->m_featureCode.CR = 0;
-		pAsduGh->m_featureCode.SE = 0;
-
-		nResult = Send_I(bufg, sizeof(ASDU203_GH));
-
-		if (nResult != SEND_OK)
-		{
-			return false;
-		}
 
 		return true;
 
@@ -932,6 +958,44 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 //         }
 //     }
 
+
+	return true;
+}
+
+bool CApduSender::OnSendDevWriteConform()
+{
+	//发送确认消息
+	char bufg[255];
+
+	//组织ASDU100
+	ASDU203_GH* pAsduGh = (ASDU203_GH*)(bufg + sizeof(APCI));
+
+
+	pAsduGh->type = D_FIX_WRITE;
+
+	pAsduGh->vsq = 0x01;
+
+
+	pAsduGh->asduAddr.SetAddr(m_pComm104Pln->GetFtpModule()->GetDeviceAddr());
+	//传送原因
+	pAsduGh->cot.SetCot(6);
+
+	//定值区号
+	pAsduGh->m_infoFixCode.SetAddr(m_pComm104Pln->GetFtpModule()->GetFixCode());
+	//TODO
+
+	pAsduGh->m_featureCode.CONT = 0;
+	pAsduGh->m_featureCode.RES = 0;
+	pAsduGh->m_featureCode.CR = 0;
+	pAsduGh->m_featureCode.SE = 0;
+
+	int nResult = 0;
+	nResult = Send_I(bufg, sizeof(ASDU203_GH));
+
+	if (nResult != SEND_OK)
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -1363,7 +1427,12 @@ bool CApduSender::OnSendWriteFileData()
 	//分包发送文件
 	if (m_btWriteData.isEmpty())
 	{
+		m_pFileTransfor->stop();
 		return true;
+	}
+	if (!m_pFileTransfor->isActive())
+	{
+		m_pFileTransfor->start();
 	}
 
 	int nMaxDataSize = MAX_ASDU_SIZE - sizeof(FILE_BASE) - 11;
@@ -1422,6 +1491,7 @@ bool CApduSender::OnSendWriteFileData()
 			//和校验
 			pReadActionData[2 + sizeof(INFOADDR4) * 2 + nMaxDataSize] = checkAllData(m_btWriteData.mid(i*nMaxDataSize).data(), nCurrentLength);
 
+			m_btWriteData.clear();
 
 		}
 		else
@@ -1435,9 +1505,12 @@ bool CApduSender::OnSendWriteFileData()
 			pReadActionData[2 + sizeof(INFOADDR4) * 2 + nMaxDataSize] = checkAllData(m_btWriteData.mid(i*nMaxDataSize, nMaxDataSize).data(),nMaxDataSize);
 			nCurrentLength = nMaxDataSize;
 
+			m_btWriteData.remove(0, i*nMaxDataSize+ nMaxDataSize);
 		}
 
 		nResult = Send_I(buf, sizeof(FILE_BASE) + 2 + sizeof(INFOADDR4) * 2 + nCurrentLength + 1);
+
+		
 
 		if (nResult != SEND_OK)
 		{
@@ -1446,12 +1519,144 @@ bool CApduSender::OnSendWriteFileData()
 			//return false;
 		}
 
+		break;
+
 	}
 
 	m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("Send Write Action Request  Success").toLocal8Bit().data(), 1);
 
 
 	return true;
+}
+
+void CApduSender::ClearDataInfo()
+{
+	m_pFileTransfor->stop();
+	m_nDevIndex = 0;
+	m_btWriteData.clear();
+}
+
+void CApduSender::Slot_OnSendMidDevData()
+{
+	if (m_nDevIndex == m_WriteDevInfo.m_lstData.count())
+	{
+		m_pDevTimer->stop();
+		return;
+	}
+	DEV_BASE*pRequestDz = &m_WriteDevInfo;
+	//定值写入
+	char buf[255] = { 0 };
+
+	//定值写入
+	ASDU_BASE* pAsdudz = (ASDU_BASE*)(buf + sizeof(APCI));
+
+	pAsdudz->type = pRequestDz->m_nCommandType;
+
+	pAsdudz->vsq = pRequestDz->m_lstData.count();
+
+	//asdu公共地址
+	pAsdudz->asduAddr.SetAddr(pRequestDz->m_nAsduID);
+	//传送原因
+	pAsdudz->cot.SetCot(pRequestDz->m_nCto);
+
+	//定值区号
+	ASDUADDR2 *pAreaCode = (ASDUADDR2*)(buf + sizeof(APCI) + sizeof(ASDU_BASE));
+	pAreaCode->SetAddr(m_pComm104Pln->GetFtpModule()->GetFixCode());
+
+	//参数特征标识   TODO.....................
+	DVFLAG *pFlag = (DVFLAG*)(buf + sizeof(APCI) + sizeof(ASDU_BASE) + sizeof(ASDUADDR2));
+	pFlag->CONT = 0;
+	pFlag->RES = 0;
+	pFlag->CR = 0;
+	pFlag->SE = 1;
+	//当前数据在所节点
+	int nSetIndex = 0;
+	//数据个数
+
+	//数据长度
+	int nPagLength = sizeof(APCI) + sizeof(ASDU_BASE) + sizeof(ASDUADDR2) + sizeof(unsigned char);
+
+
+	for (int i = m_nDevIndex; i < pRequestDz->m_lstData.count(); i++)
+	{
+
+		if (nPagLength + nSetIndex + sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength >= 255)
+		{
+			Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
+			//memset(buf, 0, 255);
+			nSetIndex = 0;
+			m_nDevIndex = i;
+			return;
+		}
+		//信息体地址
+		INFOADDR3 *pAddr = (INFOADDR3*)(buf + nPagLength + nSetIndex);
+
+		pAddr->SetAddr(pRequestDz->m_lstData.at(i).nAddress);
+
+		//tag类型
+		buf[nPagLength + nSetIndex + sizeof(INFOADDR3)] = pRequestDz->m_lstData.at(i).nTagType;
+
+		//数据长度
+		buf[nPagLength + nSetIndex + sizeof(INFOADDR3) + 1] = pRequestDz->m_lstData.at(i).nLength;
+		//数据值
+
+		if (pRequestDz->m_lstData.at(i).nTagType == 2)
+		{
+			//int
+			int *pp = (int *)(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+			*pp = pRequestDz->m_lstData.at(i).strValue.toInt();
+		}
+		else if (pRequestDz->m_lstData.at(i).nTagType == 45)
+		{
+			//u short
+			unsigned short *puData = (unsigned short *)(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+			*puData = pRequestDz->m_lstData.at(i).strValue.toUShort();
+		}
+		else if (pRequestDz->m_lstData.at(i).nTagType == 4)
+		{
+			//string
+			strncpy(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2, pRequestDz->m_lstData.at(i).strValue.toLocal8Bit().data(), pRequestDz->m_lstData.at(i).nLength);
+		}
+		else if (pRequestDz->m_lstData.at(i).nTagType == 1)
+		{
+			//bool
+			bool *pp = (bool *)(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+			*pp = pRequestDz->m_lstData.at(i).strValue.toInt();
+		}
+		else if (pRequestDz->m_lstData.at(i).nTagType == 38)
+		{
+			//float
+			unsigned char *pp = (unsigned char*)(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+
+			float tt = pRequestDz->m_lstData.at(i).strValue.toFloat();
+
+			pp[0] = LSB(LSW(*(uint32_t *)(&tt)));
+			pp[1] = MSB(LSW(*(uint32_t *)(&tt)));
+			pp[2] = LSB(MSW(*(uint32_t *)(&tt)));
+			pp[3] = MSB(MSW(*(uint32_t *)(&tt)));
+
+			//*pp = pRequestDz->m_lstData.at(i).strValue.toFloat();
+
+		}
+		else
+		{
+			char *ppp = (char*)(buf + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
+			memset(ppp, 0, pRequestDz->m_lstData.at(i).nLength);;
+		}
+
+
+
+		nSetIndex += sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength;
+	}
+
+	Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
+	m_nDevIndex = m_WriteDevInfo.m_lstData.count();
+
+}
+
+void CApduSender::Slot_FileTransPort()
+{
+	OnSendWriteFileData();
 }
 
 unsigned char CApduSender::checkAllData(const char *data, int length)

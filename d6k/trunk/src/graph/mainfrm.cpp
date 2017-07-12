@@ -91,7 +91,7 @@ bool CMainFrame::Initalize(std::vector < SIM_GRAPH_DEF >& arrFiles)
 {
 	Q_ASSERT(!arrFiles.empty());
 
-	::ConnectScada(GetProjPath().toStdString().c_str(), "");
+	::ConnectScada(GetProjPath().toStdString().c_str(), "RT_GRAPH",1);
 
 	::CreateLog("RT_GRAPH");
 

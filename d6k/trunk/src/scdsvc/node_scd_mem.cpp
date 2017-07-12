@@ -64,7 +64,7 @@ bool CDbSvc::BuildScdMem(const char* pszFilePath)
 	for (; it != m_mapScdConfig.end(); ++it)
 	{
 		pSvr = std::make_shared<CServerDB>();
-
+		pSvr->SetProjPath(pszFilePath);
 		pSvr->Initialize((it->second).toStdString().c_str(), 0, it->first);
 
 		auto iter = m_mapApps.find(it->first);

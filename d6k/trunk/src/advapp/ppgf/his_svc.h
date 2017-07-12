@@ -38,12 +38,6 @@ protected:
 
 };
 
-
-
- 
- 
-
-
 #endif // HIS_SVC_H
 
 
