@@ -1300,31 +1300,10 @@ int ASDUGZ::GetItemCount() const
     return  vsq; //应用数据单元数目
 }
 
-void ASDUGZ::SetValue(int nIndex, int nValue)
-{
-    if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU_GZ)
-    {
-        return;
-    }
-        
-    m_data[nIndex].m_AnalogValue = nValue;
-}
 
-int ASDUGZ::GetValue(int nIndex)
-{
-    if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU_GZ)
-    {
-        return 0;
-    }
-        
-    return m_data[nIndex].m_AnalogValue;
-}
 
-int ASDUGZ::GetAsduGZ_SQ0Length()
-{
-    int nSize = sizeof(ASDU_BASE) + GetItemCount() * sizeof(ASDU_GZ_DATA) + sizeof(INFOADDR3) + sizeof(CP56Time2a) + 2;
-    return nSize;
-}
+
+
 
 void ASDU112_ZOOM::SetItemCount(int nCount)
 {

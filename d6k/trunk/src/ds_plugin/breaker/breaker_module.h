@@ -26,9 +26,16 @@ class CRealtimeDoWgt;
 class CRealtimeActionWgt;
 class CRealtimeAbnormalWgt;
 class CRealtimeSoftWgt;
+class CSoeHistoryWgt;
 
+//点表
 #define  POINT_TABLE_FILE_NAME  "/ini/breaker/DA-R791-Point.txt"
+//点映射
 #define  POINT_REALTIME_FILE_NAME "/ini/breaker/Real-Time.ini"
+//基本信息配置
+#define  BASE_INFO_FILE_NAME    "/ini/breaker/baseInfo.ini"
+//录波文件目录
+#define  LB_FILE_DIR "/ini/breaker/lbFile/"
 
 #define  TIMER_INTERVAL_GET_MEAS 1000   //定时发送查询数据
 
@@ -95,6 +102,12 @@ public:
 		return m_pRealSoftWgt;
 	}
 
+	//停止定时器
+	void StopTimer();
+
+	void StartTimer();
+
+
 public slots:
     void Slot_SocketConnectSuccess();
 	//
@@ -117,6 +130,9 @@ public slots:
 	void Slot_ConnectToSocket();
 	//断连
 	void Slot_DisConnectSocket();
+	//help
+	void Slot_Help();
+	
 
 private:
 	//模块加载工具
@@ -157,6 +173,8 @@ private:
 	CRealtimeAbnormalWgt *m_pAbnormalWgt;
 	//real soft
 	CRealtimeSoftWgt *m_pRealSoftWgt;
+	//soe history
+	CSoeHistoryWgt *m_pSoeHistory;
 
 	QMap<int, QWidget*> m_IndexWgt;
 	//

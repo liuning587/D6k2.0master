@@ -57,6 +57,7 @@ void CPowerPredictSvc::powerPredict4h(const QDateTime& currTime)
 
 		}
 	}*/
+	Q_UNUSED(currTime);
 }
 
 void CPowerPredictSvc::powerPredict72h(const QDateTime& currTime)

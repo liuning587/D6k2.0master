@@ -23,14 +23,11 @@
 #include "scadaapi/scdsvcapi.h"
 #include "scadaapi/scdapp_api.h"
 #include "scadaapi/scdapp_def.h"
-#include "log/log.h"
+
 #include "app_main.h"
 
 #include <QObject> 
-#include <QDateTime>
-
-
-std::shared_ptr<CPpgf> s_Ppgf;
+#include <QDateTime> 
 
 extern "C"
 {
@@ -52,22 +49,41 @@ extern "C"
 		Q_ASSERT(pszName);
 		if (pszName == nullptr)
 		{
-			return false;
+			return 0;
 		}
-		if (s_Ppgf)
+
+		Q_ASSERT(nAppOccNo != INVALID_OCCNO && nAppOccNo <= MAX_OCCNO);
+		if (nAppOccNo == INVALID_OCCNO || nAppOccNo > MAX_OCCNO)
 		{
-			s_Ppgf.reset();
+			return 0;
 		}
 
-		s_Ppgf = std::make_shared<CPpgf>();
+		CPpgf *pPpgf = new CPpgf(nAppOccNo);
 
-		if (!s_Ppgf->Initalize(pszName))
+		if (!pPpgf->Initalize(pszName))
 		{
-			return false;
-
+			delete pPpgf;
+			pPpgf = nullptr;
+			return 0;
 		}
 
-		return 0;
+		bool bRet = false;
+
+		bRet = CExtSvcContainer::GetInstance()->RegisterService(pPpgf);
+		if (bRet == false)
+		{
+			delete pPpgf;
+			pPpgf = nullptr;
+
+			// LOG 登记一下
+
+
+			return 0;
+		}
+		// 启动起来
+		pPpgf->Run();
+
+		return 1;
 	}
 	/*! \fn SCDAPP int StopScadaApp(const char * pszName, int32u nAppOccNo)
 	********************************************************************************************************* 
@@ -85,15 +101,28 @@ extern "C"
 		Q_ASSERT(pszName);
 		if (pszName == 0)
 		{
-			return false;
+			return 0;
 		}
 
-		return 0;
+		CExtService *pSvc = CExtSvcContainer::GetInstance()->FindService(nAppOccNo);
+		Q_ASSERT(pSvc);
+		if (pSvc == nullptr)
+			return 0;
+
+		pSvc->Shutdown();
+
+
+		return 1;
 	}
 }
 
 
 CPpgf::CPpgf()
+{
+
+}
+
+CPpgf::CPpgf(int32u nOccNo):CExtService(nOccNo)
 {
 
 }
@@ -105,37 +134,6 @@ CPpgf::~CPpgf()
 
 }
 
-bool CPpgf::Initalize(const char * pszProjectName)
-{
-	Q_ASSERT(pszProjectName && strlen(pszProjectName) > 0);
-	if (!pszProjectName || strlen(pszProjectName) == 0)
-	{
-		return false;
-	}
-
-	::ConnectScada(pszProjectName, "PPGF", 1);
-
-	return true;
-
-}
-
-
-void CPpgf::Run()
-{
-	pPPSvc->Run();
-
-}
-
-void CPpgf::LogMsg(const char* logMsg, int nLevel)
-{
-	::LogMsg("PPGF", logMsg, nLevel, nullptr);
-}
-
-
-void CPpgf::Shutdown()
-{
-	::DisconnectScada("", "");
-}
 
 
 void CPpgf::GetDbData()
@@ -146,15 +144,20 @@ void CPpgf::GetDbData()
 
 void CPpgf::GetRealData()
 {
-
-	pPvStation->GetRealTimeData();
-
+	Q_ASSERT(m_pPvStation);
+	if (m_pPvStation)
+	{
+		m_pPvStation->GetRealTimeData();
+	}
 }
 
 void CPpgf::ReadXml(const QString& szFilePath)
 {
-	
-	pReadXml->ReadGroupInfo(szFilePath);
+	Q_ASSERT(m_pReadXml);
+	if (m_pReadXml)
+	{
+		m_pReadXml->ReadGroupInfo(szFilePath);
+	}
 	
 }
 

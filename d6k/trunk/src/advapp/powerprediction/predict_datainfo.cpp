@@ -1,5 +1,6 @@
 #include "predict_datainfo.h"
 #include "predict_define.h"
+#include "predict_module.h"
 
 #include <QFile>
 #include <QXmlStreamWriter>
@@ -243,6 +244,7 @@ bool CInverterInfo::ReadDi(QXmlStreamReader& reader, CInverterInfo* pInvterInfo)
 
 	return true;
 }
+
 /*! \fn void CInverterInfo::Init()
 ***********************************
 ** \brief    CInverterInfo::Init()
@@ -260,6 +262,18 @@ void CInverterInfo::Init()
 	m_vecTableInfo.append(m_ReactPower);
 	m_vecTableInfo.append(m_OpenState);
 }
+
+bool CPlantInfo::LogMsg(const char* szLogTxt, int nLevel)
+{
+	CPowerPredictApi * pApi = GetPredictModuleApi();
+	Q_ASSERT(pApi);
+	if (pApi == nullptr)
+	{
+		return false;
+	}
+
+	return pApi->LogMsg(szLogTxt, nLevel);
+}
 /*! \fn bool CPlantInfo::SaveADIData(QXmlStreamWriter& writer)
 **************************************************************
 ** \brief    CPlantInfo::SaveADIData
@@ -272,14 +286,23 @@ void CInverterInfo::Init()
 **************************************************************/
 bool CPlantInfo::SaveADIData(QXmlStreamWriter& writer)
 {
+	QString szLog;
 	writer.writeStartElement("ADIN");
 	writer.writeAttribute("Count", QString("%1").arg(m_vecTableInfo.size()));
-	for (auto const avec : m_vecTableInfo)
+	for (auto const it : m_vecTableInfo)
 	{
 		writer.writeStartElement("ai");
-		writer.writeAttribute("ID", QString("%1").arg(avec.m_nID));
-		writer.writeAttribute("Name", QString("%1").arg(avec.m_szName));
-		writer.writeAttribute("LinkedName", QString("%1").arg(avec.m_szLinkedTagName));
+		writer.writeAttribute("ID", QString("%1").arg(it.m_nID));
+		writer.writeAttribute("Name", QString("%1").arg(it.m_szName));
+		writer.writeAttribute("LinkedName", QString("%1").arg(it.m_szLinkedTagName));
+
+		if (it.m_szLinkedTagName.isEmpty() == true)
+		{
+			szLog = QString(QObject::tr("[%1] point`s LinkedTagName is null, please link first!").arg(it.m_szName));
+			LogMsg(szLog.toStdString().c_str(), 0);
+		}
+#if 0
+// Fixed by LiJin 2017.7.14
 		if (avec.m_szLinkedTagName == "")
 		{
 			QMessageBox warning(QMessageBox::Warning, "Warning", QStringLiteral("LinkedTagName is null,please link first!"));
@@ -292,7 +315,8 @@ bool CPlantInfo::SaveADIData(QXmlStreamWriter& writer)
 				return false;
 			}
 		}
-		writer.writeAttribute("Type", QString("%1").arg(avec.m_nType));
+#endif
+		writer.writeAttribute("Type", QString("%1").arg(it.m_nType));
 		writer.writeEndElement();
 	}
 	writer.writeEndElement();
@@ -330,18 +354,19 @@ bool CPlantInfo::SavePlantData(QXmlStreamWriter& writer)
 **************************************************************/
 bool CPlantInfo::LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 {
+	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "ADIN")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "ADIN")
 			{
 				ReadADIN(reader,pPlntInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp == "data")
+		else if (reader.isEndElement() && strTmp1 == "data")
 		{
 			break;
 		}
@@ -361,18 +386,20 @@ bool CPlantInfo::LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 **************************************************************/
 bool CPlantInfo::ReadADIN(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 {
+	QString strTmp1, strTmp2;
+
 	while (!reader.atEnd())
-	{	
-		QString strTmp = reader.name().toString();
+	{
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "ai")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "ai")
 			{
 				ReadAi(reader, pPlntInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp == "ADIN")
+		else if (reader.isEndElement() && strTmp1 == "ADIN")
 		{
 			break;
 		}
@@ -393,14 +420,15 @@ bool CPlantInfo::ReadADIN(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 **************************************************************/
 bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 {
+	QString strTmp1, strTmp2;
 	while(!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
+			strTmp2 = reader.name().toString();
 
-			if (strTmp == "ai")
+			if (strTmp2 == "ai")
 			{
 				CPPPointInfo pAnalog;
 				int nID = reader.attributes().value("ID").toInt();
@@ -428,7 +456,7 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 				m_vecTableInfo.push_back(pAnalog);
 			}
 		}
-		else if (reader.isEndElement() && strTmp == "ai")
+		else if (reader.isEndElement() && strTmp1 == "ai")
 		{
 			break;
 		}
@@ -469,9 +497,9 @@ bool CInverterGroup::SaveInverterGrp(QXmlStreamWriter& writer, CInverterGroup& i
 	writer.writeStartElement("inverters");
 	writer.writeAttribute("Count", QString("%1").arg(m_mapInverters.size()));
 	writer.writeAttribute("Name", QString("%1").arg(m_strName));
-	for (auto avec : invertGrp.m_mapInverters)
+	for (auto it : invertGrp.m_mapInverters)
 	{
-		avec->SaveInverterData(writer);
+		it->SaveInverterData(writer);
 	}
 	writer.writeEndElement();
 	return true;
@@ -488,13 +516,14 @@ bool CInverterGroup::SaveInverterGrp(QXmlStreamWriter& writer, CInverterGroup& i
 **************************************************************/
 bool CInverterGroup::LoadInvertersGrp(QXmlStreamReader& reader)
 {
+	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "inverter")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "inverter")
 			{
 				CInverterInfo pInverter;
 				QString nName = reader.attributes().value("Name").toString();
@@ -506,7 +535,7 @@ bool CInverterGroup::LoadInvertersGrp(QXmlStreamReader& reader)
 				m_mapInverters.insert(pInverter.m_szName, &pInverter);
 			}
 		}
-		else if (reader.isEndElement() && strTmp == "inverters")
+		else if (reader.isEndElement() && strTmp1 == "inverters")
 		{
 			/*reader.readNext();
 			QString strTmp1 = reader.name().toString();
@@ -584,13 +613,14 @@ bool CWeatherData::SaveWeatherData(QXmlStreamWriter& writer)
 **************************************************************/
 bool CWeatherData::LoadData(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 {
+	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "ADIN")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "ADIN")
 			{
 				ReadADIN(reader, pWeaInfo);
 			}
@@ -603,7 +633,6 @@ bool CWeatherData::LoadData(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 	}
 	return true;
 }
-
 /*! \fn bool CWeatherData::ReadADIN(QXmlStreamReader& reader)
 **************************************************************
 ** \brief    CWeatherData::ReadADIN
@@ -616,18 +645,19 @@ bool CWeatherData::LoadData(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 **************************************************************/
 bool CWeatherData::ReadADIN(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 {
+	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "ai")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "ai")
 			{
-				ReadAi(reader,pWeaInfo);
+				ReadAi(reader, pWeaInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp == "ADIN")
+		else if (reader.isEndElement() && strTmp1 == "ADIN")
 		{
 			break;
 		}
@@ -637,7 +667,6 @@ bool CWeatherData::ReadADIN(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 
 	return true;
 }
-
 /*! \fn bool CWeatherData::ReadAi(QXmlStreamReader& reader)
 **************************************************************
 ** \brief    CWeatherData::ReadAi
@@ -650,14 +679,14 @@ bool CWeatherData::ReadADIN(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 **************************************************************/
 bool CWeatherData::ReadAi(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 {
+	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-
-			if (strTmp == "ai")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "ai")
 			{
 				CPPPointInfo pAnalog;
 				int nID = reader.attributes().value("ID").toInt();
@@ -775,13 +804,13 @@ bool CPredictData::SaveADIData(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("ADIN");
 	writer.writeAttribute("Count", QString("%1").arg(m_vecTableInfo.size()));
-	for (auto const avec : m_vecTableInfo)
+	for (auto const it : m_vecTableInfo)
 	{
 		writer.writeStartElement("ao");
-		writer.writeAttribute("ID", QString("%1").arg(avec.m_nID));
-		writer.writeAttribute("Name", QString("%1").arg(avec.m_szName));
-		writer.writeAttribute("LinkedName", QString("%1").arg(avec.m_szLinkedTagName));
-		writer.writeAttribute("Type", QString("%1").arg(avec.m_nType));
+		writer.writeAttribute("ID", QString("%1").arg(it.m_nID));
+		writer.writeAttribute("Name", QString("%1").arg(it.m_szName));
+		writer.writeAttribute("LinkedName", QString("%1").arg(it.m_szLinkedTagName));
+		writer.writeAttribute("Type", QString("%1").arg(it.m_nType));
 		writer.writeEndElement();
 	}
 	writer.writeEndElement();
@@ -819,13 +848,14 @@ bool CPredictData::SavePredictData(QXmlStreamWriter& writer)
 **************************************************************/
 bool CPredictData::LoadData(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 {
+	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "ADIN")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "ADIN")
 			{
 				ReadADIN(reader, pPrdtInfo);
 			}
@@ -850,18 +880,19 @@ bool CPredictData::LoadData(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 **************************************************************/
 bool CPredictData::ReadADIN(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 {
+	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "ao")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "ao")
 			{
 				ReadAO(reader, pPrdtInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp == "ADIN")
+		else if (reader.isEndElement() && strTmp1 == "ADIN")
 		{
 			break;
 		}
@@ -871,7 +902,6 @@ bool CPredictData::ReadADIN(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 
 	return true;
 }
-
 /*! \fn bool CPredictData::ReadAi(QXmlStreamReader& reader)
 **************************************************************
 ** \brief    CPredictData::ReadAi
@@ -884,14 +914,16 @@ bool CPredictData::ReadADIN(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 **************************************************************/
 bool CPredictData::ReadAO(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 {
+	QString strTmp1, strTmp2;
+
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
+			strTmp2 = reader.name().toString();
 
-			if (strTmp == "ao")
+			if (strTmp2 == "ao")
 			{
 				CPPPointInfo pAnalog;
 				int nID = reader.attributes().value("ID").toInt();
@@ -957,8 +989,7 @@ void CPredictData::Init()
 ** \note
 ********************************************************************/
 bool CStationData::SaveStationData(const QString& szRoot, CStationData* pStnData)
-{
-	
+{	
 	QString fileName = QString("%1%2").arg(m_strStationName).arg(".xml");
 	QString strPath = szRoot + "/powerpredict/";
 	strPath = strPath + fileName;
@@ -996,32 +1027,34 @@ bool CStationData::SaveStationData(const QString& szRoot, CStationData* pStnData
 ********************************************************************/
 bool CStationData::LoadStationData(QXmlStreamReader &reader)
 {
+	QString strTmp1, strTmp2;
+
 	while (!reader.atEnd())
 	{
 		reader.readNext();
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "p")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "p")
 			{
 				LoadPlantData(reader);
 			}
-			else if(strTmp == "w")
+			else if(strTmp2 == "w")
 			{
 				LoadWeatherData(reader);
 			}
-			else if (strTmp == "prdt")
+			else if (strTmp2 == "prdt")
 			{
 				LoadPredictData(reader);
 			}
-			else if (strTmp == "inverters")
+			else if (strTmp2 == "inverters")
 			{
 				LoadInvertersData(reader);
 			}
 		}
-		else if (reader.isEndElement() && strTmp == "plant")
+		else if (reader.isEndElement() && strTmp1 == "plant")
 		{
 			break;
 		}
@@ -1040,22 +1073,24 @@ bool CStationData::LoadStationData(QXmlStreamReader &reader)
 ********************************************************************/
 bool CStationData::ReadPlant(QXmlStreamReader& reader)
 {
+	QString strTmp1, strTmp2;
+
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
+			strTmp2 = reader.name().toString();
 
-			if (strTmp == "p")
+			if (strTmp2 == "p")
 			{
 				Readp(reader);
 			}
-			else if (strTmp == "group")
+			else if (strTmp2 == "group")
 			{
 				
 			}
-			else if (strTmp == "channel")
+			else if (strTmp2 == "channel")
 			{
 				//read channel next node group
 				//reader.readNext();
@@ -1063,7 +1098,7 @@ bool CStationData::ReadPlant(QXmlStreamReader& reader)
 		}
 		else if (reader.isEndElement())
 		{
-			if (strTmp == "channel")
+			if (strTmp1 == "channel")
 			{
 				return true;
 			}
@@ -1088,14 +1123,16 @@ bool CStationData::ReadPlant(QXmlStreamReader& reader)
 bool CStationData::Readp(QXmlStreamReader& reader)
 {
 	CPlantInfo* pPlant = nullptr;
+	QString strTmp,strName,strTmp2;
+
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp = reader.name().toString();
 		if (reader.isStartElement())
 		{
 			if (strTmp == "p")
 			{
-				QString strName = reader.attributes().value("Name").toString();
+				strName = reader.attributes().value("Name").toString();
 				if (strName.isEmpty() == true)
 				{
 					reader.readNext();
@@ -1120,8 +1157,8 @@ bool CStationData::Readp(QXmlStreamReader& reader)
 		}
 		else if (reader.isEndElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "p")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "p")
 			{
 				break;
 			}
@@ -1143,13 +1180,15 @@ bool CStationData::Readp(QXmlStreamReader& reader)
 ********************************************************************/
 bool CStationData::LoadPlantData(QXmlStreamReader& reader)
 {
+	QString strTmp1, strTmp2;
+
 	while (!reader.atEnd())
 	{
-		QString strTmp = reader.name().toString();
+		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
-			QString strTmp = reader.name().toString();
-			if (strTmp == "p")
+			strTmp2 = reader.name().toString();
+			if (strTmp2 == "p")
 			{
 				CPlantInfo pPlant;
 				QString nName = reader.attributes().value("Name").toString();
@@ -1160,7 +1199,7 @@ bool CStationData::LoadPlantData(QXmlStreamReader& reader)
 				this->m_PlantValue = pPlant;
 			}	
 		}
-		else if (reader.isEndElement() && strTmp == "p")
+		else if (reader.isEndElement() && strTmp1 == "p")
 		{
 			break;
 		}
@@ -1603,8 +1642,8 @@ CPredictMgr::~CPredictMgr()
 ***************************************/
 void CPredictMgr::Init()
 {
+	Q_ASSERT(m_pRootPrdtGrp == nullptr);
 	m_pRootPrdtGrp = new CPredictGroup();
-
 }
 /*! \fn void CPredictMgr::Reset()
 **************************************
@@ -1685,12 +1724,16 @@ bool CPredictMgr::LoadPredictNode(QDomElement& elm, const QString& szRoot)
 ** \date     2017Äê5ÔÂ15ÈÕ
 ** \note
 **********************************************************************************/
-bool CPredictMgr::LoadPredictFile(CStationData* pStnData, const QString& fileName, const QString& szRoot)
+bool CPredictMgr::LoadPredictFile(CStationData* pStnData, const QString& szFileName, const QString& szRoot)
 {
+	Q_ASSERT(pStnData);
+	if (pStnData == nullptr)
+		return false;
+
 	QXmlStreamReader xml;
 	QString strRoot = szRoot;
 	strRoot += "/powerpredict";
-	QString strTmp = strRoot + "/" + fileName + ".xml";
+	QString strTmp = strRoot + "/" + szFileName + ".xml";
 	QFile file(strTmp);
 	if (!file.open(QFile::ReadOnly | QFile::Text))
 	{

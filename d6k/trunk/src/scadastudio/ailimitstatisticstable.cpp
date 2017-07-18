@@ -20,5 +20,5 @@ CAILimitStatisticsTable::~CAILimitStatisticsTable()
 
 void CAILimitStatisticsTable::Refresh()
 {
-
+	m_pModel->RefrushModel();
 }

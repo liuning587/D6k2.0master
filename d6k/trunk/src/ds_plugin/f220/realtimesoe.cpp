@@ -84,9 +84,9 @@ void CRealTimeSOE::AnalyseRealSeoBinaryData(int iDeviceID, int nPointID, int nVa
 	//序号
 	m_pTableModel->setItem(iRowNum, 0, new QStandardItem(QString::number(iRowNum + 1)));
 	//站点ID
-    m_pTableModel->setItem(iRowNum, 1, new QStandardItem(mapPoint[nPointID-1].Destriber));
+    m_pTableModel->setItem(iRowNum, 1, new QStandardItem(mapPoint[nPointID].Destriber));
 	//地址
-	m_pTableModel->setItem(iRowNum, 2, new QStandardItem(QString::number(nPointID-1)));
+	m_pTableModel->setItem(iRowNum, 2, new QStandardItem(QString::number(nPointID)));
 	//点值
 	m_pTableModel->setItem(iRowNum, 3, new QStandardItem(QString::number(nValue)));
 	//遥信类型  单点  双点

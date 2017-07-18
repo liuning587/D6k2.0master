@@ -87,7 +87,7 @@ void ProportionAlgorithm::PowerPredict4h(const QDateTime& currTime)
 
 void ProportionAlgorithm::PowerPredict72h(const QDateTime& currTime)
 {
-
+	Q_UNUSED(currTime);
 }
 
 

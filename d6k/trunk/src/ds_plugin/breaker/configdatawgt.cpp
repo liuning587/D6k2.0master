@@ -23,6 +23,16 @@ int CConfigDataWgt::GetPort()
 	return ui.lineEdit_2->text().toInt();
 }
 
+void CConfigDataWgt::SetIpAddress(const QString &strIp)
+{
+	ui.lineEdit->setText(strIp);
+}
+
+void CConfigDataWgt::SetPort(const QString & nPort)
+{
+	ui.lineEdit_2->setText(nPort);
+}
+
 void CConfigDataWgt::Slot_Conform()
 {
 	accept();

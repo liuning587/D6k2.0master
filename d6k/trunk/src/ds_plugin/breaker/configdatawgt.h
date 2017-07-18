@@ -13,6 +13,10 @@ public:
 
 	QString GetIpAddress();
 	int GetPort();
+	//
+	void SetIpAddress(const QString &strIp);
+	//
+	void SetPort(const QString & nPort);
 public slots:
     void Slot_Conform();
 

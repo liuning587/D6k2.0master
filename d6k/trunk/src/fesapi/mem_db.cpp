@@ -3772,6 +3772,77 @@ bool  CMemDB::ReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout)
 	}
 	return false;
 }
+
+bool CMemDB::SendIOCmd(int32u nOccNo, IO_VARIANT *nVal, int32u nTimeout)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		return false;
+
+	Q_ASSERT(nOccNo <=m_nDoutCount);
+	if (nOccNo > m_nDoutCount)
+	{
+		return false;
+	}
+
+	Q_ASSERT(nVal);
+	if (nVal == nullptr)
+		return false;
+
+	int32u nChannleNo;
+	DOUT* pDout = &m_pDouts[nOccNo - 1];
+	Q_ASSERT(pDout);
+	if (!pDout)
+	{
+		return false;
+	}
+
+	if (m_nNBSvcMailBoxID == INVALID_MAILBOX_ID)
+	{
+		m_nNBSvcMailBoxID = QueryMailBoxID("FES", "NB_SVC");
+	}
+	Q_ASSERT(m_nNBSvcMailBoxID != INVALID_MAILBOX_ID);
+
+	int32s nMailBoxID = GetChannelMailBoxID(nChannleNo);
+	
+	Q_ASSERT(nMailBoxID);
+	if (nMailBoxID == 0)
+		return false;
+
+	std::shared_ptr<SETVAL_MSG>  pSetValeEvt = std::make_shared<SETVAL_MSG>();
+	std::memset(pSetValeEvt.get(), 0, sizeof(SETVAL_MSG));
+
+	pSetValeEvt->MsgCode = MSG_SETVAL;
+	pSetValeEvt->Len = sizeof(SETVAL_MSG);
+	pSetValeEvt->IddType = IDD_DOUT;
+	pSetValeEvt->Att = ATTW_DOUT;
+	pSetValeEvt->NodeOccNo = pDout->NodeOccNo;
+	pSetValeEvt->Occno = nOccNo;
+	pSetValeEvt->Datatype = DT_BOOLEAN;
+	pSetValeEvt->Value[0] = *nVal;
+
+	DMSG dmsg;
+	std::memset(&dmsg, 0, sizeof(DMSG));
+
+	dmsg.SenderID = nMailBoxID;
+	dmsg.RecverID = m_nNBSvcMailBoxID;
+
+	dmsg.Type = MSG_EVT_RT_SETVAL;
+
+	dmsg.Size = sizeof(SETVAL_MSG);
+	memcpy(dmsg.Buff, pSetValeEvt.get(), std::min<size_t>(static_cast <size_t> (dmsg.Size), static_cast <size_t>(MAIL_MAX_SIZE)));
+
+	bool bRet = SendMail("FES", &dmsg, 0);
+	if (!bRet)
+	{
+		QString szLog = QObject::tr("Set dout [OccNo=%1] failed. Send setvalmsg failed.").arg(nOccNo);
+		LogMsg(szLog.toStdString().c_str(), 1);
+		return false;
+	}
+
+	return true;
+}
+
 /*! \fn bool CMemDB::AppGetAinValue(int32u nOccNo, fp64* pValue, int8u *pQua)
 ********************************************************************************************************* 
 ** \brief CMemDB::AppGetAinValue 

@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <QLineEdit>
 
 #define  POINTTABLEPATH "/ini/f220/pointtable/"
 #define  DEVCONFIGPATH "/ini/f220/devConfig/"  
@@ -83,6 +84,27 @@ public:
     //组装FTP数据
     void WriteFtpInfo(QXmlStreamWriter &xmlWriter);
 
+	//
+	int GetTime0()
+	{
+		return m_pLineEdTime0->text().toInt();
+	}
+
+	int GetTime1()
+	{
+		return m_pLineEdTime1->text().toInt();
+	}
+
+	int GetTime2()
+	{
+		return m_pLineEdTime2->text().toInt();
+	}
+
+	int GetTime3()
+	{
+		return m_pLineEdTime3->text().toInt();
+	}
+
 signals:
     void Signal_UpdateFtpConfig(const QString &strFilename);
 public slots:
@@ -103,7 +125,7 @@ private:
 	//点表
 	QComboBox *m_pComBoxDebiceType;
     //ftp
-    CCheckRemoteWgt *m_pRemotePonitTable;
+    //CCheckRemoteWgt *m_pRemotePonitTable;
     //装置地址
     QLineEdit *m_pDeviceAddress;
     //遥信起始地址
@@ -124,6 +146,14 @@ private:
     QLineEdit *m_pLineEdCheckTimeCall;
     //遥脉召唤
     QLineEdit *m_pLineEdKwhTimeCall;
+	//time0
+	QLineEdit *m_pLineEdTime0;
+	//time1
+	QLineEdit *m_pLineEdTime1;
+	//time2
+	QLineEdit *m_pLineEdTime2;
+	//time3
+	QLineEdit *m_pLineEdTime3;
 	
 };
 

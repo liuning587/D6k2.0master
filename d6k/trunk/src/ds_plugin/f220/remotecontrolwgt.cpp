@@ -285,7 +285,6 @@ void CRemoteControlWgt::SetRemoteTableInfo(CPointInfo *pRemoteAnalyse)
         m_mapDescPoint.insert(it.value().Destriber, it.key());
 
         ui.comboBox->addItem(it.value().Destriber);
-
         it++;
     }
 

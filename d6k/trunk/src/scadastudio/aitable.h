@@ -54,6 +54,7 @@ private:
 	CAIModel *m_pModel;
 	Config::CFesData *m_pFes;
 	IMainModuleInterface *m_pCore;
+	QStringList m_strTextList;
 };
 
 #endif // AITABLE_H

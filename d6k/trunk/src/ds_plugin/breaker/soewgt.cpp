@@ -31,6 +31,21 @@ CSoeWgt::CSoeWgt(CNetManager *pNetManager, QWidget *parent)
 	ui.tableWidget_5->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 // 	connect(ui.pushButton, SIGNAL(clicked()), this, SLOT(Slot_GetSoeEventInfo()));
 // 	connect(ui.pushButton_2, SIGNAL(clicked()), this, SLOT(Slot_GetSoeEventNum()));
+	//右击菜单
+	ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableWidget, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
+
+	ui.tableWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableWidget_2, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
+
+	ui.tableWidget_3->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableWidget_3, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
+
+	ui.tableWidget_4->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableWidget_4, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
+
+	ui.tableWidget_5->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableWidget_5, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
 }
 
 CSoeWgt::~CSoeWgt()
@@ -67,8 +82,14 @@ void CSoeWgt::AnaylseActionData(SOE_ACTION_INFO *pAction)
 	
 
 	QTableWidgetItem *pItem2 = new QTableWidgetItem;
-	pItem2->setText(QString::number(pAction->m_cActionStatus));
-
+	if (pAction->m_cActionStatus % 2 == 0)
+	{
+		pItem2->setText(QStringLiteral("返回"));
+	}
+	else if (pAction->m_cActionStatus % 2 != 0)
+	{
+		pItem2->setText(QStringLiteral("动作"));
+	}	
 	QTableWidgetItem *pItem3 = new QTableWidgetItem;
 
 	QString strDefalut;
@@ -80,7 +101,7 @@ void CSoeWgt::AnaylseActionData(SOE_ACTION_INFO *pAction)
 	{
 		if (pPointTable.find(pAction->m_data[i].dataType.GetAddr()) != pPointTable.end())
 		{
-			strDefalut += "   " + pPointTable.at(pAction->m_data[i].dataType.GetAddr())->m_strName + "=" + QString::number(*(int*)pAction->m_data[i].measData);
+			strDefalut += "   " + pPointTable.at(pAction->m_data[i].dataType.GetAddr())->m_strName + "=" + QString::number(*(int*)pAction->m_data[i].measData ) + pPointTable.at(pAction->m_data[i].dataType.GetAddr())->m_strUnit;
 		}
 		
 		pItem3->setText(strDefalut);
@@ -246,6 +267,32 @@ void CSoeWgt::Slot_SoeUpdate(int nType)
 	}
 }
 
+//情况表格
+void CSoeWgt::Slot_ClearTable()
+{
+	QTableWidget *pCurrentWgt = (QTableWidget*)sender()->parent()->parent();
+
+	if (pCurrentWgt != nullptr)
+	{
+		pCurrentWgt->clearContents();
+		pCurrentWgt->setRowCount(0);
+	}
+}
+
+void CSoeWgt::Slot_ContextMenuRequest(const QPoint & point)
+{
+	Q_UNUSED(point);
+	QMenu *pMenu = new QMenu((QTableWidget*)sender());
+
+	QAction *pClearAct = new QAction(QStringLiteral("清空"), (QTableWidget*)sender());
+	pMenu->addAction(pClearAct);
+
+	connect(pClearAct, SIGNAL(triggered()), this, SLOT(Slot_ClearTable()));
+
+	pMenu->exec(QCursor::pos());
+	pMenu->deleteLater();
+}
+
 //更新数据
 void CSoeWgt::Slot_RecvNewRealTimeData(DEG_SOE_DETAIL &tSoeDetail)
 {
@@ -253,6 +300,10 @@ void CSoeWgt::Slot_RecvNewRealTimeData(DEG_SOE_DETAIL &tSoeDetail)
 	int nDataLength = tSoeDetail.msgLeg.GetAddr() - 1;
 
 	//开始数据解析
+	if (m_pNetManager->GetSender()->GetSoeType() != 0xFFFF)
+	{
+		return;
+	}
 
 	if (tSoeDetail.SOEDATA[0] == SOE_ACTION)
 	{
@@ -307,4 +358,6 @@ void CSoeWgt::Slot_GetSoeEventInfo()
 
 	m_pNetManager->GetSender()->OnSendSoeRequest(&dbgSoe);
 
+	//设置当前类型
+	m_pNetManager->GetSender()->SetSoeType(0xffff);
 }

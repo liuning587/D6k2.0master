@@ -36,6 +36,10 @@ public slots:
 	void Slot_GetSoeEventNum();
 	//更新事件
 	void Slot_SoeUpdate(int nType);
+	//清除
+	void Slot_ClearTable();
+	//右击菜单
+	void Slot_ContextMenuRequest(const QPoint &point);
 private:
 	Ui::CSoeWgt ui;
 	//网络

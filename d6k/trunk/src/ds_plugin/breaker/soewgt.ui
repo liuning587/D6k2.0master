@@ -72,7 +72,7 @@
            </column>
            <column>
             <property name="text">
-             <string>故障</string>
+             <string>故障侧值</string>
             </property>
            </column>
           </widget>
@@ -148,7 +148,7 @@
            </column>
            <column>
             <property name="text">
-             <string>异常</string>
+             <string>异常信息</string>
             </property>
            </column>
           </widget>
@@ -181,7 +181,7 @@
            </column>
            <column>
             <property name="text">
-             <string>运行事件类型ID</string>
+             <string>运行信息</string>
             </property>
            </column>
           </widget>

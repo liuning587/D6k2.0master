@@ -3,8 +3,8 @@
 #include <QMap>
 #include <QDateTime>
 #include <QDebug>
-#include <QSqlRecord>
-#include <QSqlError>
+#include <QtSql/QSqlRecord>
+#include <QtSql/QSqlError>
 
 
 QString CPredictDatabase::Table_Weather_Predict_4h = "weather_predict_4h";
@@ -211,6 +211,7 @@ bool CPredictDatabase::GetYesterday_Value_72h(const QDateTime& time, QMap<Analog
 ** \date      2017年5月27日
 ** \note
 *****************************************************************/
+/*
 void CPredictDatabase::CreateTable_PowerPredict4h()
 {
 	QString sql;
@@ -229,7 +230,7 @@ void CPredictDatabase::CreateTable_PowerPredict4h()
 	Print_Debug_String(sql);
 
 	Query_Debug_Error(sql);
-}
+}*/
 
 /*! \fn void CPredictDatabase::CreateTable_PowerPredict72h()
 ******************************************************************
@@ -240,6 +241,7 @@ void CPredictDatabase::CreateTable_PowerPredict4h()
 ** \date      2017年5月27日
 ** \note
 *****************************************************************/
+/*
 void CPredictDatabase::CreateTable_PowerPredict72h()
 {	
 	QString sql;
@@ -258,7 +260,7 @@ void CPredictDatabase::CreateTable_PowerPredict72h()
 	Print_Debug_String(sql);
 
 	Query_Debug_Error(sql);
-}
+}*/
 
 /*! \fn void CPredictDatabase::CreateTable_WeatherPredict4h()
 ******************************************************************
@@ -269,6 +271,7 @@ void CPredictDatabase::CreateTable_PowerPredict72h()
 ** \date     2017年5月27日
 ** \note
 *****************************************************************/
+/*
 void CPredictDatabase::CreateTable_WeatherPredict4h()
 {
 	QString sql;
@@ -285,7 +288,7 @@ void CPredictDatabase::CreateTable_WeatherPredict4h()
 	sql += "FOREIGN KEY (weather_type) REFERENCES weather_type(type) ON DELETE RESTRICT)";
 
 	Query_Debug_Error(sql);
-}
+}*/
 
 /*! \fn void CPredictDatabase::CreateTable_WeatherPredict72h()
 ******************************************************************
@@ -296,6 +299,7 @@ void CPredictDatabase::CreateTable_WeatherPredict4h()
 ** \date    2017年5月27日
 ** \note
 *****************************************************************/
+/*
 void CPredictDatabase::CreateTable_WeatherPredict72h()
 {
 	QString sql;
@@ -312,7 +316,7 @@ void CPredictDatabase::CreateTable_WeatherPredict72h()
 	sql += "FOREIGN KEY (weather_type) REFERENCES weather_type(type) ON DELETE RESTRICT)";
 
 	Query_Debug_Error(sql);
-}
+}*/
 
 /*! \fn void CPredictDatabase::CreateTable_WeatherType()
 ********************************************************
@@ -323,12 +327,13 @@ void CPredictDatabase::CreateTable_WeatherPredict72h()
 ** \date    2017年5月27日
 ** \note
 *******************************************************/
+/*
 void CPredictDatabase::CreateTable_WeatherType()
 {
 	Query_Debug_Error("CREATE TABLE IF NOT EXISTS weather_type (type tinyint primary key,"
 		"name varchar(32) not null"
 		")");
-}
+}*/
 
 /*! \fn void CPredictDatabase::CreateTable_Running_Maintenance_Limit()
 **********************************************************************
@@ -339,6 +344,7 @@ void CPredictDatabase::CreateTable_WeatherType()
 ** \date     2017年5月27日
 ** \note
 **********************************************************************/
+/*
 void CPredictDatabase::CreateTable_Running_Maintenance_Limit()
 {
 	Query_Debug_Error(QString("DROP TABLE IF EXISTS %1").arg(Table_RunningCapacity));
@@ -377,7 +383,7 @@ void CPredictDatabase::CreateTable_Running_Maintenance_Limit()
 	Print_Debug_String(sql);
 
 	Query_Debug_Error(sql);
-}
+}*/
 
 /*! \fn void CPredictDatabase::InsertData_Running_Mantenance_Limit()
 **********************************************************************
@@ -388,12 +394,13 @@ void CPredictDatabase::CreateTable_Running_Maintenance_Limit()
 ** \date     2017年5月27日
 ** \note
 **********************************************************************/
+/*
 void CPredictDatabase::InsertData_Running_Mantenance_Limit()
 {
 	Query_Debug_Error("INSERT INTO runningcapacity(starttime,endtime,value) values('2017-01-01 00:00:00','2017-01-07 23:55:59',4.25)");
 	Query_Debug_Error("INSERT INTO maintenancecapacity(starttime,endtime,descripation,value) values('2017-01-01 00:00:00','2017-01-07 23:55:59','检修4.25',4.25)");
 	Query_Debug_Error("INSERT INTO limitcapacity(starttime,endtime,value) values('2017-01-01 00:00:00','2017-01-07 23:55:59',4.25)");
-}
+}*/
 
 /*! \fn void CPredictDatabase::CreateTable_For_Test()
 ********************************************************
@@ -404,6 +411,7 @@ void CPredictDatabase::InsertData_Running_Mantenance_Limit()
 ** \date     2017年5月27日
 ** \note
 ********************************************************/
+/*
 void CPredictDatabase::CreateTable_For_Test()
 {
 	CreateTable_Running_Maintenance_Limit();
@@ -412,7 +420,7 @@ void CPredictDatabase::CreateTable_For_Test()
 	CreateTable_WeatherPredict72h();
 	CreateTable_PowerPredict4h();
 	CreateTable_PowerPredict72h();
-}
+}*/
 
 /*! \fn void CPredictDatabase::CreateTable_Final_15m_Or_24h()
 *************************************************************
@@ -423,6 +431,7 @@ void CPredictDatabase::CreateTable_For_Test()
 ** \date     2017年5月27日
 ** \note
 *************************************************************/
+/*
 void CPredictDatabase::CreateTable_Final_15m_Or_24h()
 {
 	QString sql;
@@ -497,7 +506,7 @@ void CPredictDatabase::CreateTable_Final_15m_Or_24h()
 	sql.append(")");
 	Print_Debug_String(sql);
 	Query_Debug_Error(sql);
-}
+}*/
 
 /*! \fn void CPredictDatabase::Query_Debug_Error(const QString sql)
 **********************************************************************
@@ -656,6 +665,7 @@ bool CPredictDatabase::GetAnalogue_Info(const Analogues_Alias& alias, Analogues_
 ** \date   2017年5月27日
 ** \note
 *******************************************************************************************************************************/
+/*
 void CPredictDatabase::InsertData_WeatherType()
 {
 	Query_Debug_Error(QString("DELETE FORM weather_type"));
@@ -667,7 +677,7 @@ void CPredictDatabase::InsertData_WeatherType()
 	Query_Debug_Error(QString("INSERT INTO weather_type values (%1,'%2')").arg(Weather_Humidity).arg("Humidity"));
 	Query_Debug_Error(QString("INSERT INTO weather_type values (%1,'%2')").arg(Weather_Temperature).arg("Temperature"));
 	Query_Debug_Error(QString("INSERT INTO weather_type values (%1,'%2')").arg(Weather_Air_Pressure).arg("Air_Pressure"));
-}
+}*/
 
 /*! \fn void CPredictDatabase::InsertDataWeatherPredict4h_Final_15m(Weather_Predict_Data4h& data, const QDateTime& insertTime)
 ********************************************************************************************************************************
@@ -783,6 +793,7 @@ void CPredictDatabase::InsertDataWeatherPredict72h_Final_24h(Weather_Predict_Dat
 ** \date   2017年5月27日
 ** \note
 *******************************************************************************************************************************/
+/*
 void CPredictDatabase::InsertData_Hdb(const QDateTime& insertTime, const QMap<Analogues_Alias, Analogues_Info>& map_Info)
 {
 	data_type hdb_day_288[288];
@@ -823,7 +834,7 @@ void CPredictDatabase::InsertData_Hdb(const QDateTime& insertTime, const QMap<An
 
 	}
 
-}
+}*/
 
 /*
 void CPredictDatabase::InsertData_All_Hdb(const QDateTime& insertTime, const QMap<Analogues_alias, Analogues_Info>& map_Info)

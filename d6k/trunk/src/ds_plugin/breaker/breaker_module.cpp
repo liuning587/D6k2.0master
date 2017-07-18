@@ -26,6 +26,7 @@
 #include "realtimeabnormalwgt.h"
 #include "realtimesoftwgt.h"
 #include "datatimeeditwgt.h"
+#include "soehistorywgt.h"
 
 #include <QStandardItemModel>
 #include <QTimer>
@@ -34,6 +35,8 @@
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QMessageBox>
+#include <QMessageBox>
+#include <QSettings>
 
 static CBreakerModule *s_ptrModule = nullptr;
 
@@ -133,6 +136,8 @@ void CBreakerModule::Init(IMainModule *pMainModule)
 	m_pAbnormalWgt = new CRealtimeAbnormalWgt;
 	//real soft
 	m_pRealSoftWgt = new CRealtimeSoftWgt;
+	//soehistory
+	m_pSoeHistory = new CSoeHistoryWgt(m_pNetManager);;
 
 	connect(m_pNetManager->GetSocket(),SIGNAL(Signal_ConnectSuccess()),this,SLOT(Slot_SocketConnectSuccess()));
 	connect(m_pNetManager->GetSocket(), SIGNAL(Signal_SocketError(QString)), this, SLOT(Slot_SocketError(QString)));
@@ -156,6 +161,10 @@ void CBreakerModule::Init(IMainModule *pMainModule)
 	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SoeDetailInfo(DEG_SOE_DETAIL&)), m_pSoe, SLOT(Slot_RecvNewRealTimeData(DEG_SOE_DETAIL&)));
 	connect(m_pAnalogWgt,SIGNAL(Signal_SeoInfo(int)),m_pSoe,SLOT(Slot_SoeUpdate(int)));
 
+	//soehisoty
+	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SoeDetailInfo(DEG_SOE_DETAIL&)), m_pSoeHistory, SLOT(Slot_RecvNewRealTimeData(DEG_SOE_DETAIL&)));
+
+
 	//遥控
 	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_RemoteControlAck()), this, SLOT(Slot_RemoteContrExec()));
 
@@ -178,6 +187,7 @@ void CBreakerModule::UnInit()
 	m_pActionWgt->deleteLater();
 	m_pAbnormalWgt->deleteLater();
 	m_pRealSoftWgt->deleteLater();
+	m_pSoeHistory->deleteLater();
 }
 
 void CBreakerModule::CreateTreeItem()
@@ -206,7 +216,7 @@ void CBreakerModule::CreateTreeItem()
 
 
 	//测量值
-	QStandardItem *pAnalogItem = new QStandardItem(tr("测量值"));
+	QStandardItem *pAnalogItem = new QStandardItem(tr("测值信息"));
 	//pSelectPoint->setIcon(QIcon(":/icons/analog.png"));
 	pBreakerItem->appendRow(pAnalogItem);
 
@@ -311,15 +321,7 @@ void CBreakerModule::CreateTreeItem()
 //初始化菜单栏
 void CBreakerModule::InitMenu()
 {
-	QMenu *pPlcMenu = m_pMainWindow->menuBar()->addMenu(tr("控制(C)"));
-
-	//设置时间
-	QAction *pTimeAct = new QAction(tr("设置时间(S)"), pPlcMenu);
-	pPlcMenu->addAction(pTimeAct);
-
-	//遥控
-	QAction *pRemoteControlAct = new QAction(tr("遥控(R)"), pPlcMenu);
-	pPlcMenu->addAction(pRemoteControlAct);
+	QMenu *pPlcMenu = m_pMainWindow->menuBar()->addMenu(tr("装置操作(C)"));
 
 	//连接
 	QAction *pConnectAct = new QAction(tr("连接(C)"), pPlcMenu);
@@ -329,12 +331,28 @@ void CBreakerModule::InitMenu()
 	QAction *pDisConnectAct = new QAction(tr("断连(D)"), pPlcMenu);
 	pPlcMenu->addAction(pDisConnectAct);
 
+	pPlcMenu->addSeparator();
+	//设置时间
+	QAction *pTimeAct = new QAction(tr("设置时间(S)"), pPlcMenu);
+	pPlcMenu->addAction(pTimeAct);
+
+	//遥控
+	QAction *pRemoteControlAct = new QAction(tr("遥控(R)"), pPlcMenu);
+	pPlcMenu->addAction(pRemoteControlAct);
+
+
+	QMenu *pHelpMenu = m_pMainWindow->menuBar()->addMenu(tr("帮助(H)"));
+	QAction *pHelpAct = new QAction(tr("关于(A)"), pHelpMenu);
+	pHelpMenu->addAction(pHelpAct);
+
 
 	connect(pTimeAct, SIGNAL(triggered()), this, SLOT(Slot_SetDeviceTime()));
 	connect(pRemoteControlAct, SIGNAL(triggered()), this, SLOT(SLot_RemoteControl()));
 
 	connect(pConnectAct, SIGNAL(triggered()), this, SLOT(Slot_ConnectToSocket()));
 	connect(pDisConnectAct, SIGNAL(triggered()), this, SLOT(Slot_DisConnectSocket()));
+
+	connect(pHelpAct, SIGNAL(triggered()), this, SLOT(Slot_Help()));
 }
 
 void CBreakerModule::SetLoadDeviceName(const QString &strDeviceName)
@@ -347,16 +365,37 @@ void CBreakerModule::InitConnectData()
 	//初始化数据
 	m_pNetData = std::make_shared<CBreakInitData>();
 
+	//读取配置文件数据
+	QSettings *configIniRead = new QSettings(qApp->applicationDirPath() + BASE_INFO_FILE_NAME, QSettings::IniFormat);
+	//
+	QString strIp = configIniRead->value("Socket/ip").toString();
+	QString port = configIniRead->value("Socket/port").toString();
+
+	QString strFtpUserName = configIniRead->value("FTP/username").toString();
+	QString strFtpPassWd = configIniRead->value("FTP/password").toString();
+	QString strFtpDir = configIniRead->value("FTP/ftpdir").toString();
+
 	//初始化连接数据
 	CConfigDataWgt *pDataConfigWgt = new CConfigDataWgt;
+	pDataConfigWgt->SetIpAddress(strIp);
+	pDataConfigWgt->SetPort(port);
+
 	if (pDataConfigWgt->exec())
 	{
 		m_pNetData->SetIpAddress(pDataConfigWgt->GetIpAddress());
 		m_pNetData->SetPort(pDataConfigWgt->GetPort());
 
+		configIniRead->setValue("Socket/ip", pDataConfigWgt->GetIpAddress());
+		configIniRead->setValue("Socket/port", pDataConfigWgt->GetPort());
 		//连接网络
 		m_pNetManager->ConnectToServer(m_pNetData->GetIpAddress(), m_pNetData->GetPort());
 	}
+
+	//保存网络数据
+	m_pSoeHistory->SetFtpIp(strIp);
+	m_pSoeHistory->SetFtpUserName(strFtpUserName);
+	m_pSoeHistory->SetFtpPasswd(strFtpPassWd);
+	m_pSoeHistory->SetFtpDir(strFtpDir);
 
 	pDataConfigWgt->deleteLater();
 }
@@ -386,9 +425,25 @@ void CBreakerModule::SendRequest(int nRequestType)
 	m_pNetManager->GetSender()->OnSendRequest(&dbgHeader);
 }
 
+void CBreakerModule::StopTimer()
+{
+	m_pTimer->stop();
+}
+
+void CBreakerModule::StartTimer()
+{
+	m_pTimer->start();
+}
+
 void CBreakerModule::Slot_SocketConnectSuccess()
 {
+	//清空数据
+	m_pSoeHistory->ClearNums();
+
+	m_pTimer->start();
 	SendRequest(DBG_CODE_GET_SYS_INFO);
+
+	m_pNetManager->GetSender()->SetSoeType(-1);
 
 	QString strInfo = tr("发送获取系统信息请求 .....");
 	
@@ -625,6 +680,23 @@ void CBreakerModule::Slot_ClickLeftTreeItem(const QModelIndex &qIndex)
 			m_IndexWgt.insert(TREE_INFO_SOE, m_pSoe);
 		}
 	}
+	else if (nType == TREE_ITEM_HIOSTORY_SOE)
+	{
+		//soe history
+		if (m_WgtIndex.contains(m_pSoeHistory))
+		{
+			m_pMainWindow->GetTabWidget()->setCurrentWidget(m_pSoeHistory);
+		}
+		else
+		{
+			m_pMainWindow->GetTabWidget()->AddTab(m_pSoeHistory, tr("历史事件"), "historysoe");
+			m_pMainWindow->GetTabWidget()->setCurrentWidget(m_pSoeHistory);
+			m_WgtIndex.insert(m_pSoeHistory, TREE_ITEM_HIOSTORY_SOE);
+
+			m_IndexWgt.insert(TREE_ITEM_HIOSTORY_SOE, m_pSoeHistory);
+		}
+	}
+
 }
 
 void CBreakerModule::Slot_CloseOneTabWidget(int iIndex)
@@ -758,5 +830,10 @@ void CBreakerModule::Slot_ConnectToSocket()
 void CBreakerModule::Slot_DisConnectSocket()
 {
 	m_pNetManager->GetSocket()->DisConnectSocket();
+}
+
+void CBreakerModule::Slot_Help()
+{
+	QMessageBox::information(0, tr("关于"), tr("中压直流调试软件V1.0"));
 }
 

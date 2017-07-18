@@ -44,14 +44,14 @@ extern "C"
 	enum EVT_TYPE
 	{
 		MSG_EVT0 = 0X00,  //!< 无类型
-		MSG_EVT_ANA = 0X01,  //!< 模拟量越复限告警
+		MSG_EVT_ANA = 0X01,   //!< 模拟量越复限告警
 		MSG_EVT_DIGI = 0X02,  //!< 开关量
 		MSG_EVT_DIAG = 0X04,  //!< 自诊断类告警
 		MSG_EVT_OPER = 0X08,  //!< 操作类告警
 		MSG_EVT_SETVAL = 0X10,  //!< 设值
 		MSG_EVT6 = 0X20,        //!< SOE事件
 		MSG_EVT7 = 0X40,        //!< 遥控事件
-		MSG_EVT8 = 0X80,
+		MSG_EVT_RT_SETVAL = 0X80,        //!< 遥控反校事件
 		MSG_EVT9 = 0X0100,
 		MSG_EVT10 = 0X0200,
 		MSG_EVT11 = 0X0400,
@@ -63,7 +63,7 @@ extern "C"
 		MSG_EVT_ALL = MSG_EVT_ANA | MSG_EVT_DIGI
 		| MSG_EVT_DIAG | MSG_EVT_OPER
 		| MSG_EVT_SETVAL | MSG_EVT6
-		| MSG_EVT7 | MSG_EVT8
+		| MSG_EVT7 | MSG_EVT_RT_SETVAL
 		| MSG_EVT9 | MSG_EVT10
 		| MSG_EVT11 | MSG_EVT12
 		| MSG_EVT13 | MSG_EVT14

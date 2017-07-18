@@ -1673,16 +1673,43 @@ public:
 
 };
 
+class SIGNAL_DZ_U
+{
+public:
+	class ASDU_GZ_DATA_U
+	{
+	public:
+		INFOADDR3 m_infoaddr;  //遥测信息体地址
+		short m_AnalogValue;             //遥测数据
+	};
+
+	ASDU_GZ_DATA_U m_data[8];
+};
+
+class SIGNAL_DZ_F
+{
+public:
+	class ASDU_GZ_DATA_F
+	{
+	public:
+		INFOADDR3 m_infoaddr;  //遥测信息体地址
+		char m_AnalogValue[4];             //遥测数据
+	};
+
+	ASDU_GZ_DATA_F m_data[8];
+};
+
+
 //故障事件
 class ASDUGZ : public ASDU_BASE
 {
 private:
-    class ASDU_GZ_DATA
-    {
-    public:
-        INFOADDR3 m_infoaddr;  //遥测信息体地址
-        short m_AnalogValue;             //遥测数据
-    };
+    //class ASDU_GZ_DATA
+    //{
+    //public:
+    //    INFOADDR3 m_infoaddr;  //遥测信息体地址
+    //    short m_AnalogValue;             //遥测数据
+    //};
 
 public:
     void SetItemCount(int nCount);
@@ -1705,13 +1732,12 @@ public:
     unsigned char m_AnalogType;    //遥测类型
 
 public:
-    enum { MAX_DATA_PER_ASDU_GZ = 8, };
-    ASDU_GZ_DATA m_data[MAX_DATA_PER_ASDU_GZ];
+    //enum { MAX_DATA_PER_ASDU_GZ = 8, };
+    //ASDU_GZ_DATA m_data[MAX_DATA_PER_ASDU_GZ];
 
-
+	char m_pGzDats[MAX_ASDU_SIZE - sizeof(ASDU_BASE)-5-sizeof(ASDUADDR2)-sizeof(CP56Time2a)];
 };
  
-
 //////////////////////////////////////////////////////////////////////////
 //C_CS_NA_1:时钟同步命令
 //////////////////////////////////////////////////////////////////////////

@@ -63,7 +63,7 @@ public:
     //
     void SetGeneralTime(int nGeneralTime, int nSynTime, int nKwhTime);
     //
-
+	void SetTimerx(int nTime0, int nTime1, int nTime2, int nTime3);
 
 public:
         bool OnTimerSend(int nFrameType,int nUtype);

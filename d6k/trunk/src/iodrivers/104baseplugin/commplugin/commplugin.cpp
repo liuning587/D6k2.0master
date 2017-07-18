@@ -1020,6 +1020,14 @@ void CCommPlugin::SetGeneralTime(int nGeneralTime, int nSynTime,int nKwhTime)
     m_pTimerKwhMsg->setInterval(nKwhTime * 60 * 1000);
 }
 
+void CCommPlugin::SetTimerx(int nTime0, int nTime1, int nTime2, int nTime3)
+{
+	m_pTimerOut0->setInterval(nTime0);
+	m_pTimerOut1->setInterval(nTime1);
+	m_pTimerOut2->setInterval(nTime2);
+	m_pTimerOut3->setInterval(nTime3);
+}
+
 void CCommPlugin::Slot_SetSycsTime(QDateTime tSycsTime)
 {
     m_pApduSender->OnSendSycsOwnTime(m_pModule->GetDeviceAddr(),tSycsTime);

@@ -840,6 +840,16 @@ extern "C"
 		return false;
 	}
 
+	FESAPI bool SendIOCmd(INT32U nOccNo, IO_VARIANT *pVal, INT32U nTimeout)
+	{
+		auto pMemDB = s_FesApi.GetMemDB();
+		if (pMemDB)
+		{
+			return pMemDB->SendIOCmd( nOccNo , pVal, nTimeout );
+		}
+		return true;
+	}
+
 	/*! \fn bool AppGetUserVarValue(int32u nOccNo, IO_VARIANT *pVariant, int8u * pQua)
 	********************************************************************************************************* 
 	** \brief AppGetUserVarValue 
@@ -1473,6 +1483,7 @@ extern "C"
 		return true;
 	}
 }
+
 
 
 

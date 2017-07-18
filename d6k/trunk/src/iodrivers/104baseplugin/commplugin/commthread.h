@@ -52,6 +52,8 @@ public:
 	void SendDisConnectRequest();
 	//更新
 	void SendUpdateRequest(ASDU211_UPDATE &updateData);
+	//time0  time1  time2  time3
+	void SetTimer(int nTime0, int nTime1, int nTime2, int nTime3);
 signals:
 	//连接
 	void Signal_ConnectSocket();
@@ -177,6 +179,14 @@ private:
     int m_nSyncGeneralTime;
     //电度召唤时间
     int m_nKwhCallTime;
+	//tim0
+	int m_nTime0;
+	//time1
+	int m_nTime1;
+	//time2
+	int m_nTime2;
+	//time3
+	int m_nTime3;
 };
 
 #endif // COMMTHREAD_H

@@ -89,15 +89,16 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
 				RPT S_Binary;
 				S_Binary.NUM = lstData.at(0).simplified().toInt();
                 S_Binary.GroupNum = lstData.at(1).simplified().toInt();
-                S_Binary.NUM2 = m_lstBinary.count() + 1;
+                S_Binary.NUM2 = lstData.at(2).simplified().toInt();
+
 				strcpy(S_Binary.Destriber,lstData.at(3).toStdString().c_str());
 				strcpy(S_Binary.Unit, lstData.at(4).toStdString().c_str());
                 S_Binary.zoom = 0;
 				m_lstBinary.append(S_Binary);
 
-                m_mapBinaryDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
+                m_mapBinaryDeviceIdGroup.insert(S_Binary.NUM2, S_Binary);
                 //插入数据
-                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
+                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM2] = S_Binary;
                 if (!m_lstBinaryCodes.contains(lstData.at(1).simplified()))
                 {
                     m_lstBinaryCodes.append(lstData.at(1).simplified());
@@ -115,7 +116,7 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
 				RPT S_Binary;
                 S_Binary.NUM = lstData.at(0).simplified().toInt();
                 S_Binary.GroupNum = lstData.at(1).simplified().toInt();
-				S_Binary.NUM2 = m_lstAnalog.count() + 1;
+				S_Binary.NUM2 = lstData.at(2).simplified().toInt();
 				strcpy(S_Binary.Destriber, lstData.at(3).toStdString().c_str());
 				strcpy(S_Binary.Unit, lstData.at(4).toStdString().c_str());
                 //缩放
@@ -131,8 +132,8 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
 
 				m_lstAnalog.append(S_Binary);
 
-                m_mapAnalogDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
-                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
+                m_mapAnalogDeviceIdGroup.insert(S_Binary.NUM2, S_Binary);
+                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM2] = S_Binary;
 
                 if (!m_lstAnalogCodes.contains(lstData.at(1).simplified()))
                 {
@@ -150,15 +151,15 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
 				RPT S_Binary;
                 S_Binary.NUM = lstData.at(0).simplified().toInt();
                 S_Binary.GroupNum = lstData.at(1).simplified().toInt();
-				S_Binary.NUM2 = m_lstKWH.count() + 1;
+				S_Binary.NUM2 = lstData.at(2).simplified().toInt();
 				strcpy(S_Binary.Destriber, lstData.at(3).toStdString().c_str());
 				strcpy(S_Binary.Unit, lstData.at(4).toStdString().c_str());
                 S_Binary.zoom = 0;
 				m_lstKWH.append(S_Binary);
 
-                m_mapKwhDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
+                m_mapKwhDeviceIdGroup.insert(S_Binary.NUM2, S_Binary);
 
-                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
+                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM2] = S_Binary;
 
                 if (!m_lstKwhCodes.contains(lstData.at(1).simplified()))
                 {
@@ -177,14 +178,14 @@ bool CRemotePonitTableAnalyse::AnalyseXmlData(QIODevice *pDevice)
 				RPT S_Binary;
                 S_Binary.NUM = lstData.at(0).simplified().toInt();
                 S_Binary.GroupNum = lstData.at(1).simplified().toInt();
-                S_Binary.NUM2 = m_lstControl.count()+1;
+                S_Binary.NUM2 = lstData.at(2).simplified().toInt();
 				strcpy(S_Binary.Destriber, lstData.at(3).toStdString().c_str());
 				strcpy(S_Binary.Unit, lstData.at(4).toStdString().c_str());
                 S_Binary.zoom = 0;
 				m_lstControl.append(S_Binary);
 
-                m_mapControlDeviceIdGroup.insert(S_Binary.NUM, S_Binary);
-                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM] = S_Binary;
+                m_mapControlDeviceIdGroup.insert(S_Binary.NUM2, S_Binary);
+                m_mapAllPoints[S_Binary.GroupNum][S_Binary.NUM2] = S_Binary;
                 //m_lstControlCodes.append(lstData.at(1).simplified());
 
                 if (!m_lstControlCodes.contains(lstData.at(1).simplified()))

@@ -35,6 +35,7 @@ void CCommThread::run()
 {
     CCommPlugin commPlugin(m_pModule);
     commPlugin.SetGeneralTime(m_nGeneranTime, m_nSyncGeneralTime, m_nKwhCallTime);
+	commPlugin.SetTimerx(m_nTime0,m_nTime1,m_nTime2,m_nTime3);
 	commPlugin.StartRun(m_strIP, m_iPort);
 
 	//发出信号
@@ -216,6 +217,14 @@ void CCommThread::SendUpdateRequest(ASDU211_UPDATE & updateData)
 {
 	//更新程序
 	emit Singal_updateProcess(updateData);
+}
+
+void CCommThread::SetTimer(int nTime0, int nTime1, int nTime2, int nTime3)
+{
+	m_nTime0 = nTime0;
+	m_nTime1 = nTime1;
+	m_nTime2 = nTime2;
+	m_nTime3 = nTime3;
 }
 
 //开始运行

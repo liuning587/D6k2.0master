@@ -548,7 +548,7 @@ QMap<unsigned int, RPT> CDragTableWgt::GetCurrentTableData()
 		srpt.GroupNum = 0;
 		strcpy(srpt.Destriber, this->item(i, 3)->text().toStdString().c_str());
 		strcpy(srpt.Unit, this->item(i, 4)->text().toStdString().c_str());
-		mapPointInfo.insert(srpt.NUM, srpt);
+		mapPointInfo.insert(srpt.NUM2, srpt);
 	}
 	return mapPointInfo;
 }

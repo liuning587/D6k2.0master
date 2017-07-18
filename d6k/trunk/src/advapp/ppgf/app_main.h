@@ -27,26 +27,19 @@
 #include "predict_datainfo.h"
 #include "pv_station.h"
 #include "pp_svc.h"
+#include "ext_service.h"
 
 #include <QObject>
 #include <vector>
 #include <memory>
 
-class CPpgf : public QObject
+class CPpgf : public CExtService
 {
-	Q_OBJECT
-
 public:
 	CPpgf();
+	explicit  CPpgf(int32u nOccNo);
 	~CPpgf();
-
-public:
-	
-	virtual bool Initalize(const char * pszProjectName);
-
-	virtual void Run();
-
-	virtual void Shutdown();
+public:	
 
 
 private:
@@ -57,19 +50,17 @@ private:
 
 	void ReadXml(const QString& szFilePath);
 
-	void LogMsg(const char* logMsg, int nLevel);
 
 private:
 	QString m_szFilePath;
 
-	CReadXml* pReadXml;
+	CReadXml* m_pReadXml;
 
-	CPVStation* pPvStation;
+	CPVStation* m_pPvStation;
 
-	CPowerPredictSvc* pPPSvc;
-
-
+	CPowerPredictSvc* m_pPPSvc;
 };
+
 
 #endif // DLL_LIB_H
 

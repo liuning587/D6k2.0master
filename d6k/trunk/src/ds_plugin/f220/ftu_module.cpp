@@ -168,6 +168,8 @@ void CFtuModule::Init(IMainModule *pMainModule)
 	connect(m_pMainWindow->GetTabWidget(), SIGNAL(tabCloseRequested(int)), this, SLOT(Slot_CloseOneTabWidget(int)));
 
     m_pCommThread->SetGeneralTimes(m_pConfigWgt->GetGereralTime(),m_pConfigWgt->GetSyncGenertalTime(),m_pConfigWgt->GetKwhCallTime());
+	m_pCommThread->SetTimer(m_pConfigWgt->GetTime0(), m_pConfigWgt->GetTime1(), m_pConfigWgt->GetTime2(), m_pConfigWgt->GetTime3());
+
 
 	m_pCommThread->StartRun(strIP.toStdString().c_str(), iPort);
 	connect(m_pCommThread, SIGNAL(Signal_SocketError(QString)), this, SLOT(Slot_SocketError(QString)));
@@ -356,7 +358,7 @@ void CFtuModule::Slot_Recv16Data(QByteArray buff, int nLenght)
         
     }
 
-    CommMsgLog(m_strDeviceName.toStdString().c_str(), buff, nLenght, IMainModule::CMSG_TCP_RECV, strType.toStdString().c_str(), m_pCommThread->GetOwnNetInfo().toStdString().c_str(), m_pCommThread->GetOtherInfo().toStdString().c_str());
+    CommMsgLog(m_strDeviceName.toStdString().c_str(), buff, nLenght, IMainModule::CMSG_TCP_RECV, strType.toStdString().c_str(), m_pCommThread->GetOtherInfo().toStdString().c_str(), m_pCommThread->GetOwnNetInfo().toStdString().c_str());
 }
 
 //发送的信息
@@ -374,7 +376,7 @@ void CFtuModule::Slot_Send16Data(QByteArray buff)
         }
     }
 
-    CommMsgLog(m_strDeviceName.toStdString().c_str(), buff.data(), buff.length(), IMainModule::CMSG_TCP_SEND, strType.toStdString().c_str(), m_pCommThread->GetOtherInfo().toStdString().c_str(), m_pCommThread->GetOwnNetInfo().toStdString().c_str());
+    CommMsgLog(m_strDeviceName.toStdString().c_str(), buff.data(), buff.length(), IMainModule::CMSG_TCP_SEND, strType.toStdString().c_str(), m_pCommThread->GetOwnNetInfo().toStdString().c_str(), m_pCommThread->GetOtherInfo().toStdString().c_str());
 }
 //遥控反馈
 void CFtuModule::Slot_ControlFeedback(int iControlType, int iPointNum, int iOperateType, QString strStatus)

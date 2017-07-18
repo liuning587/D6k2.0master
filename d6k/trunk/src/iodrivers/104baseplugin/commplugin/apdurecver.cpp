@@ -2592,12 +2592,12 @@ void CApduRecver::OnRecvDefalutMsg(char *pBuff, int nLength)
 
     ASDUGZ* pAsduGZ = (ASDUGZ*)pBuff;
 
-
 	emit Signal_MalFuction(*pAsduGZ);
+
 	if (pAsduGZ->m_AnalogType == 1)
 	{
 		//short
-		
+
 	}
 	else
 	{

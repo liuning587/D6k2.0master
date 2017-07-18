@@ -17,6 +17,7 @@ CReadXml::~CReadXml()
 
 bool CReadXml::ReadGroupInfo(const QString& szPath)
 {
+	Q_UNUSED(szPath);
 	return true;
 }
 

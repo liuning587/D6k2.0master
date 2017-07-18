@@ -27,6 +27,18 @@ public:
 	bool OnSendSoftData(DEG_SOFT_INFO &soft);
 	//发送soe请求数据
 	bool OnSendSoeRequest(DEG_GET_SOE *pSeoRequest);
+	//
+	void SetSoeType(int nType)
+	{
+		m_nSoeRequestType = nType;
+	}
+
+	int GetSoeType()
+	{
+		return m_nSoeRequestType;
+	}
 private:
 	CSocketConnect *m_pSocketConnect;
+	//soe请求状态   SoeType==0xFFFF  SoeType==0XAA55 ACTION...
+	int m_nSoeRequestType;
 };

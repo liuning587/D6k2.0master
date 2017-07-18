@@ -142,7 +142,8 @@ extern "C"
 
 	//用户消息接口 用于遥控、调节、保护定值类以及内部调试等的消息传递，在驱动程序中定时调用，检查是否有控制命令等下发
 	FESAPI bool ReadHostCmd(INT32U nChannleNo, SETVAL_MSG *pCmd, INT32U nTimeout);
-
+	//用于遥控反校等信息上送，由驱动调用
+	FESAPI bool SendIOCmd(INT32U nOccNo, IO_VARIANT *pVal, INT32U nTimeout);
 
 	// 获取用户变量的测值
 	FESAPI bool AppGetUserVarValue(int32u nOccNo, IO_VARIANT *pVariant, int8u * pQua);

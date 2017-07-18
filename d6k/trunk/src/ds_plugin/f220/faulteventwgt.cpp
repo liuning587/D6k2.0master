@@ -64,7 +64,7 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
     ui.tableWidget->setItem(nRow, 1, item1);
 
     QTableWidgetItem *item2 = new QTableWidgetItem;
-    item2->setText(QString::number(gzData.m_BinaryType));
+    
     ui.tableWidget->setItem(nRow, 2, item2);
 
     QTableWidgetItem *item3 = new QTableWidgetItem;
@@ -72,7 +72,34 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
     ui.tableWidget->setItem(nRow, 3, item3);
 
     QTableWidgetItem *item4 = new QTableWidgetItem;
-    item4->setText(QString::number(gzData.m_BinaryValue));
+	if (gzData.m_BinaryType !=3)
+	{
+		//µ¥µã
+		if (gzData.m_BinaryValue == 1)
+		{
+			item4->setText(tr("ON"));
+		}
+		else
+		{
+			item4->setText(tr("OFF"));
+		}
+
+		item2->setText(tr("Single"));
+	}
+	else
+	{
+		//Ë«µã
+		if (gzData.m_BinaryValue == 1)
+		{
+			item4->setText(tr("OFF"));
+		}
+		else
+		{
+			item4->setText(tr("ON"));
+		}
+
+	}
+    //item4->setText(QString::number(gzData.m_BinaryValue));
     ui.tableWidget->setItem(nRow, 4, item4);
 
     QTableWidgetItem *item5 = new QTableWidgetItem;
@@ -90,10 +117,42 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
 	QString strData;
 	QStringList lstTitle;
 	lstTitle << "UAB" << "UBC" << "UCA" << "U0" << "IA" << "IB" << "IC" << "I0";
-	for (int i=0; i<ASDUGZ::MAX_DATA_PER_ASDU_GZ; i++)
+
+	int nDNum = lstTitle.count() > 8 ? 8 : lstTitle.count();
+
+	if (gzData.m_AnalogType == 21)
 	{
-		strData += lstTitle[i] + ":"  + QString::number(gzData.m_data[i].m_AnalogValue) + "     ";
+		SIGNAL_DZ_U *gziData = (SIGNAL_DZ_U *)(gzData.m_pGzDats);
+		//short
+		for (int i = 0; i<nDNum; i++)
+		{
+			strData += lstTitle[i] + ":" + QString::number(gziData->m_data[i].m_AnalogValue) + "     ";
+		}
 	}
+	else if (gzData.m_AnalogType == 13)
+	{
+		SIGNAL_DZ_F *gziData = (SIGNAL_DZ_F *)(gzData.m_pGzDats);
+		//float
+		for (int i = 0; i<nDNum; i++)
+		{
+			char *pfStart = gziData->m_data[i].m_AnalogValue;
+			qDebug() << QByteArray(pfStart,4).toHex();
+
+			float tt = 0.0;
+			*(uint32_t *)(&tt) = (unsigned char)pfStart[0] + (unsigned char)pfStart[1] * 0x100 + (unsigned char)pfStart[2] * 0x10000 + (unsigned char)pfStart[3] * 0x1000000;
+
+
+			strData += lstTitle[i] + ":" + QString::number(tt) + "     ";
+		}
+
+	}
+
+
+
+	//for (int i=0; i<ASDUGZ::MAX_DATA_PER_ASDU_GZ; i++)
+	//{
+	//	strData += lstTitle[i] + ":"  + QString::number(gzData.m_data[i].m_AnalogValue) + "     ";
+	//}
 
 
     QTableWidgetItem *item8 = new QTableWidgetItem;

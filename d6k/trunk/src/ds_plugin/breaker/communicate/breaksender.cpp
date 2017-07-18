@@ -13,6 +13,8 @@ CBreakSender::CBreakSender(CSocketConnect *pSocket, QObject *parent)
 		return;
 	}
 
+	m_nSoeRequestType = -1;
+
 	m_pSocketConnect = pSocket;
 
 }

@@ -220,7 +220,7 @@ public:
 
 	int32s GetChannelMailBoxID(int32u nChannelNo);
 	bool ReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout);
-
+	bool SendIOCmd(int32u nOccNo, IO_VARIANT *pCmd, int32u nTimeout);
 private:
 	//  ÄÚ´æ¿â
 	bool BuildMemDB(const char *szDBName);

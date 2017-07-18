@@ -28,6 +28,9 @@
 #include "aicurvesaveview.h"
 #include "aimaxminstatisticsview.h"
 #include "ailimitstatisticsview.h"
+#include "aicumulativestatisticsview.h"
+#include "dicumulativestatisticsview.h"
+#include "kwhcumulativestatisticsview.h"
 #include "scadastudio/tabwidget.h"
 
 #include <QObject>
@@ -118,15 +121,21 @@ void CHisSave::DoubleClicked(const QModelIndex &index)
 	{
 		//模拟量累计值统计
 		//预留接口
+		CAICumulativeStatisticsView *pView = new CAICumulativeStatisticsView(nullptr);
+		m_pCore->GetUIMgr()->GetTabWidget()->addTab(pView, "test");
 	}
 	else if (FES_TYPE_HIS_DI_CUM_ITEM == nType)
 	{
 		//开关量累计值统计
 		//预留接口
+		CDICumulativeStatisticsView *pView = new CDICumulativeStatisticsView(nullptr);
+		m_pCore->GetUIMgr()->GetTabWidget()->addTab(pView, "test");
 	}
 	else if (FES_TYPE_HIS_KWH_CUM_ITEM == nType)
 	{
 		//点度量累计值统计
 		//预留接口
+		CKwhCumulativeStatisticsView *pView = new CKwhCumulativeStatisticsView(nullptr);
+		m_pCore->GetUIMgr()->GetTabWidget()->addTab(pView, "test");
 	}
 }

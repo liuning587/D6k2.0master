@@ -27,7 +27,7 @@ public:
 	}
 public:
 	int m_nID;
-	QString m_szName;
+	QString m_szName;          //! 预测中用的名字 
 	QString m_szLinkedTagName; //! 实时库的测点TAGNAME
 	int m_nType; //! 开关量、模拟量
 };
@@ -114,23 +114,28 @@ public:
 	{
 
 	}
+public:
 	void Init();
 	bool SaveADIData(QXmlStreamWriter& writer);
 	bool SavePlantData(QXmlStreamWriter& writer);
 	bool LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
 	bool ReadADIN(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
 	bool ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
-
 	
 	QString & GetName()
 	{
 		return m_strName;
 	}
+protected:
+	//日志输出
+	bool LogMsg(const char* szLogTxt, int nLevel);
 public:
 	CPPPointInfo  m_ActPower;  //! 全厂有功
 	CPPPointInfo  m_ReactPower; //! 全厂无功
 	QString m_strName;          //! 厂站名称
 	QVector<CPPPointInfo > m_vecTableInfo;
+
+
 };
 /*! \class  CInverterGroup
 *   \brief 某一电厂下的所有逆变器信息 */
@@ -301,8 +306,8 @@ public:
 
 	QVector<CPPPointInfo > m_vecTableInfo;
 };
-class CPredictGroup;
 
+class CPredictGroup;
 /*! \class  CStationData
 *   \brief 某一电厂的配置信息 */
 class CStationData
@@ -364,18 +369,17 @@ public:
 public:
 	QString m_strStationName;  //! 厂站名
 	CPredictGroup * m_pParent;  //! 所属的组
-	QVector<CPlantInfo> m_vecPlantInfo;
-	QVector<CInverterGroup> m_vecInverterGroup;
-	QVector<CWeatherData> m_vecWeatherData;
-	QVector<CPredictData> m_vecPredictData;
+// 	QVector<CPlantInfo> m_vecPlantInfo;
+// 	QVector<CInverterGroup> m_vecInverterGroup;
+// 	QVector<CWeatherData> m_vecWeatherData;
+// 	QVector<CPredictData> m_vecPredictData;
 private:
 	CPlantInfo     m_PlantValue;     //! 电厂的基本信息
 	CInverterGroup  m_Inverters;     //! 全厂的所有逆变器
 	CWeatherData  m_WeatherValue;    //! 天气数据
-	CPredictData  m_PredictValue;    //! 预测数据
-	
-	
+	CPredictData  m_PredictValue;    //! 预测数据	
 };
+
 /*! \class  CPredictGroup
 *   \brief 电厂组
     \details 组下面还可以有组

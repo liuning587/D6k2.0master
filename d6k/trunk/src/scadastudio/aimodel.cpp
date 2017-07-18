@@ -860,42 +860,10 @@ bool CAIModel::setData(const QModelIndex &index, const QVariant &value, int role
 			}
 			else if (index.column() == AlarmTagName)
 			{
-				if (m_arrAIs[nRow]->m_strAlarmTagName.isEmpty())
-				{
-					return true;
-				}
-				
-				//删除关联关系
-				if (!m_pFes->DeleteAIsRelationAlarmArr(m_arrAIs[nRow]->m_strAlarmTagName.toStdString(), m_arrAIs[nRow]))
-				{
-					auto strTmp = QObject::tr("[Fes %1]  Delete AI TagName %2 Relation Alarm failed!!!").arg(m_pFes->m_szTagName).arg(m_arrAIs[nRow]->m_szTagName);
-					m_pCore->LogMsg(FES_DESC, strTmp.toStdString().c_str(), LEVEL_1);
-
-					return false;
-				}
-
-				m_arrAIs[nRow]->m_strAlarmTagName.clear();
-
 				return true;
 			}
 			else if (index.column() == ScaleTagName)
 			{
-				if (m_arrAIs[nRow]->m_strScaleTagName.isEmpty())
-				{
-					return true;
-				}
-				
-				//删除关联关系
-				if (!m_pFes->DeleteAIsRelationScaleArr(m_arrAIs[nRow]->m_strScaleTagName.toStdString(), m_arrAIs[nRow]))
-				{
-					auto strTmp = QObject::tr("[Fes %1]  Delete AI TagName %2 Relation Scale failed!!!").arg(m_pFes->m_szTagName).arg(m_arrAIs[nRow]->m_szTagName);
-					m_pCore->LogMsg(FES_DESC, strTmp.toStdString().c_str(), LEVEL_1);
-
-					return false;
-				}
-
-				m_arrAIs[nRow]->m_strScaleTagName.clear();
-
 				return true;
 			}
 
@@ -1094,7 +1062,7 @@ bool CAIModel::setData(const QModelIndex &index, const QVariant &value, int role
 bool CAIModel::InsertRows(int position, int rows, const QModelIndex &parent)
 {
 	//auto nCount = m_arrAIs.size();
-
+	
 	beginInsertRows(parent, position, position + rows - 1);
 
 	Q_ASSERT(m_pFes);

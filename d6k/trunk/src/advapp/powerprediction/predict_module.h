@@ -89,7 +89,6 @@ public:
 	}
 
 public:
-
 	//ÈÕÖ¾Êä³ö
 	bool LogMsg(const char* szLogTxt, int nLevel);
 

@@ -2,12 +2,13 @@
 #define  PREDICT_DATABASE_H
 
 #include <QObject>
-#include <QSqlQuery>
-#include <QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlDatabase>
 #include <QDateTime>
 #include <QString>
 #include <QMap>
 #include "predict_global.h"
+
 
 
 class CPredictDatabase : public QObject

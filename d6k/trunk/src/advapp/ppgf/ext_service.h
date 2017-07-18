@@ -22,27 +22,67 @@
 #ifndef EXT_SVC_H
 #define EXT_SVC_H
 
+#include "datatypes.h"
+#include "singleton.h"
 #include <vector>
 #include <memory>
-
-class  CInverter;   
-
+ 
 class CExtService
 {
 public:
 	CExtService(void);
+	explicit CExtService(int32u nOccNo);
+
 	~CExtService(void);
 public:
- 
-protected:
- 
-private:
+	virtual bool Initalize(const char * pszProjectName);
 
-	//!  逆变器
-	std::vector<std::shared_ptr<CInverter>>  m_arrInverters;
- 
+	virtual void Run();
+
+	virtual void Shutdown();
+
+	void LogMsg(const char* logMsg, int nLevel);
+
+	int32u GetOccNo() const
+	{
+		return m_nOccNo;
+	}
+protected:
+	//! APP的排行号
+	int32u m_nOccNo;
+	//! APP的标签
+	std::string m_szTagName;
+
+private:
+	 
 };
 
+/*! \struct  CExtSvcContainer
+*   \brief   扩展服务的容器，一个进程内可能存在多个服务 */
+class CExtSvcContainer
+{
+public:
+	static CExtSvcContainer *GetInstance()
+	{
+		return Singleton<CExtSvcContainer, DefaultSingletonTraits<CExtSvcContainer>>::instance();
+	}
+public:
+	bool RegisterService(CExtService *pSvc);
+
+	bool UnRegisterService(int32u nOccNo);
+
+	CExtService * FindService(int32u nOccNo);
+	//! 启动 
+	bool Start(int32u nOccNo);
+	//! 停止 
+	bool Stop(int32u nOccNo);
+private:
+	CExtSvcContainer();
+	~CExtSvcContainer();
+private:
+	friend DefaultSingletonTraits<CExtSvcContainer>;
+	std::vector<CExtService*> m_arrExtSvcs;
+};
 
 #endif // EXT_SVC_H
 

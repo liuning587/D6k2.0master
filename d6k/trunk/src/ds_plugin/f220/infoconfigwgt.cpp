@@ -69,7 +69,7 @@ CInfoConfigWgt::CInfoConfigWgt(QWidget *parent)
 void  CInfoConfigWgt::InitWgt()
 {
     //加载点表bin文件wgt
-    m_pRemotePonitTable = new CCheckRemoteWgt("", this);
+    //m_pRemotePonitTable = new CCheckRemoteWgt("", this);
 	QTabWidget *pTabWgt = new QTabWidget(this);
 
 	//组装wgt
@@ -213,11 +213,48 @@ void  CInfoConfigWgt::InitWgt()
 	QWidget *pbaseInfoWgt = new QWidget;
 	pbaseInfoWgt->setLayout(pPage1Layout);
 
+	//时间设置
+	QLabel *pLabelTime0 = new QLabel(tr("Time0"),this);
+	QLabel *pLabelTime1 = new QLabel(tr("Time1"), this);
+	QLabel *pLabelTime2 = new QLabel(tr("Time2"), this);
+	QLabel *pLabelTime3 = new QLabel(tr("Time3"), this);
+
+	m_pLineEdTime0 = new QLineEdit("5000");
+	m_pLineEdTime1 = new QLineEdit("5000");
+	m_pLineEdTime2 = new QLineEdit("10000");
+	m_pLineEdTime3 = new QLineEdit("20000");
+
+	QHBoxLayout *pLayoutTime0 = new QHBoxLayout;
+	pLayoutTime0->addWidget(pLabelTime0);
+	pLayoutTime0->addWidget(m_pLineEdTime0);
+
+	QHBoxLayout *pLayoutTime1 = new QHBoxLayout;
+	pLayoutTime1->addWidget(pLabelTime1);
+	pLayoutTime1->addWidget(m_pLineEdTime1);
+
+
+	QHBoxLayout *pLayoutTime2 = new QHBoxLayout;
+	pLayoutTime2->addWidget(pLabelTime2);
+	pLayoutTime2->addWidget(m_pLineEdTime2);
+
+
+	QHBoxLayout *pLayoutTime3 = new QHBoxLayout;
+	pLayoutTime3->addWidget(pLabelTime3);
+	pLayoutTime3->addWidget(m_pLineEdTime3);
+
+	QWidget *pTimeWgt = new QWidget;
+	QVBoxLayout *pTimetotalLayout = new QVBoxLayout(pTimeWgt);
+	pTimetotalLayout->addLayout(pLayoutTime0);
+	pTimetotalLayout->addLayout(pLayoutTime1);
+	pTimetotalLayout->addLayout(pLayoutTime2);
+	pTimetotalLayout->addLayout(pLayoutTime3);
+
 	pTabWgt->addTab(pbaseInfoWgt, tr("Base Info"));
     pTabWgt->addTab(pAddrWgt, tr("Addr Config"));
-    pTabWgt->addTab(m_pRemotePonitTable, tr("FTP Bin Info"));
+	pTabWgt->addTab(pTimeWgt,tr("Time Set"));
+    //pTabWgt->addTab(m_pRemotePonitTable, tr("FTP Bin Info"));
 
-	pTabWgt->removeTab(2);
+	//pTabWgt->removeTab(2);
 
 	QPushButton *pConformBtn = new QPushButton(tr("Confrom"), this);
 	QPushButton *CancelBtn = new QPushButton(tr("Cancel"), this);
@@ -241,7 +278,7 @@ void  CInfoConfigWgt::InitWgt()
 	connect(CancelBtn, SIGNAL(clicked()), this, SLOT(Slot_Cancel()));
     //更新FTP配置信息
     connect(m_pComBoxDebiceType, SIGNAL(activated(const QString &)), this, SLOT(Slot_UpdateFtpConfig(const QString &)));
-    connect(this, SIGNAL(Signal_UpdateFtpConfig(const QString &)), m_pRemotePonitTable, SLOT(Slot_ReadXmlConfig(const QString &)));
+    //connect(this, SIGNAL(Signal_UpdateFtpConfig(const QString &)), m_pRemotePonitTable, SLOT(Slot_ReadXmlConfig(const QString &)));
 }
 
 //加载点表
@@ -312,15 +349,15 @@ CInfoConfigWgt::~CInfoConfigWgt()
     
 }
 
-QString CInfoConfigWgt::GetFtpFileName()
-{
-    return m_pRemotePonitTable->GetPointBinFileName();
-}
+//QString CInfoConfigWgt::GetFtpFileName()
+//{
+ //   return m_pRemotePonitTable->GetPointBinFileName();
+//}
 
-CCheckRemoteWgt * CInfoConfigWgt::GetFtpRemoteWgt()
-{
-    return m_pRemotePonitTable;
-}
+//CCheckRemoteWgt * CInfoConfigWgt::GetFtpRemoteWgt()
+//{
+//    return m_pRemotePonitTable;
+//}
 
 void CInfoConfigWgt::Slot_UpdateFtpConfig(const QString &strFilename)
 {
@@ -478,6 +515,22 @@ void CInfoConfigWgt::AnalyseXmlFile(QIODevice *pDevice)
             {
                 AnalyseDownItemData(xmlReader);
             }
+			else if (xmlReader.name().toString() == "time0")
+			{
+				m_pLineEdTime0->setText(xmlReader.readElementText());
+			}
+			else if (xmlReader.name().toString() == "time1")
+			{
+				m_pLineEdTime1->setText(xmlReader.readElementText());
+			}
+			else if (xmlReader.name().toString() == "time2")
+			{
+				m_pLineEdTime2->setText(xmlReader.readElementText());
+			}
+			else if (xmlReader.name().toString() == "time3")
+			{
+				m_pLineEdTime3->setText(xmlReader.readElementText());
+			}
 
         }
     }
@@ -492,23 +545,23 @@ void CInfoConfigWgt::AnalyseDownItemData(QXmlStreamReader &xmlReader)
         {
             if (xmlReader.name().toString() == "ftpip")
             {
-                m_pRemotePonitTable->SetDownLoadFtpIP(xmlReader.readElementText());
+               // m_pRemotePonitTable->SetDownLoadFtpIP(xmlReader.readElementText());
             }
             else if (xmlReader.name().toString() == "ftpport")
             {
-                m_pRemotePonitTable->SetDownLoadFtpPort(xmlReader.readElementText());
+               // m_pRemotePonitTable->SetDownLoadFtpPort(xmlReader.readElementText());
             }
             else if (xmlReader.name().toString() == "username")
             {
-                m_pRemotePonitTable->SetDownLoadFtpUserName(xmlReader.readElementText());
+               // m_pRemotePonitTable->SetDownLoadFtpUserName(xmlReader.readElementText());
             }
             else if (xmlReader.name().toString() == "password")
             {
-                m_pRemotePonitTable->SetDownLoadFtpPassWd(xmlReader.readElementText());
+               // m_pRemotePonitTable->SetDownLoadFtpPassWd(xmlReader.readElementText());
             }
             else if (xmlReader.name().toString() == "filename")
             {
-                m_pRemotePonitTable->SetDonwLoadFileName(xmlReader.readElementText());
+               // m_pRemotePonitTable->SetDonwLoadFileName(xmlReader.readElementText());
             }
         }
 
@@ -592,10 +645,26 @@ void CInfoConfigWgt::WriteBaseInfo(QXmlStreamWriter &xmlWriter)
     xmlWriter.writeStartElement("KwhTime");
     xmlWriter.writeCharacters(m_pLineEdKwhTimeCall->text());
     xmlWriter.writeEndElement();
+
+	xmlWriter.writeStartElement("time0");
+	xmlWriter.writeCharacters(m_pLineEdTime0->text());
+	xmlWriter.writeEndElement();
+	xmlWriter.writeStartElement("time1");
+	xmlWriter.writeCharacters(m_pLineEdTime1->text());
+	xmlWriter.writeEndElement();
+	xmlWriter.writeStartElement("time2");
+	xmlWriter.writeCharacters(m_pLineEdTime2->text());
+	xmlWriter.writeEndElement();
+	xmlWriter.writeStartElement("time3");
+	xmlWriter.writeCharacters(m_pLineEdTime3->text());
+	xmlWriter.writeEndElement();
+
+
 }
 
 void CInfoConfigWgt::WriteFtpInfo(QXmlStreamWriter &xmlWriter)
 {
+	/*
     xmlWriter.writeStartElement("download");
 
     xmlWriter.writeStartElement("ftpip");
@@ -619,6 +688,7 @@ void CInfoConfigWgt::WriteFtpInfo(QXmlStreamWriter &xmlWriter)
     xmlWriter.writeEndElement();
 
     xmlWriter.writeEndElement();
+	*/
 }
 
 QString CInfoConfigWgt::GetProjectName()

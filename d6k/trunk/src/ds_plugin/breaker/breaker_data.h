@@ -335,6 +335,24 @@ public:
 
 };
 
+//soe数量
+class SOE_NUM_INFO : public DBG_HEADER
+{
+public:
+	//action
+	DBG_MSG2 m_actionLeg;
+	//dievent
+	DBG_MSG2 m_diLeg;
+	//abnormal
+	DBG_MSG2 m_abnormalleg;
+	//run
+	DBG_MSG2 m_runleg;
+	//wave
+	DBG_MSG2 m_waveleg;
+	//trace
+	DBG_MSG2 m_traceleg;
+};
+
 //变位soe
 class SOE_IO_INFO : public SOE_INFO_HEADER
 {
@@ -493,4 +511,131 @@ public:
 	QString m_strName;
 	//值
 	int m_nVlaue;
+};
+
+//事件传输 统计信息信息
+class SOE_EVENT_STATIC
+{
+public:
+	enum
+	{
+		SOE_SEO_NULL,
+		SOE_GET_NUMBER,   // 获取条目数
+		SOE_GET_ACTION,       //获取action
+		SOE_GET_DIEVENT,      //获取Di
+		SOE_GET_ABNORMAL,    //获取异常
+		SOE_GET_RUN,        //获取run
+		SOE_GET_WAVE,        //获取录波
+		SOE_GET_TRACE,       //获取trace
+	};
+
+	SOE_EVENT_STATIC()
+	{
+		m_nCurrentStatic = SOE_SEO_NULL;
+
+		//action总条目数
+		m_nActionTotalNum = 0;
+		//aciton当前条目
+		m_nActionCurrentNum = 0;
+
+		//di总条目数
+		m_nDiTotalNum = 0;
+		//di当前条目数
+		m_nDiCurrentNum = 0;
+
+		//abnormal 总数
+		m_nAbnormalTotalNum = 0;
+		//abnormal   当前条目
+		m_nAbnoramlCurrentNum = 0;
+
+		//run 总条数
+		m_nRunTotalNum = 0;
+		//run 当前条目数
+		m_nRunCurrentNum = 0;
+
+		//wave总条
+		m_nWaveTotaolNum = 0;
+		//wave当前条目
+		m_nVaveCurrentNum = 0;
+
+		//tracel
+		m_nTraceTotalNum = 0;
+		//tarce
+		m_nTraceCurrentNum = 0;
+	}
+
+	void ClearStatic()
+	{
+		m_nCurrentStatic = SOE_SEO_NULL;
+
+		//当前所处的状态
+		m_nCurrentStatic = 0;
+
+		//action总条目数
+		m_nActionTotalNum = 0;
+		//aciton当前条目
+		m_nActionCurrentNum = 0;
+
+		//di总条目数
+		m_nDiTotalNum = 0;
+		//di当前条目数
+		m_nDiCurrentNum = 0;
+
+		//abnormal 总数
+		m_nAbnormalTotalNum = 0;
+		//abnormal   当前条目
+		m_nAbnoramlCurrentNum = 0;
+
+		//run 总条数
+		m_nRunTotalNum = 0;
+		//run 当前条目数
+		m_nRunCurrentNum = 0;
+
+		//wave总条
+		m_nWaveTotaolNum = 0;
+		//wave当前条目
+		m_nVaveCurrentNum = 0;
+
+		//tracel
+		m_nTraceTotalNum = 0;
+		//tarce
+		m_nTraceCurrentNum = 0;
+	}
+public:
+	//当前所处的状态
+	int m_nCurrentStatic;
+
+	//action总条目数
+	int m_nActionTotalNum;
+	//aciton当前条目
+	int m_nActionCurrentNum;
+
+	//di总条目数
+	int m_nDiTotalNum;
+	//di当前条目数
+	int m_nDiCurrentNum;
+
+	//abnormal 总数
+	int m_nAbnormalTotalNum;
+	//abnormal   当前条目
+	int m_nAbnoramlCurrentNum;
+
+	//run 总条数
+	int m_nRunTotalNum;
+	//run 当前条目数
+	int m_nRunCurrentNum;
+
+	//wave总条
+	int m_nWaveTotaolNum;
+	//wave当前条目
+	int m_nVaveCurrentNum;
+
+	//tracel
+	int m_nTraceTotalNum;
+	//tarce
+	int m_nTraceCurrentNum;
+
+public:
+
+	
 };

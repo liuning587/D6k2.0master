@@ -256,7 +256,17 @@ void CAITable::DoubleClicked(const QModelIndex & index)
 ********************************************************************************************************/
 void CAITable::ShowMouseRightButton(const QPoint& point)
 {
+	QModelIndex index = this->indexAt(point);
+	if (!index.isValid())
+	{
+		return;
+	}
+
 	QModelIndex indexSelect = m_pSortModel->mapToSource(this->indexAt(point));
+	if (!indexSelect.isValid())
+	{
+		return;
+	}
 
 	QMenu *pMenu = new QMenu(nullptr);
 
@@ -281,6 +291,14 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 		pMenu->addAction(pClearRelationPoint);
 	}
 
+	QAction *pCopy = new QAction(tr("copy"), pMenu);
+	pCopy->setIcon(QIcon(CLOSE_GROUP_PNG));
+	pMenu->addAction(pCopy);
+
+	QAction *pPaste = new QAction(tr("paste"), pMenu);
+	pPaste->setIcon(QIcon(CLOSE_GROUP_PNG));
+	pMenu->addAction(pPaste);
+
 	QAction* selectedItem = pMenu->exec(QCursor::pos());
 
 	if (selectedItem == pAddPoint)
@@ -299,8 +317,156 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 	}
 	else if (selectedItem == pClearRelationPoint && pClearRelationPoint != nullptr)
 	{
-		//清空关联
-		m_pModel->setData(indexSelect, Qt::EditRole);
+		if (indexSelect.column() == CAIModel::AlarmTagName)
+		{
+			//清空关联
+			auto &arrAIs = m_pModel->GetAIs();
+
+			int nRow = indexSelect.row();
+
+			if (arrAIs[nRow]->m_strAlarmTagName.isEmpty())
+			{
+				return;
+			}
+
+			//删除关联关系
+			if (!m_pFes->DeleteAIsRelationAlarmArr(arrAIs[nRow]->m_strAlarmTagName.toStdString(), arrAIs[nRow]))
+			{
+				auto strTmp = QObject::tr("[Fes %1]  Delete AI TagName %2 Relation Alarm failed!!!").arg(m_pFes->m_szTagName).arg(arrAIs[nRow]->m_szTagName);
+				m_pCore->LogMsg(FES_DESC, strTmp.toStdString().c_str(), LEVEL_1);
+
+				return;
+			}
+
+			arrAIs[nRow]->m_strAlarmTagName.clear();
+		}
+		else if (indexSelect.column() == CAIModel::COLUMN::ScaleTagName)
+		{
+			auto &arrAIs = m_pModel->GetAIs();
+			int nRow = indexSelect.row();
+
+			if (arrAIs[nRow]->m_strScaleTagName.isEmpty())
+			{
+				return;
+			}
+
+			//删除关联关系
+			if (!m_pFes->DeleteAIsRelationScaleArr(arrAIs[nRow]->m_strScaleTagName.toStdString(), arrAIs[nRow]))
+			{
+				auto strTmp = QObject::tr("[Fes %1]  Delete AI TagName %2 Relation Scale failed!!!").arg(m_pFes->m_szTagName).arg(arrAIs[nRow]->m_szTagName);
+				m_pCore->LogMsg(FES_DESC, strTmp.toStdString().c_str(), LEVEL_1);
+
+				return;
+			}
+
+			arrAIs[nRow]->m_strScaleTagName.clear();
+		}
+	}
+	else if (selectedItem == pCopy)
+	{
+		QSortFilterProxyModel * pModelSort = static_cast<QSortFilterProxyModel *>(this->model());
+		Q_ASSERT(pModelSort);
+		if (!pModelSort)
+		{
+			return;
+		}
+
+		QModelIndexList list;
+		list.clear();
+		QItemSelectionModel * selection = this->selectionModel();
+		list = selection->selectedIndexes();
+
+		m_strTextList.clear();
+		QModelIndex tmp;
+		if (list.size() > 0)
+		{
+			tmp = pModelSort->mapToSource(list[0]);
+			QVariant data = m_pModel->data(tmp, Qt::EditRole);
+			QString strText = data.toString();
+			m_strTextList.append(strText);
+		}
+
+		tmp = list.first();
+		QModelIndex previous = pModelSort->mapToSource(list[0]);
+
+		for (int i = 1; i < list.size(); i++)
+		{
+			//int nRow = current.row();
+			//int nCol = current.column();
+			tmp = pModelSort->mapToSource(list[i]);
+			QVariant data = m_pModel->data(tmp, Qt::EditRole);
+			QString text = data.toString();
+			// At this point `text` contains the text in one cell
+
+			// If you are at the start of the row the row number of the previous index
+			// isn't the same.  Text is followed by a row separator, which is a newline.
+			if (tmp.column() != previous.column())
+			{
+				m_strTextList.append("\\n");
+
+				m_strTextList.append(text);
+			}
+			// Otherwise it's the same row, so append a column separator, which is a tab.
+			else
+			{
+				m_strTextList.append("\\t");
+
+				m_strTextList.append(text);
+			}
+			previous = pModelSort->mapToSource(list[i]);
+		}
+	}
+	else if (selectedItem == pPaste)
+	{
+		QSortFilterProxyModel * pModelSort = static_cast<QSortFilterProxyModel *>(this->model());
+		Q_ASSERT(pModelSort);
+		if (!pModelSort)
+		{
+			return;
+		}
+		
+		int nRow = index.row();
+		int nCol = index.column();
+
+		int currentRow = index.row();
+		int currentCol = index.column();
+
+		int rowTmp = currentRow;
+		int colTmp = currentCol;
+
+		for (int i = 0; i < m_strTextList.size(); i++)
+		{
+			if (m_strTextList[i] == "\\t")
+			{
+				rowTmp++;
+			}
+			else if (m_strTextList[i] == "\\n")
+			{
+				currentCol++;
+
+				rowTmp = currentRow;
+				colTmp = currentCol;
+			}
+			else
+			{
+				int test = pModelSort->rowCount();
+				int testtest = pModelSort->columnCount();
+
+				if (pModelSort->rowCount() - 1 < rowTmp || pModelSort->columnCount() - 1 < colTmp)
+				{
+					continue;
+				}
+
+				QModelIndex index = m_pSortModel->index(rowTmp, colTmp);
+				QModelIndex indexSource = m_pSortModel->mapToSource(index);
+				if (!indexSource.isValid())
+				{
+					continue;
+				}
+
+				m_pModel->setData(indexSource, m_strTextList[i]);
+			}
+		}
 	}
 
 	pMenu->deleteLater();
@@ -318,6 +484,8 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 ********************************************************************************************************/
 void CAITable::AddAnalogPoint(QModelIndex &index)
 {
+	m_strTextList.clear();
+	
 	int nRow = index.row();
 	auto test = m_pModel->GetAIs();
 	nRow = (int)test.size();
@@ -341,6 +509,8 @@ void CAITable::DeleteAnalogPoint(QModelIndex &index)
 		return;
 	}
 	
+	m_strTextList.clear();
+
 	int nRow = index.row();
 
 	m_pModel->RemoveRows(nRow, 1);
@@ -349,5 +519,7 @@ void CAITable::DeleteAnalogPoint(QModelIndex &index)
 void CAITable::BatchAddPoint()
 {
 	//弹个对话框
+
+	m_strTextList.clear();
 
 }
