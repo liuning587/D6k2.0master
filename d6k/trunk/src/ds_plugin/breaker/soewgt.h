@@ -16,7 +16,7 @@ public:
 	~CSoeWgt();
 public:
 	//动作soe
-	void AnaylseActionData(SOE_ACTION_INFO *pAction);
+	int AnaylseActionData(SOE_ACTION_INFO *pAction);
 	//变位soe
 	void AnayseIoData(SOE_IO_INFO *pIO);
 	//异常SOE
@@ -28,7 +28,7 @@ public:
 
 public slots:
     //收取详细信息
-    void Slot_RecvNewRealTimeData(DEG_SOE_DETAIL &tSoeDetail);
+    void Slot_RecvNewRealTimeData(DEG_SOE_DETAIL tSoeDetail);
 
     // 获取soe信息
     void Slot_GetSoeEventInfo();

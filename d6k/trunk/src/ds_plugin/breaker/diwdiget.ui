@@ -33,7 +33,7 @@
      </column>
      <column>
       <property name="text">
-       <string>开入滤波时间值</string>
+       <string>开入脉冲时间(毫秒)</string>
       </property>
      </column>
      <column>

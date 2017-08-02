@@ -1,18 +1,17 @@
 #ifndef ULTRA_LIST_H
 #define ULTRA_LIST_H
 
-#include <QAbstractTableModel>
-#include <QColor>
-#include <QTime>
-
-//#include <ace/Date_Time.h> 
-//#include <ace/OS_NS_sys_time.h>
-
-
-#include <vector>
-#include <string>
 #include "logdefine.h"
 
+#include <QAbstractTableModel>
+#include <QColor>
+#include <vector>
+#include <string>
+#include <memory>
+
+class CMsgLog;
+
+#if 0
 class CDataItem
 {
 public:
@@ -49,11 +48,24 @@ public:
 	int m_nThreadID;
 	int m_nProcessID;
 };
+#endif
 
 class CSystemOutputModel : public QAbstractTableModel
 {
 	enum{Date, Time, Tag, Type, ThreadId, ProcessID};
-
+	
+	enum
+	{
+		COL_LEVEL = 0,
+		COL_INDEX,  //!< ÐòºÅ
+		COL_DATE,
+		COL_TIME,
+		COL_MODULE,
+		COL_COMMENT,
+		COL_PROCESS,
+		COL_THREAD,
+		COL_MAX,
+	};
 public:
 	explicit CSystemOutputModel(QObject *parent = 0, int rowCount = 1000000, int colCount = 6);
 	~CSystemOutputModel();
@@ -65,17 +77,16 @@ public:
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 	//bool InsertRows(int position, int rows, const QModelIndex &parent = QModelIndex());
-
-	int m_rowCount;
-	int m_colCount;
-
-	QStringList m_horizontal_header_list;
-
 private:
-	std::vector<CDataItem*> m_items;
+	int m_nRowCount;
+	int m_nColCount;
 
-public:
-	int AddItem(const MSG_LOG &log, QColor & color);
+	QStringList m_lstHeader;
+
+private: 
+	std::vector<std::shared_ptr<CMsgLog>> m_arrLogs;
+public: 	
+	void AddItem(std::shared_ptr<CMsgLog> pLog);
 	void ClearAll();
 };
 

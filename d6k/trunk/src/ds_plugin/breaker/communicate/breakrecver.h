@@ -43,6 +43,10 @@ public:
 	void OnRcvSysAck(char *pBuff, int nLen);
 	//
 	void OnRecvRemoteContrlAck(char *pBuff, int nLen);
+	//信号复归
+	void OnRecvReset(char *pBuff, int nLen);
+	//清空soe事件
+	void OnRecvClearSoeAck(char *pBuff, int nLen);
 signals:
 	void Signal_SysInfo(DBG_GET_SYS_INFO&);
 	//测量值
@@ -60,9 +64,11 @@ signals:
 	//软压板
 	void Signal_SoftDev(DEG_SOFT_INFO&);
 	//soe详细信息
-	void Signal_SoeDetailInfo(DEG_SOE_DETAIL&);
+	void Signal_SoeDetailInfo(DEG_SOE_DETAIL);
 	//遥控成功响应
 	void Signal_RemoteControlAck();
+	//soe清空操作成功
+	void Signal_SeoClearSuccess();
 private:
 	CDbgCache m_dbgCache;
 

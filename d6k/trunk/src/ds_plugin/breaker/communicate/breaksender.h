@@ -27,6 +27,8 @@ public:
 	bool OnSendSoftData(DEG_SOFT_INFO &soft);
 	//发送soe请求数据
 	bool OnSendSoeRequest(DEG_GET_SOE *pSeoRequest);
+	//发送SOe清空
+	bool OnSendSoeClearRequestr(DEG_SOE_CLEAR &dgbData);
 	//
 	void SetSoeType(int nType)
 	{

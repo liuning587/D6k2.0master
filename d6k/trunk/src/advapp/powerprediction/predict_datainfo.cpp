@@ -18,21 +18,22 @@
 *****************************************************************/
 bool CInverterInfo::SaveADIData(QXmlStreamWriter& writer)
 {
-	writer.writeStartElement("ADIN");
+	writer.writeStartElement("data");
 	writer.writeAttribute("Count", QString("%1").arg(m_vecTableInfo.size()));
 	int i = 1;
 	for (auto const avec : m_vecTableInfo)
 	{
 		if ( i == 3 )
 		{
-			writer.writeStartElement("di");
+			writer.writeStartElement("e");
 		}
 		else
 		{
-			writer.writeStartElement("ai");
+			writer.writeStartElement("e");
 		}
 		writer.writeAttribute("ID", QString("%1").arg(avec.m_nID));
 		writer.writeAttribute("Name", QString("%1").arg(avec.m_szName));
+		writer.writeAttribute("Description", QString("%1").arg(avec.m_strDescription));
 		writer.writeAttribute("LinkedName", QString("%1").arg(avec.m_szLinkedTagName));
 		writer.writeAttribute("Type", QString("%1").arg(avec.m_nType));
 		writer.writeEndElement();
@@ -55,10 +56,10 @@ bool CInverterInfo::SaveInverterData(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("inverter");
 	writer.writeAttribute("Name", QString("%1").arg(m_szName));
-	writer.writeAttribute("ID", QString("%1").arg(m_nID));
-	writer.writeStartElement("data");
+	writer.writeAttribute("DeviceID", QString("%1").arg(m_nID));
+	//writer.writeStartElement("data");
 	SaveADIData(writer);
-	writer.writeEndElement();
+	//writer.writeEndElement();
 	writer.writeEndElement();
 	return true;
 }
@@ -80,7 +81,7 @@ bool CInverterInfo::LoadData(QXmlStreamReader& reader, CInverterInfo* pInvterInf
 		if (reader.isStartElement())
 		{
 			QString strTmp = reader.name().toString();
-			if (strTmp == "ADIN")
+			if (strTmp == "data")
 			{
 				ReadADIN(reader,pInvterInfo);
 			}
@@ -105,22 +106,24 @@ bool CInverterInfo::LoadData(QXmlStreamReader& reader, CInverterInfo* pInvterInf
 **************************************************************/
 bool CInverterInfo::ReadADIN(QXmlStreamReader& reader, CInverterInfo* pInvterInfo)
 {
+	m_vecTableInfo.clear();
+	
 	while (!reader.atEnd())
 	{
 		QString strTmp = reader.name().toString();
 		if (reader.isStartElement())
 		{
 			QString strTmp = reader.name().toString();
-			if (strTmp == "ai")
+			//if (strTmp == "ai")
 			{
 				ReadAi(reader,pInvterInfo);
 			}
-			else if (strTmp == "di")
-			{
-				ReadDi(reader, pInvterInfo);
-			}
+			//else if (strTmp == "di")
+			//{
+			//	ReadDi(reader, pInvterInfo);
+			//}
 		}
-		else if (reader.isEndElement() && strTmp == "ADIN")
+		else if (reader.isEndElement() && strTmp == "data")
 		{
 			break;
 		}
@@ -149,13 +152,16 @@ bool CInverterInfo::ReadAi(QXmlStreamReader& reader, CInverterInfo* pInvterInfo)
 		{
 			QString strTmp = reader.name().toString();
 
-			if (strTmp == "ai")
+			if (strTmp == "e")
 			{
 				CPPPointInfo pAnalog;
 				int nID = reader.attributes().value("ID").toInt();
 				pAnalog.m_nID = nID;
 				QString szName = reader.attributes().value("Name").toString();
 				pAnalog.m_szName = szName;
+
+				pAnalog.m_strDescription = reader.attributes().value("Description").toString();
+
 				QString szLinkedName = reader.attributes().value("LinkedName").toString();
 				pAnalog.m_szLinkedTagName = szLinkedName;
 				int nType = reader.attributes().value("Type").toInt();
@@ -164,6 +170,7 @@ bool CInverterInfo::ReadAi(QXmlStreamReader& reader, CInverterInfo* pInvterInfo)
 				{
 					pInvterInfo->m_ActPower.m_nID = pAnalog.m_nID;
 					pInvterInfo->m_ActPower.m_szName = pAnalog.m_szName;
+					pInvterInfo->m_ActPower.m_strDescription = pAnalog.m_strDescription;
 					pInvterInfo->m_ActPower.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pInvterInfo->m_ActPower.m_nType = pAnalog.m_nType;
 				}
@@ -171,6 +178,7 @@ bool CInverterInfo::ReadAi(QXmlStreamReader& reader, CInverterInfo* pInvterInfo)
 				{
 					pInvterInfo->m_ReactPower.m_nID = pAnalog.m_nID;
 					pInvterInfo->m_ReactPower.m_szName = pAnalog.m_szName;
+					pInvterInfo->m_ReactPower.m_strDescription = pAnalog.m_strDescription;
 					pInvterInfo->m_ReactPower.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pInvterInfo->m_ReactPower.m_nType = pAnalog.m_nType;
 				}
@@ -178,6 +186,7 @@ bool CInverterInfo::ReadAi(QXmlStreamReader& reader, CInverterInfo* pInvterInfo)
 				{
 					pInvterInfo->m_OpenState.m_nID = pAnalog.m_nID;
 					pInvterInfo->m_OpenState.m_szName = pAnalog.m_szName;
+					pInvterInfo->m_OpenState.m_strDescription = pAnalog.m_strDescription;
 					pInvterInfo->m_OpenState.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pInvterInfo->m_OpenState.m_nType = pAnalog.m_nType;
 				}
@@ -287,13 +296,14 @@ bool CPlantInfo::LogMsg(const char* szLogTxt, int nLevel)
 bool CPlantInfo::SaveADIData(QXmlStreamWriter& writer)
 {
 	QString szLog;
-	writer.writeStartElement("ADIN");
+	writer.writeStartElement("data");
 	writer.writeAttribute("Count", QString("%1").arg(m_vecTableInfo.size()));
 	for (auto const it : m_vecTableInfo)
 	{
-		writer.writeStartElement("ai");
+		writer.writeStartElement("e");
 		writer.writeAttribute("ID", QString("%1").arg(it.m_nID));
 		writer.writeAttribute("Name", QString("%1").arg(it.m_szName));
+		writer.writeAttribute("Description", QString("%1").arg(it.m_strDescription));
 		writer.writeAttribute("LinkedName", QString("%1").arg(it.m_szLinkedTagName));
 
 		if (it.m_szLinkedTagName.isEmpty() == true)
@@ -334,11 +344,32 @@ bool CPlantInfo::SaveADIData(QXmlStreamWriter& writer)
 **************************************************************/
 bool CPlantInfo::SavePlantData(QXmlStreamWriter& writer)
 {
-	writer.writeStartElement("p");
-	writer.writeAttribute("Name", QString("%1").arg(m_strName));
-	writer.writeStartElement("data");
-	SaveADIData(writer);
+	writer.writeStartElement("plant");
+	//writer.writeAttribute("deviceid", "1");
+	
+	writer.writeStartElement("staticdata");
+	for each (auto var in m_vecTableStaticInfo)
+	{
+		writer.writeStartElement("sdata");
+		writer.writeAttribute("key", QString("%1").arg(var.m_strKey));
+		writer.writeAttribute("name", QString("%1").arg(var.m_szName));
+		//Description
+
+		writer.writeEndElement();
+	}
 	writer.writeEndElement();
+
+
+	writer.writeStartElement("dynamicdata");
+	writer.writeAttribute("count", QString("%1").arg(m_vecTableInfo.size()));
+	//writer.writeStartElement("data");
+	SaveADIData(writer);
+	//writer.writeEndElement();
+	writer.writeEndElement();
+
+
+
+
 	writer.writeEndElement();
 	return true;
 }
@@ -360,13 +391,22 @@ bool CPlantInfo::LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
+			if (strTmp1 == "staticdata")
+			{
+
+			}
+			else if (strTmp1 == "dynamicdata")
+			{
+
+			}
+
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "ADIN")
+			if (strTmp2 == "data")
 			{
 				ReadADIN(reader,pPlntInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp1 == "data")
+		else if (reader.isEndElement() && strTmp1 == "plant")
 		{
 			break;
 		}
@@ -388,18 +428,20 @@ bool CPlantInfo::ReadADIN(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 {
 	QString strTmp1, strTmp2;
 
+	m_vecTableInfo.clear();
+
 	while (!reader.atEnd())
 	{
 		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "ai")
+			if (strTmp2 == "e")
 			{
 				ReadAi(reader, pPlntInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp1 == "ADIN")
+		else if (reader.isEndElement() && strTmp1 == "data")
 		{
 			break;
 		}
@@ -428,13 +470,16 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 		{
 			strTmp2 = reader.name().toString();
 
-			if (strTmp2 == "ai")
+			if (strTmp2 == "e")
 			{
 				CPPPointInfo pAnalog;
 				int nID = reader.attributes().value("ID").toInt();
 				pAnalog.m_nID = nID;
 				QString szName = reader.attributes().value("Name").toString();
 				pAnalog.m_szName = szName;
+
+				pAnalog.m_strDescription = reader.attributes().value("Description").toString();
+
 				QString szLinkedName = reader.attributes().value("LinkedName").toString();
 				pAnalog.m_szLinkedTagName = szLinkedName;
 				int nType = reader.attributes().value("Type").toInt();
@@ -443,6 +488,7 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 				{
 					pPlntInfo->m_ActPower.m_nID = pAnalog.m_nID;
 					pPlntInfo->m_ActPower.m_szName = pAnalog.m_szName;
+					pPlntInfo->m_ActPower.m_strDescription = pAnalog.m_strDescription;
 					pPlntInfo->m_ActPower.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pPlntInfo->m_ActPower.m_nType = pAnalog.m_nType;
 				}
@@ -450,13 +496,14 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 				{
 					pPlntInfo->m_ReactPower.m_nID = pAnalog.m_nID;
 					pPlntInfo->m_ReactPower.m_szName = pAnalog.m_szName;
+					pPlntInfo->m_ReactPower.m_strDescription = pAnalog.m_strDescription;
 					pPlntInfo->m_ReactPower.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pPlntInfo->m_ReactPower.m_nType = pAnalog.m_nType;
 				}
 				m_vecTableInfo.push_back(pAnalog);
 			}
 		}
-		else if (reader.isEndElement() && strTmp1 == "ai")
+		else if (reader.isEndElement() && strTmp1 == "e")
 		{
 			break;
 		}
@@ -466,6 +513,12 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 
 	return true;
 }
+
+bool CPlantInfo::ReadStaticData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
+{
+	return true;
+}
+
 /*! \fn void CPlantInfo::Init()
 ********************************
 ** \brief    CPlantInfo::Init
@@ -479,8 +532,14 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 void CPlantInfo::Init()
 {
 	m_strName = "Plant Data";
+	//添加动态数据
+	m_vecTableInfo.clear();
+	
 	m_vecTableInfo.append(m_ActPower);
 	m_vecTableInfo.append(m_ReactPower);
+
+	//静态信息
+	m_vecTableStaticInfo.clear();
 }
 /*! \fn bool CInverterGroup::SaveInverterGrp(QXmlStreamWriter& writer)
 **********************************************************************
@@ -495,9 +554,9 @@ void CPlantInfo::Init()
 bool CInverterGroup::SaveInverterGrp(QXmlStreamWriter& writer, CInverterGroup& invertGrp)
 {
 	writer.writeStartElement("inverters");
-	writer.writeAttribute("Count", QString("%1").arg(m_mapInverters.size()));
+	writer.writeAttribute("Count", QString("%1").arg(m_arrInverters.size()));
 	writer.writeAttribute("Name", QString("%1").arg(m_strName));
-	for (auto it : invertGrp.m_mapInverters)
+	for (auto it : invertGrp.m_arrInverters)
 	{
 		it->SaveInverterData(writer);
 	}
@@ -525,14 +584,16 @@ bool CInverterGroup::LoadInvertersGrp(QXmlStreamReader& reader)
 			strTmp2 = reader.name().toString();
 			if (strTmp2 == "inverter")
 			{
-				CInverterInfo pInverter;
+				CInverterInfo *pInverter = new CInverterInfo;
 				QString nName = reader.attributes().value("Name").toString();
-				pInverter.m_szName = nName;
+				pInverter->m_szName = nName;
 				int nID = reader.attributes().value("ID").toInt();
-				pInverter.m_nID = nID;
-				pInverter.LoadData(reader, &pInverter);
+				pInverter->m_nID = nID;
+				pInverter->m_nDeviceID = reader.attributes().value("DeviceID").toInt();
+
+				pInverter->LoadData(reader, pInverter);
 				m_arrInverters.push_back(pInverter);
-				m_mapInverters.insert(pInverter.m_szName, &pInverter);
+				//m_mapInverters.insert(pInverter.m_szName, &pInverter);
 			}
 		}
 		else if (reader.isEndElement() && strTmp1 == "inverters")
@@ -565,13 +626,14 @@ bool CInverterGroup::LoadInvertersGrp(QXmlStreamReader& reader)
 ****************************************************************/
 bool CWeatherData::SaveADIData(QXmlStreamWriter& writer)
 {
-	writer.writeStartElement("ADIN");
+	writer.writeStartElement("data");
 	writer.writeAttribute("Count", QString("%1").arg(m_vecTableInfo.size()));
 	for (auto const avec : m_vecTableInfo)
 	{
-		writer.writeStartElement("ai");
+		writer.writeStartElement("e");
 		writer.writeAttribute("ID", QString("%1").arg(avec.m_nID));
 		writer.writeAttribute("Name", QString("%1").arg(avec.m_szName));
+		writer.writeAttribute("Description", QString("%1").arg(avec.m_strDescription));
 		writer.writeAttribute("LinkedName", QString("%1").arg(avec.m_szLinkedTagName));
 		writer.writeAttribute("Type", QString("%1").arg(avec.m_nType));
 		writer.writeEndElement();
@@ -593,9 +655,11 @@ bool CWeatherData::SaveWeatherData(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("w");
 	writer.writeAttribute("Name", QString("%1").arg(m_strName));
-	writer.writeStartElement("data");
+	//writer.writeAttribute("deviceid", QString("%1").arg(2));
+
+	//writer.writeStartElement("data");
 	SaveADIData(writer);
-	writer.writeEndElement();
+	//writer.writeEndElement();
 	writer.writeEndElement();
 	return true;
 }
@@ -620,16 +684,20 @@ bool CWeatherData::LoadData(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "ADIN")
+			if (strTmp2 == "data")
 			{
 				ReadADIN(reader, pWeaInfo);
+
+				break;
 			}
 		}
 		else if (reader.isEndElement())
 		{
 			break;
 		}
+
 		reader.readNext();
+
 	}
 	return true;
 }
@@ -646,18 +714,20 @@ bool CWeatherData::LoadData(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 bool CWeatherData::ReadADIN(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 {
 	QString strTmp1, strTmp2;
+	pWeaInfo->m_vecTableInfo.clear();
+	
 	while (!reader.atEnd())
 	{
 		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "ai")
+			if (strTmp2 == "e")
 			{
 				ReadAi(reader, pWeaInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp1 == "ADIN")
+		else if (reader.isEndElement() && strTmp1 == "data")
 		{
 			break;
 		}
@@ -680,19 +750,23 @@ bool CWeatherData::ReadADIN(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 bool CWeatherData::ReadAi(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 {
 	QString strTmp1, strTmp2;
+
 	while (!reader.atEnd())
 	{
 		strTmp1 = reader.name().toString();
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "ai")
+			if (strTmp2 == "e")
 			{
 				CPPPointInfo pAnalog;
 				int nID = reader.attributes().value("ID").toInt();
 				pAnalog.m_nID = nID;
 				QString szName = reader.attributes().value("Name").toString();
 				pAnalog.m_szName = szName;
+
+				pAnalog.m_strDescription = reader.attributes().value("Description").toString();
+
 				QString szLinkedName = reader.attributes().value("LinkedName").toString();
 				pAnalog.m_szLinkedTagName = szLinkedName;
 				int nType = reader.attributes().value("Type").toInt();
@@ -701,60 +775,84 @@ bool CWeatherData::ReadAi(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 				{
 					pWeaInfo->m_AirPressure.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_AirPressure.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_AirPressure.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_AirPressure.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_AirPressure.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_AirPressure);
 				}
 				else if (pAnalog.m_szName == pWeaInfo->m_AirTemperature.m_szName)
 				{
 					pWeaInfo->m_AirTemperature.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_AirTemperature.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_AirTemperature.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_AirTemperature.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_AirTemperature.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_AirTemperature);
 				}
 				else if (pAnalog.m_szName == pWeaInfo->m_AvergWindDirect.m_szName)
 				{
 					pWeaInfo->m_AvergWindDirect.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_AvergWindDirect.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_AvergWindDirect.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_AvergWindDirect.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_AvergWindDirect.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_AvergWindDirect);
 				}
 				else if (pAnalog.m_szName == pWeaInfo->m_AvergWindSpeed.m_szName)
 				{
 					pWeaInfo->m_AvergWindSpeed.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_AvergWindSpeed.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_AvergWindSpeed.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_AvergWindSpeed.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_AvergWindSpeed.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_AvergWindSpeed);
 				}
 				else if (pAnalog.m_szName == pWeaInfo->m_DirectRadiation.m_szName)
 				{
 					pWeaInfo->m_DirectRadiation.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_DirectRadiation.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_DirectRadiation.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_DirectRadiation.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_DirectRadiation.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_DirectRadiation);
 				}
 				else if (pAnalog.m_szName == pWeaInfo->m_RelativeHumdty.m_szName)
 				{
 					pWeaInfo->m_RelativeHumdty.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_RelativeHumdty.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_RelativeHumdty.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_RelativeHumdty.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_RelativeHumdty.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_RelativeHumdty);
 				}
 				else if (pAnalog.m_szName == pWeaInfo->m_ScattRadiation.m_szName)
 				{
 					pWeaInfo->m_ScattRadiation.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_ScattRadiation.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_ScattRadiation.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_ScattRadiation.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_ScattRadiation.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_ScattRadiation);
 				}
 				else if (pAnalog.m_szName == pWeaInfo->m_TotalRadiation.m_szName)
 				{
 					pWeaInfo->m_TotalRadiation.m_nID = pAnalog.m_nID;
 					pWeaInfo->m_TotalRadiation.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_TotalRadiation.m_strDescription = pAnalog.m_strDescription;
 					pWeaInfo->m_TotalRadiation.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pWeaInfo->m_TotalRadiation.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_TotalRadiation);
 				}
 
-				m_vecTableInfo.push_back(pAnalog);
+				//m_vecTableInfo.push_back(pAnalog);
 			}
 		}
 		else if (reader.isEndElement())
@@ -802,13 +900,15 @@ void CWeatherData::Init()
 ****************************************************************/
 bool CPredictData::SaveADIData(QXmlStreamWriter& writer)
 {
-	writer.writeStartElement("ADIN");
+	writer.writeStartElement("data");
 	writer.writeAttribute("Count", QString("%1").arg(m_vecTableInfo.size()));
 	for (auto const it : m_vecTableInfo)
 	{
-		writer.writeStartElement("ao");
+		writer.writeStartElement("e");
 		writer.writeAttribute("ID", QString("%1").arg(it.m_nID));
 		writer.writeAttribute("Name", QString("%1").arg(it.m_szName));
+		//Description
+		writer.writeAttribute("Description", QString("%1").arg(it.m_strDescription));
 		writer.writeAttribute("LinkedName", QString("%1").arg(it.m_szLinkedTagName));
 		writer.writeAttribute("Type", QString("%1").arg(it.m_nType));
 		writer.writeEndElement();
@@ -830,6 +930,8 @@ bool CPredictData::SavePredictData(QXmlStreamWriter& writer)
 {
 	writer.writeStartElement("prdt");
 	writer.writeAttribute("Name", QString("%1").arg(m_strName));
+	//writer.writeAttribute("deviceid", QString("%1").arg(2));
+
 	writer.writeStartElement("data");
 	SaveADIData(writer);
 	writer.writeEndElement();
@@ -855,7 +957,7 @@ bool CPredictData::LoadData(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "ADIN")
+			if (strTmp2 == "data")
 			{
 				ReadADIN(reader, pPrdtInfo);
 			}
@@ -880,6 +982,8 @@ bool CPredictData::LoadData(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 **************************************************************/
 bool CPredictData::ReadADIN(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 {
+	m_vecTableInfo.clear();
+	
 	QString strTmp1, strTmp2;
 	while (!reader.atEnd())
 	{
@@ -887,12 +991,12 @@ bool CPredictData::ReadADIN(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "ao")
+			if (strTmp2 == "e")
 			{
 				ReadAO(reader, pPrdtInfo);
 			}
 		}
-		else if (reader.isEndElement() && strTmp1 == "ADIN")
+		else if (reader.isEndElement() && strTmp1 == "data")
 		{
 			break;
 		}
@@ -923,13 +1027,16 @@ bool CPredictData::ReadAO(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 		{
 			strTmp2 = reader.name().toString();
 
-			if (strTmp2 == "ao")
+			if (strTmp2 == "e")
 			{
 				CPPPointInfo pAnalog;
 				int nID = reader.attributes().value("ID").toInt();
 				pAnalog.m_nID = nID;
 				QString szName = reader.attributes().value("Name").toString();
 				pAnalog.m_szName = szName;
+				
+				pAnalog.m_strDescription = reader.attributes().value("Description").toString();
+
 				QString szLinkedName = reader.attributes().value("LinkedName").toString();
 				pAnalog.m_szLinkedTagName = szLinkedName;
 				int nType = reader.attributes().value("Type").toInt();
@@ -938,6 +1045,7 @@ bool CPredictData::ReadAO(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 				{
 					pPrdtInfo->m_4Hour.m_nID = pAnalog.m_nID;
 					pPrdtInfo->m_4Hour.m_szName = pAnalog.m_szName;
+					pPrdtInfo->m_4Hour.m_strDescription = pAnalog.m_strDescription;
 					pPrdtInfo->m_4Hour.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pPrdtInfo->m_4Hour.m_nType = pAnalog.m_nType;
 				}
@@ -945,6 +1053,7 @@ bool CPredictData::ReadAO(QXmlStreamReader& reader, CPredictData* pPrdtInfo)
 				{
 					pPrdtInfo->m_72Hour.m_nID = pAnalog.m_nID;
 					pPrdtInfo->m_72Hour.m_szName = pAnalog.m_szName;
+					pPrdtInfo->m_4Hour.m_strDescription = pAnalog.m_strDescription;
 					pPrdtInfo->m_72Hour.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pPrdtInfo->m_72Hour.m_nType = pAnalog.m_nType;
 				}
@@ -1003,15 +1112,26 @@ bool CStationData::SaveStationData(const QString& szRoot, CStationData* pStnData
 	QXmlStreamWriter writer(&file);
 	writer.setAutoFormatting(true);
 	writer.writeStartDocument();
-	writer.writeStartElement("plant");
-	writer.writeAttribute("Description", m_strStationName);
+	//修改层次结构
+	//[station]
+	writer.writeStartElement("station");
+	writer.writeAttribute("StationID", QString("%1").arg(m_nStationID));
+	writer.writeAttribute("Description", m_strDescrition);
+	writer.writeAttribute("Algorithm", m_strAlgorithm);
+	writer.writeAttribute("ReverseIsolationPath", m_strReverseIsolationPath);
+	writer.writeAttribute("Name", m_strStationName);
+
 	//writer.writeAttribute("Group", m_pParent->m_strGrpName);
-	m_PlantValue.SavePlantData(writer);
-	m_WeatherValue.SaveWeatherData(writer);
-	m_PredictValue.SavePredictData(writer);
-	m_Inverters.SaveInverterGrp(writer, pStnData->m_Inverters);
+	m_PlantValue->SavePlantData(writer);
+	m_WeatherValue->SaveWeatherData(writer);
+	m_PredictValue->SavePredictData(writer);
+	m_Inverters->SaveInverterGrp(writer, *(pStnData->m_Inverters));
 	//m_Inverters.SaveInverterGrp(writer);
 	writer.writeEndElement();
+
+	//[station]
+	writer.writeEndElement();
+
 	writer.writeEndDocument();
 	return true;
 }
@@ -1037,9 +1157,14 @@ bool CStationData::LoadStationData(QXmlStreamReader &reader)
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
-			if (strTmp2 == "p")
+			if (strTmp2 == "plant")
 			{
-				LoadPlantData(reader);
+				//LoadPlantData(reader);
+;
+				QString nName = reader.attributes().value("Name").toString();
+				this->m_PlantValue->m_strName = nName;
+				this->m_PlantValue->LoadData(reader, this->m_PlantValue);
+				//m_vecPlantInfo.push_back(pPlant);
 			}
 			else if(strTmp2 == "w")
 			{
@@ -1188,15 +1313,22 @@ bool CStationData::LoadPlantData(QXmlStreamReader& reader)
 		if (reader.isStartElement())
 		{
 			strTmp2 = reader.name().toString();
+			if (strTmp2 == "staticdata")
+			{
+
+			}
+			else if (strTmp2 == "dynamicdata")
+			{
+
+			}
+
+
 			if (strTmp2 == "p")
 			{
-				CPlantInfo pPlant;
 				QString nName = reader.attributes().value("Name").toString();
-				pPlant.m_strName = nName;
-				pPlant.LoadData(reader,&pPlant);
+				this->m_PlantValue->m_strName = nName;
+				this->m_PlantValue->LoadData(reader, this->m_PlantValue);
 				//m_vecPlantInfo.push_back(pPlant);
-				
-				this->m_PlantValue = pPlant;
 			}	
 		}
 		else if (reader.isEndElement() && strTmp1 == "p")
@@ -1227,12 +1359,10 @@ bool CStationData::LoadWeatherData(QXmlStreamReader& reader)
 			QString strTmp = reader.name().toString();
 			if (strTmp == "w")
 			{
-				CWeatherData pWeather;
 				QString nName = reader.attributes().value("Name").toString();
-				pWeather.m_strName = nName;
-				pWeather.LoadData(reader, &pWeather);
+				this->m_WeatherValue->m_strName = nName;
+				this->m_WeatherValue->LoadData(reader, this->m_WeatherValue);
 				//m_vecWeatherData.push_back(pWeather);
-				this->m_WeatherValue = pWeather;
 			}
 		}
 		else if (reader.isEndElement() && strTmp == "w")
@@ -1263,12 +1393,10 @@ bool CStationData::LoadPredictData(QXmlStreamReader& reader)
 			QString strTmp = reader.name().toString();
 			if (strTmp == "prdt")
 			{
-				CPredictData pPrdt;
 				QString nName = reader.attributes().value("Name").toString();
-				pPrdt.m_strName = nName;
-				pPrdt.LoadData(reader, &pPrdt);
+				this->m_PredictValue->m_strName = nName;
+				this->m_PredictValue->LoadData(reader, this->m_PredictValue);
 				//m_vecPredictData.push_back(pPrdt);
-				this->m_PredictValue = pPrdt;
 			}
 		}
 		else if (reader.isEndElement() && strTmp == "prdt")
@@ -1298,14 +1426,12 @@ bool CStationData::LoadInvertersData(QXmlStreamReader& reader)
 			QString strTmp = reader.name().toString();
 			if (strTmp == "inverters")
 			{
-				CInverterGroup pInverters;
 				int nSixe = reader.attributes().value("Count").toInt();
-				pInverters.m_nCount = nSixe;
+				this->m_Inverters->m_nCount = nSixe;
 				QString szName = reader.attributes().value("Name").toString();
-				pInverters.m_strName = szName;
-				pInverters.LoadInvertersGrp(reader);
+				this->m_Inverters->m_strName = szName;
+				this->m_Inverters->LoadInvertersGrp(reader);
 				//m_vecInverterGroup.push_back(pInverters);
-				this->m_Inverters = pInverters;
 			}
 		}
 		else if (reader.isEndElement() && strTmp == "inverters")
@@ -1334,29 +1460,47 @@ CInverterInfo* CInverterGroup::AddInverter()
 	{
 		return nullptr;
 	}
-	int nIndex = 0;
+	int nIndex = m_arrInverters.count();
 	QString strName = "";
+
+	int nDeviceIDMax = 1;
+	for each (auto var in m_arrInverters)
+	{
+		if (var->m_nDeviceID < nDeviceIDMax)
+		{
+			var->m_nDeviceID = nDeviceIDMax;
+		}
+	}
+
 	while (true)
 	{
-		if (nIndex == 0)
+		strName = QString("%1%2").arg(PREDICT_INVERTER_NAME).arg(nDeviceIDMax);
+		
+		bool bFlag = false;
+		for each (auto var in m_arrInverters)
 		{
-			strName = QString("%1%2").arg(PREDICT_INVERTER_NAME).arg(nIndex);
+			if (var->m_szName == strName)
+			{
+				bFlag = true;
+				break;
+			}
 		}
-		else
+
+		if (bFlag)
 		{
-			strName = QString("%1%2").arg(PREDICT_INVERTER_NAME).arg(nIndex);
+			nDeviceIDMax++;
+			
+			continue;
 		}
-		auto iter = m_mapInverters.find(strName);
-		if (iter == m_mapInverters.end())
-		{
-			m_mapInverters[strName] = pData;
-			pData->m_szName = strName;
-			pData->m_nID = nIndex + 1;
-			m_arrInverters.append(*pData);
-			return pData;
-		}
-		nIndex++;
+
+		pData->m_szName = strName;
+		pData->m_nID = nDeviceIDMax;
+		m_arrInverters.append(pData);
+		pData->m_nDeviceID = nDeviceIDMax;
+
+		break;
 	}
+
 	return pData;
 }
 /*! \fn CPredictGroup::DeleteInverter(CInverterInfo *pInverter)
@@ -1375,11 +1519,11 @@ bool CInverterGroup::DeleteInverter(CInverterInfo *pInverter)
 	if (pInverter == nullptr)
 		return false;
 
-	auto it_find = m_mapInverters.find(pInverter->m_szName);
-	if (it_find != m_mapInverters.end())
+	auto it_find = std::find(m_arrInverters.begin(), m_arrInverters.end(), pInverter);
+	if (it_find != m_arrInverters.end())
 	{
 		delete pInverter;
-		m_mapInverters.erase(it_find);
+		m_arrInverters.erase(it_find);
 		return true;
 	}
 
@@ -1662,6 +1806,10 @@ void CPredictMgr::Reset()
 		delete m_pRootPrdtGrp;
 		m_pRootPrdtGrp = nullptr;
 	}
+
+	m_pRootPrdtGrp = new CPredictGroup;
+
+	m_mapRootGrpStrPrdtItem.clear();
 }
 /*! \fn bool CPredictMgr::LoadPredictNode(QDomElement& elm, const QString& szRoot)
 **********************************************************************************
@@ -1746,11 +1894,26 @@ bool CPredictMgr::LoadPredictFile(CStationData* pStnData, const QString& szFileN
 		QString strTmp = xml.name().toString();
 		if (strTmp == "plant")
 		{
+			//QString strDesc = xml.attributes().value("Description").toString();
+			//pStnData->m_strStationName = strDesc;
+			//pStnData->LoadStationData(xml);
+
+			////m_arrPrdtDatas.push_back(pStnData);
+			//m_mapRootGrpStrPrdtItem.insert(pStnData->m_strStationName, pStnData);
+		}
+		if (strTmp == "station")
+		{
+			pStnData->m_nStationID = xml.attributes().value("StationID").toInt();
+			pStnData->m_strStationName = xml.attributes().value("Name").toString();
 			QString strDesc = xml.attributes().value("Description").toString();
-			pStnData->m_strStationName = strDesc;
+			pStnData->m_strDescrition = strDesc;
+
+			pStnData->m_strAlgorithm = xml.attributes().value("Algorithm").toString();
+			pStnData->m_strReverseIsolationPath = xml.attributes().value("ReverseIsolationPath").toString();
+
 			pStnData->LoadStationData(xml);
 
-			m_arrPrdtDatas.push_back(pStnData);
+			//m_arrPrdtDatas.push_back(pStnData);
 			m_mapRootGrpStrPrdtItem.insert(pStnData->m_strStationName, pStnData);
 		}
 	}
@@ -2021,6 +2184,31 @@ CStationData::~CStationData()
 		m_vecPrdtData.clear();
 	}
 #endif
+
+	if (m_Inverters)
+	{
+		delete m_Inverters;
+		m_Inverters = nullptr;
+	}
+
+	if (m_WeatherValue)
+	{
+		delete m_WeatherValue;
+		m_WeatherValue = nullptr;
+	}
+
+	if (m_PlantValue)
+	{
+		delete m_PlantValue;
+		m_PlantValue = nullptr;
+	}
+
+	if (m_PredictValue)
+	{
+		delete m_PredictValue;
+		m_PredictValue = nullptr;
+	}
+
 }
 
 #if 0

@@ -154,6 +154,12 @@ public:
 	int m_nDevIndex;
 	//
 	QTimer *m_pDevTimer;
+	public:
+
+	//数据包起始借点编号
+	int m_nStartNode;
+	
+
 
 };
 

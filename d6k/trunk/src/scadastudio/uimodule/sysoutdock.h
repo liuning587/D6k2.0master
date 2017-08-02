@@ -1,6 +1,8 @@
 #ifndef SYSOUTDOCK_H
 #define SYSOUTDOCK_H
 
+#include "log/ui_log.h"
+
 #include <QDockWidget>
 
 class CSystemOutputView;
@@ -14,17 +16,9 @@ class CSysOutDock : public QDockWidget
 	Q_OBJECT
 
 public:
-	CSysOutDock(QWidget *parent);
+	CSysOutDock(CUiLog & uilog,QWidget *parent);
 	~CSysOutDock();
 
-	void AddItem(MSG_LOG &log, QColor &color = QColor());
-
-	void resizeEvent(QResizeEvent *event);
-
-public slots:
-	void newConnection();
-
-	void readyRead();
 
 public slots:
 	void ModelRowsInserted(const QModelIndex & parent, int start, int end);
@@ -47,11 +41,13 @@ protected:
 		
 		QDockWidget::closeEvent(event);
 	}
-
+	void timerEvent(QTimerEvent *);
 	void SetShow(bool bFlag)
 	{
 		this->SetShow(bFlag);
 	}
+
+	void resizeEvent(QResizeEvent *event);
 private:
 	void CreateCommandView();
 
@@ -60,15 +56,16 @@ private:
 private:
 	QTabWidget	*m_pMessageTab;
 
-	CSystemOutputView *m_commandView;
-	CSystemOutputModel *m_commandModel;
+	CSystemOutputView *m_pCommandView;
+	CSystemOutputModel *m_pCommandModel;
 
 	CSystemOutputView *m_pLogView;
 	CSystemOutputModel *m_pLogModel;
-
-	QTcpServer *m_pTcpServer;
+	int m_nLogTimerId;
 	//ÊÇ·ñ¹ö¶¯
 	bool m_bSrcollFlag;
+
+	CUiLog & m_UiLog;
 };
 
 #endif // SYSOUTDOCK_H

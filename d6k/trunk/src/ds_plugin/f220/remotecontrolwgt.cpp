@@ -212,7 +212,7 @@ void CRemoteControlWgt::InsertDataFromFeedBack(int iControlType, int iPointNum, 
 	{
         m_pTimeOut->stop();
 
-        QString strErrorInfo = tr("operator error");
+        QString strErrorInfo = tr("operator error,errorCode:%1").arg(strStatus);
 
         if (strStatus == "10")
         {

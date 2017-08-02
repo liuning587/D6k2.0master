@@ -232,7 +232,7 @@ void CRealTimeAnalog::AnalyseRealAnalogData(int iDeviceID, int nPointID, float n
 //             nValue = nValue;
 //         }
 
-        m_pTableModel->item(iUpdateRow, 3)->setText(QString::number(nValue, 'f', 6));
+        m_pTableModel->item(iUpdateRow, 3)->setText(QString::number(nValue, 'f', 3));
 
 	}
 	else

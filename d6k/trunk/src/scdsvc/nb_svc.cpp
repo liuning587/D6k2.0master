@@ -360,6 +360,18 @@ void CNetbusSvc::RecvNodeData()
 				}
 				case COT_SUB: //订阅数据上送，具体定义后续
 					break;
+
+				case COT_RTSETVAL:  //遥控反校 确认等指令上送 
+				{
+					DMSG *pMailMsg;
+					pMailMsg = (DMSG*)(&msg->BuffData);
+					Q_ASSERT(pMailMsg);
+					if (pMailMsg)
+					{
+						SendMail("SCADA", pMailMsg, 0);
+					}
+					break;
+				}
 				default:
 					break;
 				}

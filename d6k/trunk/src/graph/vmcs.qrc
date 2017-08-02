@@ -1,4 +1,10 @@
 <RCC>
-  <qresource>
-  </qresource>
+    <qresource prefix="/">
+        <file>images/fullscreen.png</file>
+        <file>images/normalscreen.png</file>
+        <file>images/eye_off.png</file>
+        <file>images/eye_on.png</file>
+        <file>images/pwpred.png</file>
+        <file>images/setup.png</file>
+    </qresource>
 </RCC>

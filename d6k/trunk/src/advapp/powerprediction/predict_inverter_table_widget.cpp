@@ -11,10 +11,10 @@ CInverterTableWidget::CInverterTableWidget(CInverterInfo* inverterItem)
 {
 	QStringList headStringList;
 
-	headStringList << "ID" << "NAME" << "Type" <<"SelectPoint";
+	headStringList << "ID" << "NAME" << QObject::tr("Description") << "Type" <<"SelectPoint" << QObject::tr("DeviceID");
 
 	this->setRowCount(3);
-	this->setColumnCount(4);
+	this->setColumnCount(6);
 	this->setHorizontalHeaderLabels(headStringList);
 
 	QTableWidgetItem *newItem = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_ActPower.m_nID));
@@ -47,56 +47,92 @@ CInverterTableWidget::CInverterTableWidget(CInverterInfo* inverterItem)
 	newItem_12->setFlags(newItem_12->flags() & (~Qt::ItemIsEditable));
 	this->setItem(2, 1, newItem_12);
 
+
+	QTableWidgetItem *pTmp = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_ActPower.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(0, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_ReactPower.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(1, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_OpenState.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(2, 2, pTmp);
+
+
+
 	QTableWidgetItem *newItem_20 = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_ActPower.m_nType));
 	newItem_20->setTextAlignment(Qt::AlignCenter);
 	newItem_20->setFlags(newItem_20->flags() & (~Qt::ItemIsEditable));
-	this->setItem(0, 2, newItem_20);
+	this->setItem(0, 3, newItem_20);
 
 	QTableWidgetItem *newItem_21 = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_ReactPower.m_nType));
 	newItem_21->setTextAlignment(Qt::AlignCenter);
 	newItem_21->setFlags(newItem_21->flags() & (~Qt::ItemIsEditable));
-	this->setItem(1, 2, newItem_21);
+	this->setItem(1, 3, newItem_21);
 
 	QTableWidgetItem *newItem_22 = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_OpenState.m_nType));
 	newItem_22->setTextAlignment(Qt::AlignCenter);
 	newItem_22->setFlags(newItem_22->flags() & (~Qt::ItemIsEditable));
-	this->setItem(2, 2, newItem_22);
+	this->setItem(2, 3, newItem_22);
 
 	QTableWidgetItem *newItem_30 = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_ActPower.m_szLinkedTagName));
 	newItem_30->setTextAlignment(Qt::AlignCenter);
 	newItem_30->setFlags(newItem_30->flags() & (~Qt::ItemIsEditable));
-	this->setItem(0, 3, newItem_30);
+	this->setItem(0, 4, newItem_30);
 
 	QTableWidgetItem *newItem_31 = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_ReactPower.m_szLinkedTagName));
 	newItem_31->setTextAlignment(Qt::AlignCenter);
 	newItem_31->setFlags(newItem_31->flags() & (~Qt::ItemIsEditable));
-	this->setItem(1, 3, newItem_31);
+	this->setItem(1, 4, newItem_31);
 
 	QTableWidgetItem *newItem_32 = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_OpenState.m_szLinkedTagName));
 	newItem_32->setTextAlignment(Qt::AlignCenter);
 	newItem_32->setFlags(newItem_32->flags() & (~Qt::ItemIsEditable));
-	this->setItem(2, 3, newItem_32);
+	this->setItem(2, 4, newItem_32);
 
 	QPushButton *pushButton = new QPushButton("");
 	pushButton->setFlat(true);
-	this->setCellWidget(0, 3, pushButton);
+	this->setCellWidget(0, 4, pushButton);
 	connect(pushButton, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_1 = new QPushButton("");
 	pushButton_1->setFlat(true);
-	this->setCellWidget(1, 3, pushButton_1);
+	this->setCellWidget(1, 4, pushButton_1);
 	connect(pushButton_1, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_2 = new QPushButton("");
 	pushButton_2->setFlat(true);
-	this->setCellWidget(2, 3, pushButton_2);
+	this->setCellWidget(2, 4, pushButton_2);
 	connect(pushButton_2, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_nDeviceID));
+	pTmp->setTextAlignment(Qt::AlignCenter);
+	pTmp->setFlags(pTmp->flags() & (~Qt::ItemIsEditable));
+	this->setItem(0, 5, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_nDeviceID));
+	pTmp->setTextAlignment(Qt::AlignCenter);
+	pTmp->setFlags(pTmp->flags() & (~Qt::ItemIsEditable));
+	this->setItem(1, 5, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pInverterItem->m_nDeviceID));
+	pTmp->setTextAlignment(Qt::AlignCenter);
+	pTmp->setFlags(pTmp->flags() & (~Qt::ItemIsEditable));
+	this->setItem(2, 5, pTmp);
 
 	setColumnWidth(0, 100);
 	setColumnWidth(1, 200);
-	setColumnWidth(2, 100);
-	setColumnWidth(3, 300);
+	setColumnWidth(2, 200);
+	setColumnWidth(3, 100);
+	setColumnWidth(4, 300);
+	setColumnWidth(5, 100);
 
+	connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(itemChanged(QTableWidgetItem *)));
 }
 
 
@@ -139,6 +175,25 @@ QString CInverterTableWidget::GetBindValue()
 	}
 
 	return "";
+}
+
+void CInverterTableWidget::itemChanged(QTableWidgetItem * item)
+{
+	if (item->column() == 2 && item->row() == 0)
+	{
+		m_pInverterItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_pInverterItem->m_ActPower.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 1)
+	{
+		m_pInverterItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_pInverterItem->m_ReactPower.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 2)
+	{
+		m_pInverterItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_pInverterItem->m_OpenState.m_strDescription = item->text();
+	}
 }
 
 void CInverterTableWidget::Slot_SetBindValue()

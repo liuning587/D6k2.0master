@@ -27,9 +27,11 @@ public:
 	}
 public:
 	int m_nID;
-	QString m_szName;          //! 预测中用的名字 
+	QString m_szName;           
+	QString m_strDescription;	//! 预测中用的名字
 	QString m_szLinkedTagName; //! 实时库的测点TAGNAME
 	int m_nType; //! 开关量、模拟量
+	QString m_strKey;
 };
 /*! \class  CInverterPointInfo
 *   \brief 逆变器基本信息 */
@@ -79,6 +81,29 @@ public:
 	CPPPointInfo  m_ActPower;  //! 逆变器有功
 	CPPPointInfo  m_ReactPower; //! 逆变器无功
 	QVector<CPPPointInfo > m_vecTableInfo;
+	int m_nDeviceID;
+};
+
+/*! \class  CPlantStaticInfo
+*   \brief 全厂的静态信息 */
+class CPlantStaticInfo
+{
+public:
+	enum 
+	{
+		ID_DESCRIP = 1
+
+	};
+
+protected:
+	QString  m_szDescription;   //! 厂站信息
+	QString  m_szGenGroup;      //! 发电集团
+	QString  m_szWeather;
+ 
+
+private:
+
+
 };
 /*! \class  CPlantInfo
 *   \brief 全厂的基本信息 */
@@ -94,9 +119,11 @@ public:
 	CPlantInfo()
 	{
 		m_ActPower.m_szName = QObject::tr("Plant Active Power");
+		m_ActPower.m_strDescription.clear();
 		m_ActPower.m_nType = IDD_AIN;
 		m_ActPower.m_nID = ActivePower;
 		m_ReactPower.m_szName = QObject::tr("Plant Reactive Power");
+		m_ReactPower.m_strDescription.clear();
 		m_ReactPower.m_nType = IDD_AIN;
 		m_ReactPower.m_nID = ReactivePower;
 		Init();
@@ -121,7 +148,8 @@ public:
 	bool LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
 	bool ReadADIN(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
 	bool ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
-	
+	bool ReadStaticData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
+
 	QString & GetName()
 	{
 		return m_strName;
@@ -133,9 +161,10 @@ public:
 	CPPPointInfo  m_ActPower;  //! 全厂有功
 	CPPPointInfo  m_ReactPower; //! 全厂无功
 	QString m_strName;          //! 厂站名称
-	QVector<CPPPointInfo > m_vecTableInfo;
+	QVector<CPPPointInfo > m_vecTableInfo;		//动态数据
+	QVector<CPPPointInfo > m_vecTableStaticInfo;		//静态数据
 
-
+	CPlantStaticInfo  m_StaticInfo;   //! 静态数据
 };
 /*! \class  CInverterGroup
 *   \brief 某一电厂下的所有逆变器信息 */
@@ -158,6 +187,11 @@ public:
 	void Reset()
 	{
 		// todo 先回收资源
+		for each (auto var in m_arrInverters)
+		{
+			delete var;
+		}
+
 
 		m_arrInverters.clear();
 	}
@@ -171,8 +205,8 @@ public:
 	}
 
 public:	
-	QVector<CInverterInfo > m_arrInverters;
-	QMap<QString, CInverterInfo* > m_mapInverters;
+	QVector<CInverterInfo *> m_arrInverters;
+	//QMap<QString, CInverterInfo* > m_mapInverters;
 	QString m_strName;                  //!逆变器组名
 	int m_nCount;
 };
@@ -232,7 +266,7 @@ public:
 	}
 	~CWeatherData()
 	{
-
+		m_vecTableInfo.clear();
 	}
 	void Init();
 	bool SaveADIData(QXmlStreamWriter& writer);
@@ -272,11 +306,11 @@ public:
 
 	CPredictData()
 	{
-		m_4Hour.m_szName = QObject::tr("Plant 4 Hour Predication Value");
+		m_4Hour.m_szName = ("Plant 4 Hour Predication Value");
 		m_4Hour.m_nType = IDD_AOUT;
 		m_4Hour.m_nID = predict4h;
 		
-		m_72Hour.m_szName = QObject::tr("Plant 72 Hour Predication Value");
+		m_72Hour.m_szName = ("Plant 72 Hour Predication Value");
 		m_72Hour.m_nType = IDD_AOUT;
 		m_72Hour.m_nID = predict72h;
 		Init();
@@ -315,7 +349,10 @@ class CStationData
 public:
 	explicit CStationData(CPredictGroup *pGrp):m_pParent(pGrp)
 	{
-		
+		m_Inverters = new CInverterGroup;
+		m_PlantValue = new CPlantInfo;
+		m_WeatherValue = new CWeatherData;
+		m_PredictValue = new CPredictData;
 	}
 	~CStationData();
 
@@ -324,25 +361,25 @@ public:
 	// 获取全站数据
 	CPlantInfo * GetPlantInfo()
 	{
-		return &m_PlantValue;
+		return m_PlantValue;
 	}
 
 	const CPlantInfo &GetPlantInfo()const
 	{
-		return  m_PlantValue;
+		return  *m_PlantValue;
 	}
 
 	CWeatherData * GetWeatherInfo()
 	{
-		return &m_WeatherValue;
+		return m_WeatherValue;
 	}
 	CPredictData * GetPredictInfo()
 	{
-		return &m_PredictValue;
+		return m_PredictValue;
 	}
 	CInverterGroup * GetInverterGrpInfo()
 	{
-		return &m_Inverters;
+		return m_Inverters;
 	}
 	const QString &GetName()const
 	{
@@ -373,11 +410,18 @@ public:
 // 	QVector<CInverterGroup> m_vecInverterGroup;
 // 	QVector<CWeatherData> m_vecWeatherData;
 // 	QVector<CPredictData> m_vecPredictData;
+
+	//新加
+	int m_nStationID;
+	QString m_strDescrition;
+	QString m_strAlgorithm;
+	QString m_strReverseIsolationPath;
+
 private:
-	CPlantInfo     m_PlantValue;     //! 电厂的基本信息
-	CInverterGroup  m_Inverters;     //! 全厂的所有逆变器
-	CWeatherData  m_WeatherValue;    //! 天气数据
-	CPredictData  m_PredictValue;    //! 预测数据	
+	CPlantInfo     *m_PlantValue;     //! 电厂的基本信息
+	CInverterGroup  *m_Inverters;     //! 全厂的所有逆变器
+	CWeatherData  *m_WeatherValue;    //! 天气数据
+	CPredictData  *m_PredictValue;    //! 预测数据	
 };
 
 /*! \class  CPredictGroup
@@ -456,7 +500,7 @@ public:
 	//QMap<QString, CInverterInfo* > m_mapRootStrInvters;
 
 	//预测项vector
-	QVector<CStationData*> m_arrPrdtDatas;
+	//QVector<CStationData*> m_arrPrdtDatas;
 
 private:
 	enum 

@@ -257,16 +257,8 @@ void CAITable::DoubleClicked(const QModelIndex & index)
 void CAITable::ShowMouseRightButton(const QPoint& point)
 {
 	QModelIndex index = this->indexAt(point);
-	if (!index.isValid())
-	{
-		return;
-	}
 
 	QModelIndex indexSelect = m_pSortModel->mapToSource(this->indexAt(point));
-	if (!indexSelect.isValid())
-	{
-		return;
-	}
 
 	QMenu *pMenu = new QMenu(nullptr);
 
@@ -317,7 +309,7 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 	}
 	else if (selectedItem == pClearRelationPoint && pClearRelationPoint != nullptr)
 	{
-		if (indexSelect.column() == CAIModel::AlarmTagName)
+		if (indexSelect.column() == CAIModel::AlarmTagName && index.isValid())
 		{
 			//Çå¿Õ¹ØÁª
 			auto &arrAIs = m_pModel->GetAIs();
@@ -340,7 +332,7 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 
 			arrAIs[nRow]->m_strAlarmTagName.clear();
 		}
-		else if (indexSelect.column() == CAIModel::COLUMN::ScaleTagName)
+		else if (indexSelect.column() == CAIModel::COLUMN::ScaleTagName && index.isValid())
 		{
 			auto &arrAIs = m_pModel->GetAIs();
 			int nRow = indexSelect.row();
@@ -362,7 +354,7 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 			arrAIs[nRow]->m_strScaleTagName.clear();
 		}
 	}
-	else if (selectedItem == pCopy)
+	else if (selectedItem == pCopy  && index.isValid())
 	{
 		QSortFilterProxyModel * pModelSort = static_cast<QSortFilterProxyModel *>(this->model());
 		Q_ASSERT(pModelSort);
@@ -387,7 +379,7 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 		}
 
 		tmp = list.first();
-		QModelIndex previous = pModelSort->mapToSource(list[0]);
+		QModelIndex previous = list[0];
 
 		for (int i = 1; i < list.size(); i++)
 		{
@@ -400,7 +392,7 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 
 			// If you are at the start of the row the row number of the previous index
 			// isn't the same.  Text is followed by a row separator, which is a newline.
-			if (tmp.column() != previous.column())
+			if (list[i].row() != previous.row())
 			{
 				m_strTextList.append("\\n");
 
@@ -413,10 +405,10 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 
 				m_strTextList.append(text);
 			}
-			previous = pModelSort->mapToSource(list[i]);
+			previous = list[i];
 		}
 	}
-	else if (selectedItem == pPaste)
+	else if (selectedItem == pPaste  && index.isValid())
 	{
 		QSortFilterProxyModel * pModelSort = static_cast<QSortFilterProxyModel *>(this->model());
 		Q_ASSERT(pModelSort);
@@ -436,28 +428,26 @@ void CAITable::ShowMouseRightButton(const QPoint& point)
 
 		for (int i = 0; i < m_strTextList.size(); i++)
 		{
-			if (m_strTextList[i] == "\\t")
+			if (m_strTextList[i] == "\\n")
 			{
-				rowTmp++;
+				currentRow++;
+				currentCol = nCol;
 			}
-			else if (m_strTextList[i] == "\\n")
+			else if (m_strTextList[i] == "\\t")
 			{
 				currentCol++;
-
-				rowTmp = currentRow;
-				colTmp = currentCol;
 			}
 			else
 			{
 				int test = pModelSort->rowCount();
 				int testtest = pModelSort->columnCount();
 
-				if (pModelSort->rowCount() - 1 < rowTmp || pModelSort->columnCount() - 1 < colTmp)
+				if (pModelSort->rowCount() - 1 < currentRow || pModelSort->columnCount() - 1 < currentCol)
 				{
 					continue;
 				}
 
-				QModelIndex index = m_pSortModel->index(rowTmp, colTmp);
+				QModelIndex index = m_pSortModel->index(currentRow, currentCol);
 				QModelIndex indexSource = m_pSortModel->mapToSource(index);
 				if (!indexSource.isValid())
 				{

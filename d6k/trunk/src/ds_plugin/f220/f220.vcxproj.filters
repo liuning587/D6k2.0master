@@ -424,6 +424,15 @@
     <ClCompile Include="analogdragtablewgt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_deviec_configwgt.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_deviec_configwgt.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="deviec_configwgt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="f220_global.h">
@@ -496,6 +505,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_filetranswgt.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_deviec_configwgt.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -661,6 +673,12 @@
     </CustomBuild>
     <CustomBuild Include="analogdragtablewgt.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="deviec_configwgt.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="deviec_configwgt.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

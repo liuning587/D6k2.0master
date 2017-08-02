@@ -716,9 +716,9 @@ enum MSG_CODE
 	MSG_DIAG,   //! 自诊断告警
 	MSG_OPER,   //! 操作告警
 	MSG_SETVAL,        //! 设值
-
-
+	MSG_RT_SETVAL,     //! 设值反校（可用于遥控反校，选择回复）
 };
+
 
 enum
 {

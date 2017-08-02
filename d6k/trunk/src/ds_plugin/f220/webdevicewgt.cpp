@@ -45,7 +45,7 @@ void CWebDeviceWgt::InitWgt()
 	topLayout->addWidget(pBackBtn);
 	topLayout->addWidget(pForwordBtn);
 
-	m_pWebView = new QWebEngineView;
+	m_pWebView = new QWebEngineView(this);
 	//pWebView->load(QUrl("http://172.16.42.111:8080/"));
 
 	QVBoxLayout *pTotalLayout = new QVBoxLayout(this);
@@ -59,8 +59,8 @@ void CWebDeviceWgt::InitWgt()
 
 CWebDeviceWgt::~CWebDeviceWgt()
 {
-	m_pWebView->stop();
-	m_pWebView->close();
+	//m_pWebView->stop();
+	//m_pWebView->close();
 }
 
 void CWebDeviceWgt::Slot_Confrom()

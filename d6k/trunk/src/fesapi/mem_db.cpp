@@ -3812,7 +3812,7 @@ bool CMemDB::SendIOCmd(int32u nOccNo, IO_VARIANT *nVal, int32u nTimeout)
 	std::shared_ptr<SETVAL_MSG>  pSetValeEvt = std::make_shared<SETVAL_MSG>();
 	std::memset(pSetValeEvt.get(), 0, sizeof(SETVAL_MSG));
 
-	pSetValeEvt->MsgCode = MSG_SETVAL;
+	pSetValeEvt->MsgCode = MSG_RT_SETVAL;
 	pSetValeEvt->Len = sizeof(SETVAL_MSG);
 	pSetValeEvt->IddType = IDD_DOUT;
 	pSetValeEvt->Att = ATTW_DOUT;

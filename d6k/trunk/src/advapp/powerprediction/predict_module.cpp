@@ -9,6 +9,10 @@
 #include "predict_tree.h"
 #include "predict_datainfo.h"
 
+#include "addstationdialog.h"
+
+#include "predict_inverter_table_widget.h"
+
 #include <QDir>
 #include <QDomNode>
 #include <QMessageBox>
@@ -374,7 +378,14 @@ void CPowerPredictApi::Slot_AddItem(QModelIndex& index)
 	switch (nType)
 	{
 	case POWER_PREDICT_ROOT_TYPE:
-	{	//根节点下,添加单个厂站item
+	{	
+		CAddStationDialog dialog;
+		if (dialog.exec() == QDialog::Rejected)
+		{
+			return;
+		}
+
+		//根节点下,添加单个厂站item
 		CStationData* pPredictItem = m_pPrdtMgr->CreateNewPredictItem(m_pPrdtMgr->m_pRootPrdtGrp);
 
 		Q_ASSERT(pPredictItem);
@@ -382,6 +393,12 @@ void CPowerPredictApi::Slot_AddItem(QModelIndex& index)
 		{
 			return;
 		}
+
+		//新加
+		pPredictItem->m_nStationID = dialog.m_nStationID;
+		pPredictItem->m_strDescrition = dialog.m_strDescrition;
+		pPredictItem->m_strAlgorithm = dialog.m_strAlgorithm;
+		pPredictItem->m_strReverseIsolationPath = dialog.m_strReverseIsolationPath;
 
 		/*CPlantInfo* pStnDatas = pPredictItem->AddPlantData();
 		CInverterGroup* pInvDatas = pPredictItem->AddInverterData();
@@ -408,6 +425,22 @@ void CPowerPredictApi::Slot_AddItem(QModelIndex& index)
 		itemStationData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemStationData->setEditable(false);
 		newItem->appendRow(itemStationData);
+		//新加两分支
+		//静态信息
+		CQuoteItem* itemStationStaticData = new CQuoteItem(QObject::tr("StaticData"));
+		itemStationStaticData->setData(reinterpret_cast<long long>(pPredictItem->GetPlantInfo()), POINTERDATA);
+		itemStationStaticData->setData(POWER_PREDICT_STATION_STATIC_TYPE, PREDICT_ROOT_ROLE);
+		itemStationStaticData->setData(pPredictItem->GetName(), STATION_NAME_ROLE);
+		itemStationStaticData->setEditable(false);
+		itemStationData->appendRow(itemStationStaticData);
+		//动态信息
+		CQuoteItem* itemStationDynamicData = new CQuoteItem(QObject::tr("DynaticData"));
+		itemStationDynamicData->setData(reinterpret_cast<long long>(pPredictItem->GetPlantInfo()), POINTERDATA);
+		itemStationDynamicData->setData(POWER_PREDICT_STATION_DYNATIC_TYPE, PREDICT_ROOT_ROLE);
+		itemStationDynamicData->setData(pPredictItem->GetName(), STATION_NAME_ROLE);
+		itemStationDynamicData->setEditable(false);
+		itemStationData->appendRow(itemStationDynamicData);
+
 
 		//逆变器组数据
 		auto strInverterData = tr("Inverter Groups");
@@ -455,7 +488,26 @@ void CPowerPredictApi::Slot_AddItem(QModelIndex& index)
 			return;
 		}
 
-		auto ppItem = m_pPrdtMgr->CreateNewPredictItem(pGroup);
+		CAddStationDialog dialog;
+		if (dialog.exec() == QDialog::Rejected)
+		{
+			return;
+		}
+
+		//根节点下,添加单个厂站item
+		CStationData* ppItem = m_pPrdtMgr->CreateNewPredictItem(pGroup);
+
+		Q_ASSERT(ppItem);
+		if (ppItem == nullptr)
+		{
+			return;
+		}
+
+		//新加
+		ppItem->m_nStationID = dialog.m_nStationID;
+		ppItem->m_strDescrition = dialog.m_strDescrition;
+		ppItem->m_strAlgorithm = dialog.m_strAlgorithm;
+		ppItem->m_strReverseIsolationPath = dialog.m_strReverseIsolationPath;
 
 		/*CPlantInfo* pStnDatas = ppItem->AddPlantData();
 		CInverterGroup* pInvDatas = ppItem->AddInverterData();
@@ -931,6 +983,9 @@ void CPowerPredictApi::Slot_ItemChanged(QStandardItem* pItem)
 			}
 
 			auto pValue = pFaGroup->m_mapStations[strOldValue];
+			//station name修改
+			pValue->m_strStationName = strNewValue;
+
 			auto oldIter = pFaGroup->m_mapStations.find(strOldValue);
 			pFaGroup->m_mapStations.erase(oldIter);
 			pFaGroup->m_mapStations[strNewValue] = pValue;
@@ -939,6 +994,39 @@ void CPowerPredictApi::Slot_ItemChanged(QStandardItem* pItem)
 			auto oldRootIter = m_pPrdtMgr->m_mapRootGrpStrPrdtItem.find(strOldValue);
 			m_pPrdtMgr->m_mapRootGrpStrPrdtItem.erase(oldRootIter);
 			m_pPrdtMgr->m_mapRootGrpStrPrdtItem[strNewValue] = pRootValue;
+
+			pItem->setData(strNewValue, PREDICT_OLD_NAME_ROLE);
+
+			break;
+		}
+		case POWER_PREDICT_INVERTER_TYPE:
+		{
+			//逆变器name修改
+			CInverterGroup *pGroup = reinterpret_cast<CInverterGroup *>(pItem->parent()->data(POINTERDATA).toLongLong());
+			Q_ASSERT(pGroup);
+			if (pGroup == nullptr)
+			{
+				return;
+			}
+
+			CInverterInfo *pChildItem = reinterpret_cast<CInverterInfo *>(pItem->data(POINTERDATA).toLongLong());
+			Q_ASSERT(pChildItem);
+			if (pChildItem == nullptr)
+			{
+				return;
+			}
+
+			auto newIter = std::find(pGroup->m_arrInverters.begin(), pGroup->m_arrInverters.end(), pChildItem);
+
+			if (newIter == pGroup->m_arrInverters.end())
+			{
+				pItem->setData(strOldValue, Qt::EditRole);
+				return;
+			}
+
+			auto pValue = *newIter;
+			//station name修改
+			pValue->m_szName = strNewValue;
 
 			pItem->setData(strNewValue, PREDICT_OLD_NAME_ROLE);
 
@@ -1031,6 +1119,9 @@ bool CPowerPredictApi::LoadProject(QDomDocument *pXml, QDomElement *pRoot, const
 	{
 		return false;
 	}
+	
+	m_pPrdtMgr->Reset();
+	
 	//获取根节点下第一个子节点nChild
 	QDomNode nChild = pRoot->firstChild();
 	for ( ;!nChild.isNull(); nChild = nChild.nextSibling())
@@ -1221,44 +1312,55 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 	for (; ite != pPtdtGroup->m_mapStations.end(); ++ite)
 	{
 		//厂站item
-		CStationData* pPrdt = ite.value();
-		Q_ASSERT(pPrdt);
-		if (pPrdt == nullptr)
+		CStationData* pStation = ite.value();
+		Q_ASSERT(pStation);
+		if (pStation == nullptr)
 		{
 			continue;
 		}
-		Q_ASSERT(pPrdt->m_strStationName.isEmpty() == false);
-		if (pPrdt->m_strStationName.isEmpty() == true)
+		Q_ASSERT(pStation->m_strStationName.isEmpty() == false);
+		if (pStation->m_strStationName.isEmpty() == true)
 		{
 			continue;
 		}
-		CQuoteItem* pPrdtItem = new CQuoteItem(pPrdt->m_strStationName);
-		pPrdtItem->setData(pPrdt->m_strStationName, LASTVALUE);
-		pPrdtItem->setData(POWER_PREDICT_ITEM_TYPE, PREDICT_ROOT_ROLE);
-		pPrdtItem->setData(reinterpret_cast<long long>(pPrdt), POINTERDATA);
-		pPrdtItem->setData(pPrdt->GetName(), STATION_NAME_ROLE);
-		pPrdtItem->setIcon(QIcon(PREDICT_ITEM_PNG));
-		pPrdtItem->setEditable(true);
-		pItem->appendRow(pPrdtItem);
+		//厂站item
+		CQuoteItem* newItem = new CQuoteItem(pStation->GetName());
+		newItem->setData(reinterpret_cast<long long>(pStation), POINTERDATA);
+		newItem->setData(POWER_PREDICT_ITEM_TYPE, PREDICT_ROOT_ROLE);
+		newItem->setData(pStation->GetName(), PREDICT_OLD_NAME_ROLE);
+		newItem->setData(pStation->GetName(), STATION_NAME_ROLE);
+		newItem->setIcon(QIcon(PREDICT_ITEM_PNG));
+		newItem->setEditable(true);
+		pItem->appendRow(newItem);
 
 		//整站数据
-		QString strStationData = pPrdt->GetPlantInfo()->GetName();
-		Q_ASSERT(strStationData.isEmpty() == false);
-		if (strStationData.isEmpty() == true)
-		{
-			continue;
-		}
+		auto strStationData = tr("Plant Data");
 		CQuoteItem* itemStationData = new CQuoteItem(strStationData);
-		itemStationData->setData(strStationData, LASTVALUE);
+		itemStationData->setData(strStationData, PREDICT_OLD_NAME_ROLE);
+		itemStationData->setData(reinterpret_cast<long long>(pStation->GetPlantInfo()), POINTERDATA);
 		itemStationData->setData(POWER_PREDICT_STATION_TYPE, PREDICT_ROOT_ROLE);
-		itemStationData->setData(reinterpret_cast<long long>(pPrdt->GetPlantInfo()), POINTERDATA);
-		itemStationData->setData(pPrdt->GetName(), STATION_NAME_ROLE);
+		itemStationData->setData(pStation->GetName(), STATION_NAME_ROLE);
 		itemStationData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemStationData->setEditable(false);
-		pPrdtItem->appendRow(itemStationData);
+		newItem->appendRow(itemStationData);
+		//新加两分支
+		//静态信息
+		CQuoteItem* itemStationStaticData = new CQuoteItem(QObject::tr("StaticData"));
+		itemStationStaticData->setData(reinterpret_cast<long long>(pStation->GetPlantInfo()), POINTERDATA);
+		itemStationStaticData->setData(POWER_PREDICT_STATION_STATIC_TYPE, PREDICT_ROOT_ROLE);
+		itemStationStaticData->setData(pStation->GetName(), STATION_NAME_ROLE);
+		itemStationStaticData->setEditable(false);
+		itemStationData->appendRow(itemStationStaticData);
+		//动态信息
+		CQuoteItem* itemStationDynamicData = new CQuoteItem(QObject::tr("DynaticData"));
+		itemStationDynamicData->setData(reinterpret_cast<long long>(pStation->GetPlantInfo()), POINTERDATA);
+		itemStationDynamicData->setData(POWER_PREDICT_STATION_DYNATIC_TYPE, PREDICT_ROOT_ROLE);
+		itemStationDynamicData->setData(pStation->GetName(), STATION_NAME_ROLE);
+		itemStationDynamicData->setEditable(false);
+		itemStationData->appendRow(itemStationDynamicData);
 
 		//气象仪数据
-		auto strWeatherData = pPrdt->GetWeatherInfo()->GetName();
+		auto strWeatherData = pStation->GetWeatherInfo()->GetName();
 		Q_ASSERT(strWeatherData.isEmpty() == false);
 		if (strWeatherData.isEmpty() == true)
 		{
@@ -1267,14 +1369,14 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 		CQuoteItem* itemWeatherData = new CQuoteItem(strWeatherData);
 		itemWeatherData->setData(strWeatherData, LASTVALUE);
 		itemWeatherData->setData(POWER_PREDICT_WEATHER_TYPE, PREDICT_ROOT_ROLE);
-		itemWeatherData->setData(reinterpret_cast<long long>(pPrdt->GetWeatherInfo()), POINTERDATA);
-		itemWeatherData->setData(pPrdt->GetName(), STATION_NAME_ROLE);
+		itemWeatherData->setData(reinterpret_cast<long long>(pStation->GetWeatherInfo()), POINTERDATA);
+		itemWeatherData->setData(pStation->GetName(), STATION_NAME_ROLE);
 		itemWeatherData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemWeatherData->setEditable(false);
-		pPrdtItem->appendRow(itemWeatherData);
+		pItem->appendRow(itemWeatherData);
 
 		//预测数据
-		auto strPredictData = pPrdt->GetPredictInfo()->GetName();
+		auto strPredictData = pStation->GetPredictInfo()->GetName();
 		Q_ASSERT(strPredictData.isEmpty() == false);
 		if (strPredictData.isEmpty() == true)
 		{
@@ -1283,14 +1385,14 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 		CQuoteItem* itemPredictData = new CQuoteItem(strPredictData);
 		itemPredictData->setData(strPredictData, LASTVALUE);
 		itemPredictData->setData(POWER_PREDICT_PREDICT_TYPE, PREDICT_ROOT_ROLE);
-		itemPredictData->setData(reinterpret_cast<long long>(pPrdt->GetPlantInfo()), POINTERDATA);
-		itemPredictData->setData(pPrdt->GetName(), STATION_NAME_ROLE);
+		itemPredictData->setData(reinterpret_cast<long long>(pStation->GetPlantInfo()), POINTERDATA);
+		itemPredictData->setData(pStation->GetName(), STATION_NAME_ROLE);
 		itemPredictData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemPredictData->setEditable(false);
-		pPrdtItem->appendRow(itemPredictData);
+		pItem->appendRow(itemPredictData);
 
 		//逆变器组数据
-		auto strInverterData = pPrdt->GetInverterGrpInfo()->GetName();
+		auto strInverterData = pStation->GetInverterGrpInfo()->GetName();
 		Q_ASSERT(strInverterData.isEmpty() == false);
 		if (strInverterData.isEmpty() == true)
 		{
@@ -1299,11 +1401,11 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 		CQuoteItem* itemInverterData = new CQuoteItem(strInverterData);
 		itemInverterData->setData(strInverterData, LASTVALUE);
 		itemInverterData->setData(POWER_PREDICT_INVERTER_GROUP_TYPE, PREDICT_ROOT_ROLE);
-		itemInverterData->setData(reinterpret_cast<long long>(pPrdt->GetInverterGrpInfo()), POINTERDATA);
-		itemInverterData->setData(pPrdt->GetName(), STATION_NAME_ROLE);
+		itemInverterData->setData(reinterpret_cast<long long>(pStation->GetInverterGrpInfo()), POINTERDATA);
+		itemInverterData->setData(pStation->GetName(), STATION_NAME_ROLE);
 		itemInverterData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemInverterData->setEditable(false);
-		pPrdtItem->appendRow(itemInverterData);
+		pItem->appendRow(itemInverterData);
 
 		auto pGroup = reinterpret_cast<CInverterGroup*>(itemInverterData->data(POINTERDATA).toLongLong());
 		Q_ASSERT(pGroup);
@@ -1316,12 +1418,12 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 		{
 			//auto strInverter = pGroup->m_arrInverters[i].m_szName;
 			//CInverterInfo*  pInvter = pGroup->AddInverter();
-			CInverterInfo*  pInvter = &(pGroup->m_arrInverters[i]);
+			CInverterInfo*  pInvter = pGroup->m_arrInverters[i];
 			CQuoteItem* itemIvtData = new CQuoteItem(pInvter->m_szName);
 			itemIvtData->setData(pInvter->m_szName, LASTVALUE);
 			itemIvtData->setData(POWER_PREDICT_INVERTER_TYPE, PREDICT_ROOT_ROLE);
 			itemIvtData->setData(reinterpret_cast<long long>(pInvter), POINTERDATA);
-			itemIvtData->setData(pPrdt->GetName(), STATION_NAME_ROLE);
+			itemIvtData->setData(pStation->GetName(), STATION_NAME_ROLE);
 			itemIvtData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 			itemIvtData->setEditable(true);
 			itemInverterData->appendRow(itemIvtData);

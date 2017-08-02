@@ -11,10 +11,10 @@ COutputTableWidget::COutputTableWidget(CPredictData* outputItem)
 {
 	QStringList headStringList;
 
-	headStringList << "ID" << "NAME" << "Type" << "SelectPoint";
+	headStringList << "ID" << "NAME" << QObject::tr("Description") << "Type" << "SelectPoint";
 
 	this->setRowCount(2);
-	this->setColumnCount(4);
+	this->setColumnCount(5);
 	this->setHorizontalHeaderLabels(headStringList);
 
 	QTableWidgetItem *newItem = new QTableWidgetItem(QString("%1").arg(m_pOutputItem->m_4Hour.m_nID));
@@ -37,40 +37,57 @@ COutputTableWidget::COutputTableWidget(CPredictData* outputItem)
 	newItem_3->setFlags(newItem_3->flags() & (~Qt::ItemIsEditable));
 	this->setItem(1, 1, newItem_3);
 
+
+
+	QTableWidgetItem *pTmp = new QTableWidgetItem(QString("%1").arg(m_pOutputItem->m_4Hour.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(0, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pOutputItem->m_72Hour.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(1, 2, pTmp);
+
+
+
 	QTableWidgetItem *newItem_4 = new QTableWidgetItem(QString("%1").arg(m_pOutputItem->m_4Hour.m_nType));
 	newItem_4->setTextAlignment(Qt::AlignCenter);
 	newItem_4->setFlags(newItem_4->flags() & (~Qt::ItemIsEditable));
-	this->setItem(0, 2, newItem_4);
+	this->setItem(0, 3, newItem_4);
 
 	QTableWidgetItem *newItem_5 = new QTableWidgetItem(QString("%1").arg(m_pOutputItem->m_72Hour.m_nType));
 	newItem_5->setTextAlignment(Qt::AlignCenter);
 	newItem_5->setFlags(newItem_5->flags() & (~Qt::ItemIsEditable));
-	this->setItem(1, 2, newItem_5);
+	this->setItem(1, 3, newItem_5);
 
 	QTableWidgetItem *newItem_6 = new QTableWidgetItem(QString("%1").arg(m_pOutputItem->m_4Hour.m_szLinkedTagName));
 	newItem_6->setTextAlignment(Qt::AlignCenter);
 	newItem_6->setFlags(newItem_6->flags() & (~Qt::ItemIsEditable));
-	this->setItem(0, 3, newItem_6);
+	this->setItem(0, 4, newItem_6);
 
 	QTableWidgetItem *newItem_7 = new QTableWidgetItem(QString("%1").arg(m_pOutputItem->m_72Hour.m_szLinkedTagName));
 	newItem_7->setTextAlignment(Qt::AlignCenter);
 	newItem_7->setFlags(newItem_7->flags() & (~Qt::ItemIsEditable));
-	this->setItem(1, 3, newItem_7);
+	this->setItem(1, 4, newItem_7);
 
 	QPushButton *pushButton = new QPushButton("");
 	pushButton->setFlat(true);
-	this->setCellWidget(0, 3, pushButton);
+	this->setCellWidget(0, 4, pushButton);
 	connect(pushButton, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_1 = new QPushButton("");
 	pushButton_1->setFlat(true);
-	this->setCellWidget(1, 3, pushButton_1);
+	this->setCellWidget(1, 4, pushButton_1);
 	connect(pushButton_1, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	setColumnWidth(0, 100);
 	setColumnWidth(1, 200);
-	setColumnWidth(2, 100);
-	setColumnWidth(3, 300);
+	setColumnWidth(2, 200);
+	setColumnWidth(3, 100);
+	setColumnWidth(4, 300);
+
+	connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(itemChanged(QTableWidgetItem *)));
 }
 
 
@@ -115,6 +132,20 @@ QString COutputTableWidget::GetBindValue()
 	return "";
 }
 
+void COutputTableWidget::itemChanged(QTableWidgetItem * item)
+{
+	if (item->column() == 2 && item->row() == 0)
+	{
+		m_pOutputItem->m_4Hour.m_strDescription = item->text();
+		m_pOutputItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 1)
+	{
+		m_pOutputItem->m_72Hour.m_strDescription = item->text();
+		m_pOutputItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+	}
+}
+
 void COutputTableWidget::Slot_SetBindValue()
 {
 	QString strBindValue = GetBindValue();
@@ -135,7 +166,7 @@ void COutputTableWidget::Slot_SetBindValue()
 
 	for (int i = 0; i < rowCount(); i++)
 	{
-		if (this->cellWidget(i, 3) == pushBtn)
+		if (this->cellWidget(i, 4) == pushBtn)
 		{
 			m_pOutputItem->m_vecTableInfo[i].m_szLinkedTagName = strBindValue;
 		}

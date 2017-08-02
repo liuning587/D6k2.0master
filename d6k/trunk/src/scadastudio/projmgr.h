@@ -1,13 +1,18 @@
 #ifndef PROJMGR_H
 #define PROJMGR_H
 
+#include "scadastudio/iprojmgr.h"
+
 #include <QObject>
 #include <QLibrary>
-#include "scadastudio/iprojmgr.h"
-#include "../src/equipmentmodel/equipmentmodel.h"
-
+#include <QtXml/qdom.h>
+//#include "../src/equipmentmodel/equipmentmodel.h"
 //class IMainModuleInterface;
 class  CCore;
+class QMainWindow;
+class QLibrary;
+class QAction;
+
 class CProjMgr : public QObject, public IProjMgr
 {
 	Q_OBJECT
@@ -70,7 +75,7 @@ private:
 	QString m_strProjectPath;
 
     QLibrary* m_pModelLib;
-    equipmentmodel* m_pModelDll;
+	QMainWindow* m_pModelDll;
 
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActs[MaxRecentFiles];

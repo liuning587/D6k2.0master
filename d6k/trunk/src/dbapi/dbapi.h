@@ -9,13 +9,13 @@
 
 #include "var_info.h"
 
-class DBAPI_EXPORT dbapi
+class DBAPI_EXPORT CDB_API
 {
 	enum { ORACLE, MYSQL };
 
 public:
-	dbapi(QString strConnName);
-	~dbapi();
+	CDB_API(QString strConnName);
+	~CDB_API();
 
 	bool open(const QString& strDns = SERVICENAME, const QString& strUserName = UID,
 		const QString& strPassword = PWD, int nType = ORACLE, int timeout = 20);

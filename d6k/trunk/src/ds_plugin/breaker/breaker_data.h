@@ -78,6 +78,9 @@ typedef unsigned char   BIT08;  //08位
 
 #define DBG_CODE_RM_CTRL             30//遥控
 
+#define DBG_CODE_SIGNALRESET       31//信号复归
+
+#define  DBG_CODE_ClearSOE            32 //清除SOE
 
 
 /* 1. 数值类型段 */
@@ -282,6 +285,14 @@ public:
 	//soe暂未用
 	DBG_MSG2 m_SoeIndex;
 	//
+};
+
+//soe clear
+class DEG_SOE_CLEAR : public DBG_HEADER
+{
+public:
+	//soe  type
+	unsigned char m_SoeType;
 };
 
 //soe num

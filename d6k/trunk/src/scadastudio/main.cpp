@@ -31,6 +31,8 @@
 #include <QFile>
 #include <QDebug>
 
+#include <QDomDocument>
+
 typedef CUIMgr *(*Fun)();
 //
  
@@ -52,7 +54,6 @@ bool LogMsg(char *pszMoudleName, char *szLogTxt, int nLevel)
 	return false;
 }
 
-#include <QDomDocument>
 int main(int argc, char *argv[])
 {
 	QFile file("config.xml");

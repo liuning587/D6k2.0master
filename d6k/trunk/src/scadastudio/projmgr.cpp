@@ -25,8 +25,7 @@
 #include "scadastudio/base.h"
 #include "scadastudio/tabwidget.h"
 
-typedef equipmentmodel* (*ModelTool)();
-
+typedef QMainWindow* (*GetDeviceTemplate)();
 
 CProjMgr::CProjMgr(CCore *pCore)
 	:m_pCore(NULL), m_pDomDocument(NULL), m_pFile(nullptr), m_strFile("")
@@ -41,17 +40,17 @@ CProjMgr::CProjMgr(CCore *pCore)
 	
 	m_pCore = pCore;
 
-	QAction *pAct = new QAction(tr("open"), pCore->GetUIMgr()->menuBar());
+	QAction *pAct = new QAction(tr("Open"), pCore->GetUIMgr()->menuBar());
 	pAct->setIcon(QIcon(OPEN_GROUP_PNG));
 	QMenu *pMenu = pCore->GetUIMgr()->menuBar()->addMenu(QObject::tr("&File"));
 
-	QAction *pActSave = new QAction(tr("save"), pCore->GetUIMgr()->menuBar());
+	QAction *pActSave = new QAction(tr("Save"), pCore->GetUIMgr()->menuBar());
 	pActSave->setIcon(QIcon(SAVE_PNG));
 
-	QAction *pCreateNewProjectAct = new QAction(tr("new"), pCore->GetUIMgr()->menuBar());
+	QAction *pCreateNewProjectAct = new QAction(tr("New"), pCore->GetUIMgr()->menuBar());
 	pCreateNewProjectAct->setIcon(QIcon(NEW_PNG));
 
-	QAction *pCloseProjectAct = new QAction(tr("close"), pCore->GetUIMgr()->menuBar());
+	QAction *pCloseProjectAct = new QAction(tr("Close"), pCore->GetUIMgr()->menuBar());
 	pCloseProjectAct->setIcon(QIcon(CLOSE_PROJECT_PNG));
 
 	pMenu->addAction(pCreateNewProjectAct);
@@ -651,24 +650,28 @@ void CProjMgr::EquipmentModel()
     }
 
 #ifdef _DEBUG
-    m_pModelLib = new QLibrary("equipmentmodeld");
+    m_pModelLib = new QLibrary("devicetemplate");
 #else
-    m_pModelLib = new QLibrary("equipmentmodel");
+    m_pModelLib = new QLibrary("devicetemplate");
 #endif
+
+	QString strTmp = QObject::tr("device template dll load fail!!!");
 
     //判断是否正确加载
     if (!m_pModelLib->load())
     {
-        QMessageBox warning(QMessageBox::Warning, "Warning", QStringLiteral("Model加载失败!!!"));
+        QMessageBox warning(QMessageBox::Warning, "Warning", strTmp);
         warning.exec();
         return;
     }
 
+	m_pCore->LogMsg(FES_DESC, strTmp.toStdString().c_str(), LEVEL_1);
+
     // 获取模型工具
-    ModelTool getModelToolDll = (ModelTool)m_pModelLib->resolve("GetModelToolDll");
-    if (getModelToolDll)
+	GetDeviceTemplate getDeviceTemplate = (GetDeviceTemplate)m_pModelLib->resolve("GetDeviceTemplate");
+    if (getDeviceTemplate)
     {
-        m_pModelDll = getModelToolDll();
+        m_pModelDll = getDeviceTemplate();
         m_pModelDll->show();
     }
 }

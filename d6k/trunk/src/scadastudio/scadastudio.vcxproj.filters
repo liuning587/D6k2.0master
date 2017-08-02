@@ -2116,6 +2116,24 @@
     <ClCompile Include="kwhcumulativestatisticsmodel.cpp">
       <Filter>module\config\fes config\his\kwhcumulative</Filter>
     </ClCompile>
+    <ClCompile Include="log\base_module.cpp">
+      <Filter>module\log</Filter>
+    </ClCompile>
+    <ClCompile Include="log\logimpl.cpp">
+      <Filter>module\log</Filter>
+    </ClCompile>
+    <ClCompile Include="log\write_log_task.cpp">
+      <Filter>module\log</Filter>
+    </ClCompile>
+    <ClCompile Include="log\msglog.cpp">
+      <Filter>module\log</Filter>
+    </ClCompile>
+    <ClCompile Include="log\log_config.cpp">
+      <Filter>module\log</Filter>
+    </ClCompile>
+    <ClCompile Include="log\ui_log.cpp">
+      <Filter>module\log</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="channel.h">
@@ -2965,5 +2983,31 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="scadastudio.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="log\base_module.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
+    <ClInclude Include="log\logimpl.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
+    <ClInclude Include="log\singleton.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
+    <ClInclude Include="log\stl_util-inl.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
+    <ClInclude Include="log\write_log_task.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
+    <ClInclude Include="log\msglog.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
+    <ClInclude Include="log\log_config.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
+    <ClInclude Include="log\ui_log.h">
+      <Filter>module\log</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -489,6 +489,7 @@ void CFixdDeploy::Slot_ReadFixData(DEV_BASE &devRead)
 //更新定值参数
 void CFixdDeploy::UpdateDevData(QTableWidget *pCurrentTable, int iNumber, const QString &strValue)
 {
+
 	//更新装置参数信息
 	int iRowNumber = 0;
 
@@ -512,6 +513,18 @@ void CFixdDeploy::UpdateDevData(QTableWidget *pCurrentTable, int iNumber, const 
 	if (pCurrentTable->rowCount() > iRowNumber)
 	{
 		pCurrentTable->item(iRowNumber, 1)->setText(strValue);
+
+		int nColumn = pCurrentTable->columnCount() - 1;
+		if (pCurrentTable->item(iRowNumber, nColumn-1)->text() == "String")
+		{
+			pCurrentTable->item(iRowNumber, nColumn)->setText(QString::number(strValue.length()));
+		}
+
+		//if ((iRowNumber == 9 || iRowNumber == 10) && strValue.length() == 6)
+		//{
+		//	QString strText = QString::number(strValue.at(0).toLatin1()) + ":" + QString::number(strValue.at(1).toLatin1()) + ":" +
+		//		QString::number(strValue.at(2).toLatin1()) + ":" + QString::number(strValue.at(3).toLatin1()) + ":" + QString::number(strValue.at(4).toLatin1()) + ":" + QString::number(strValue.at(5).toLatin1()) + ":";
+		//}
 	}
 	else
 	{

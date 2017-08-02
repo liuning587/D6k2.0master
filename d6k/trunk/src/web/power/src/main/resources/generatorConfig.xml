@@ -17,7 +17,7 @@
 
         <!-- jdbc连接 -->
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/D6000?useSSL=true" userId="d6k"
+                        connectionURL="jdbc:mysql://localhost:3306/D6000?useSSL=true&amp;useUnicode=TRUE&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;failOverReadOnly=false" userId="d6k"
                         password="d6k2" />
 
         <!-- 类型转换 -->

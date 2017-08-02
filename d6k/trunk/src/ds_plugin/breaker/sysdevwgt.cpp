@@ -1,4 +1,4 @@
-#include "sysdevwgt.h"
+ï»¿#include "sysdevwgt.h"
 #include "breaker_module.h"
 #include "analysepointtable.h"
 #include "netmanager.h"
@@ -8,6 +8,8 @@
 #include <memory>
 #include <QDateTime>
 #include <QMenu>
+#include <QLineEdit>
+#include <QHostAddress>
 
 
 CSysDevWgt::CSysDevWgt(CNetManager *pNetManager, QWidget *parent)
@@ -21,13 +23,48 @@ CSysDevWgt::CSysDevWgt(CNetManager *pNetManager, QWidget *parent)
 	}
 	m_pNetManager = pNetManager;
 
+	m_pLineEdIp1 = new QLineEdit;
+
+	QRegExp ipRegExp = QRegExp("^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$");
+
+	QRegExpValidator *ipRegExpValidator = new QRegExpValidator(ipRegExp, this);
+	m_pLineEdIp1->setValidator(ipRegExpValidator);
+	m_pLineEdIp1->setInputMask("000.000.000.000");
+
+	m_pLineEdMask1 = new QLineEdit;
+	m_pLineEdMask1->setValidator(ipRegExpValidator);
+	m_pLineEdMask1->setInputMask("000.000.000.000");
+
+	//
+	m_pLineEdGate1 = new QLineEdit;
+	m_pLineEdGate1->setValidator(ipRegExpValidator);
+	m_pLineEdGate1->setInputMask("000.000.000.000");
+
+
+	m_pLineEdIp2 = new QLineEdit;
+	m_pLineEdIp2->setValidator(ipRegExpValidator);
+	m_pLineEdIp2->setInputMask("000.000.000.000");
+
+	//
+	m_pLineEdMask2 = new QLineEdit;
+	//
+	m_pLineEdMask2->setValidator(ipRegExpValidator);
+	m_pLineEdMask2->setInputMask("000.000.000.000");
+
+	m_pLineEdGate2 = new QLineEdit;
+	m_pLineEdGate2->setValidator(ipRegExpValidator);
+	m_pLineEdGate2->setInputMask("000.000.000.000");
+
+
+
 	ui.tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	InitData();
-	//ÓÒ»÷²Ëµ¥
+	//å³å‡»èœå•
 	ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui.tableWidget, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
+
 
 }
 
@@ -36,7 +73,7 @@ CSysDevWgt::~CSysDevWgt()
 }
 
 
-//³õÊ¼»¯Êı¾İ
+//åˆå§‹åŒ–æ•°æ®
 void CSysDevWgt::InitData()
 {
 	const std::map<int, std::shared_ptr<CDevInfo> > &pPointTable = GetBreakerModuleApi()->GetPointTable()->GetSystemInfoDevInfo();
@@ -44,6 +81,8 @@ void CSysDevWgt::InitData()
 	for (auto item : pPointTable)
 	{
 		int nRow = ui.tableWidget->rowCount();
+
+		ui.tableWidget->insertRow(nRow);
 
 		QTableWidgetItem *pItem0 = new QTableWidgetItem;
 		pItem0->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -70,30 +109,72 @@ void CSysDevWgt::InitData()
 		pItem5->setText(item.second->m_strDevRange);
 
 
-		QTableWidgetItem *pItem6 = new QTableWidgetItem;
-		pItem6->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
-		pItem6->setText(QString::number(item.second->m_strValue));
+// 		QTableWidgetItem *pItem6 = new QTableWidgetItem;
+// 		pItem6->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
+// 
+// 		pItem6->setText(QString::number(item.second->m_strValue));
+		if (nRow == IP_ROW_NUM)
+		{
+			m_pLineEdIp1->setText(GetFormatData(item.second->m_strValue));
+			ui.tableWidget->setCellWidget(nRow,6,m_pLineEdIp1);
+		}
+		else if (nRow == MASK_ROW_NUM)
+		{
+			m_pLineEdMask1->setText(GetFormatData(item.second->m_strValue));
+			ui.tableWidget->setCellWidget(nRow, 6, m_pLineEdMask1);
+		}
+		else if (nRow == MASK_ROW_GATE)
+		{
+			m_pLineEdGate1->setText(GetFormatData(item.second->m_strValue));
+			ui.tableWidget->setCellWidget(nRow, 6, m_pLineEdGate1);
+		}
+		else if (nRow == IP_ROW_NUM2)
+		{
+			m_pLineEdIp2->setText(GetFormatData(item.second->m_strValue));
+			ui.tableWidget->setCellWidget(nRow, 6, m_pLineEdIp2);
+		}
+		else if (nRow == MASK_ROW_NUM2)
+		{
+			m_pLineEdMask2->setText(GetFormatData(item.second->m_strValue));
+			ui.tableWidget->setCellWidget(nRow, 6, m_pLineEdMask2);
+		}
+		else if (nRow == MASK_ROW_GATE2)
+		{
+			m_pLineEdGate2->setText(GetFormatData(item.second->m_strValue));
+			ui.tableWidget->setCellWidget(nRow, 6, m_pLineEdGate2);
+		}
+		else
+		{
+			QTableWidgetItem *pItem6 = new QTableWidgetItem;
+			pItem6->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
+			
+			pItem6->setText(QString::number(item.second->m_strValue));
+
+			ui.tableWidget->setItem(nRow, 6, pItem6);
+			m_IdItem.insert(std::make_pair(item.second->m_nPointNum, pItem6));
+		}
 
 		QTableWidgetItem *pItem7 = new QTableWidgetItem;
 		pItem7->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-		ui.tableWidget->insertRow(nRow);
+		
 		ui.tableWidget->setItem(nRow, 0, pItem0);
 		ui.tableWidget->setItem(nRow, 1, pItem1);
 		ui.tableWidget->setItem(nRow, 2, pItem2);
 		ui.tableWidget->setItem(nRow, 3, pItem3);
 		ui.tableWidget->setItem(nRow, 4, pItem4);
 		ui.tableWidget->setItem(nRow, 5, pItem5);
-		ui.tableWidget->setItem(nRow, 6, pItem6);
+
+		//ui.tableWidget->setItem(nRow, 6, pItem6);
 		ui.tableWidget->setItem(nRow, 7, pItem7);
 
-		m_IdItem.insert(std::make_pair(item.second->m_nPointNum, pItem6));
+		
 	}
 }
 
 void CSysDevWgt::Slot_RecvNewRealTimeData(DBG_GET_MEAS &tMeas)
 {
-	//¸üĞÂÊµÊ±Êı¾İ
+	//æ›´æ–°å®æ—¶æ•°æ®
 
 	int nDataNum = tMeas.msgLeg.GetAddr() / sizeof(DBG_GET_MEAS::MEAS_DATA);
 
@@ -105,18 +186,51 @@ void CSysDevWgt::Slot_RecvNewRealTimeData(DBG_GET_MEAS &tMeas)
 		if (pPointTable.find(tMeas.m_data[i].infoaddr) != pPointTable.end())
 		{
 
-			//int ÀàĞÍÊı¾İ
+			//
 			if (m_IdItem.find(tMeas.m_data[i].infoaddr) != m_IdItem.end())
 			{
 				QString strValue = QString::number(*(int *)tMeas.m_data[i].measData);
 
-				//¸üĞÂÊı¾İ
+				//æ›´æ–°æ•°æ®
 				m_IdItem[tMeas.m_data[i].infoaddr]->setText(strValue);
 
 				ui.tableWidget->item(m_IdItem[tMeas.m_data[i].infoaddr]->row(), 7)->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz"));
 			}
+			else
+			{
+				int nData = *(int *)tMeas.m_data[i].measData;
+				if (tMeas.m_data[i].infoaddr == IP_ROW_NUM)
+				{
+					//7
+					m_pLineEdIp1->setText(QHostAddress(nData).toString());
+				}
+				else if (tMeas.m_data[i].infoaddr == MASK_ROW_NUM)
+				{
+					m_pLineEdMask1->setText(QHostAddress(nData).toString());
+				}
+				else if (tMeas.m_data[i].infoaddr == MASK_ROW_GATE)
+				{
+					m_pLineEdGate1->setText(QHostAddress(nData).toString());
+				}
+				else if (tMeas.m_data[i].infoaddr == IP_ROW_NUM2)
+				{
+					m_pLineEdIp2->setText(QHostAddress(nData).toString());
+				}
+				else if (tMeas.m_data[i].infoaddr == MASK_ROW_NUM2)
+				{
+					m_pLineEdMask2->setText(QHostAddress(nData).toString());
+				}
+				else if (tMeas.m_data[i].infoaddr == MASK_ROW_GATE2)
+				{
+					m_pLineEdGate2->setText(QHostAddress(nData).toString());
+				}
+
+				ui.tableWidget->item(tMeas.m_data[i].infoaddr, 7)->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz"));
+
+			}
 
 		}
+
 
 	}
 }
@@ -126,9 +240,9 @@ void CSysDevWgt::Slot_ContextMenuRequest(const QPoint &cPoint)
 	Q_UNUSED(cPoint);
 	QMenu *pMenu = new QMenu(ui.tableWidget);
 
-	QAction *pUpdateAct = new QAction(QStringLiteral("¸üĞÂ"), ui.tableWidget);
+	QAction *pUpdateAct = new QAction(QStringLiteral("æ›´æ–°"), ui.tableWidget);
 	pMenu->addAction(pUpdateAct);
-	QAction *pSetAct = new QAction(QStringLiteral("ÉèÖÃ"), ui.tableWidget);
+	QAction *pSetAct = new QAction(QStringLiteral("è®¾ç½®"), ui.tableWidget);
 	pMenu->addAction(pSetAct);
 
 	connect(pUpdateAct, SIGNAL(triggered()), this, SLOT(Slot_UpdateData()));
@@ -138,7 +252,7 @@ void CSysDevWgt::Slot_ContextMenuRequest(const QPoint &cPoint)
 	pMenu->deleteLater();
 }
 
-//¶¨Öµ»ñÈ¡
+//å®šå€¼è·å–
 void CSysDevWgt::Slot_UpdateData()
 {
 	DBG_HEADER dbgHeader;
@@ -146,41 +260,92 @@ void CSysDevWgt::Slot_UpdateData()
 	dbgHeader.header1 = 0x55;
 
 	dbgHeader.msgLeg.SetAddr(1);
-	//»ñÈ¡ÏµÍ³²ÎÊı¶¨Öµ
+	//è·å–ç³»ç»Ÿå‚æ•°å®šå€¼
 	dbgHeader.type = DBG_CODE_GET_SYSCFG;
 
 	m_pNetManager->GetSender()->OnSendRequest(&dbgHeader);
 }
 
 
-//ÉèÖÃ¶¨Öµ
+//è®¾ç½®å®šå€¼
 void CSysDevWgt::Slot_SetDevData()
 {
-	QList<int> lstRows = GetSelectRows();
-	if (lstRows.count() == 0)
-	{
-		return;
-	}
+// 	QList<int> lstRows = GetSelectRows();
+// 	if (lstRows.count() == 0)
+// 	{
+// 		return;
+// 	}
 
 	DBG_GET_MEAS devData;
 	devData.header0 = 0xAA;
 	devData.header1 = 0x55;
-	devData.msgLeg.SetAddr(1 + sizeof(DBG_GET_MEAS::MEAS_DATA) *lstRows.count());   //³¤¶È°üÀ¨¹¦ÄÜÂë
+	devData.msgLeg.SetAddr(1 + sizeof(DBG_GET_MEAS::MEAS_DATA) *ui.tableWidget->rowCount());   //é•¿åº¦åŒ…æ‹¬åŠŸèƒ½ç 
 	devData.type = DBG_CODE_SET_SYSCFG;
 
-	for (int i = 0; i < lstRows.count(); i++)
+	for (int i = 0; i < ui.tableWidget->rowCount(); i++)
 	{
-		devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
-		int *pnData = (int *)devData.m_data[i].measData;
-		*pnData = ui.tableWidget->item(i, 6)->text().toInt();
+		if (i == IP_ROW_NUM)
+		{
+			//7
+			devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
+			int *pnData = (int *)devData.m_data[i].measData;
+			*pnData = QHostAddress(m_pLineEdIp1->text()).toIPv4Address();
+		}
+		else if (i == MASK_ROW_NUM)
+		{
+			//8
+			devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
+			int *pnData = (int *)devData.m_data[i].measData;
+			*pnData = QHostAddress(m_pLineEdMask1->text()).toIPv4Address();
+
+		}
+		else if (i == MASK_ROW_GATE)
+		{
+			//9
+			devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
+			int *pnData = (int *)devData.m_data[i].measData;
+			*pnData = QHostAddress(m_pLineEdGate1->text()).toIPv4Address();
+
+		}
+		else if (i == IP_ROW_NUM2)
+		{
+			//10
+			devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
+			int *pnData = (int *)devData.m_data[i].measData;
+			*pnData = QHostAddress(m_pLineEdIp2->text()).toIPv4Address();
+
+		}
+		else if (i == MASK_ROW_NUM2)
+		{
+			//11
+			devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
+			int *pnData = (int *)devData.m_data[i].measData;
+			*pnData = QHostAddress(m_pLineEdMask2->text()).toIPv4Address();
+
+		}
+		else if (i == MASK_ROW_GATE2)
+		{
+			//12
+			devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
+			int *pnData = (int *)devData.m_data[i].measData;
+			*pnData = QHostAddress(m_pLineEdGate2->text()).toIPv4Address();
+
+		}
+		else
+		{
+			devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
+			int *pnData = (int *)devData.m_data[i].measData;
+			*pnData = ui.tableWidget->item(i, 6)->text().toInt();
+		}
+
 	}
 
 	m_pNetManager->GetSender()->OnSend4Data(devData);
-	GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("·¢ËÍ¶¨ÖµÉèÖÃ°ü").toLocal8Bit().data(), 1);
+	GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("å‘é€å®šå€¼è®¾ç½®åŒ…").toLocal8Bit().data(), 1);
 }
 
 
-//»ñÈ¡Ñ¡ÖĞµÄĞĞºÅ
+//è·å–é€‰ä¸­çš„è¡Œå·
 QList<int> CSysDevWgt::GetSelectRows()
 {
 	QList<int> lstSelectRows;
@@ -206,4 +371,11 @@ QList<int> CSysDevWgt::GetSelectRows()
 	}
 
 	return lstSelectRows;
+}
+
+QString CSysDevWgt::GetFormatData(int nData)
+{
+	QHostAddress taddr(nData);
+	QString strValue = taddr.toString();
+	return strValue;
 }

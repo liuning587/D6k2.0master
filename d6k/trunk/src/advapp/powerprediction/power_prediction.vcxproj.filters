@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_custom_delegate.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_inverter_group_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_inverter_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_inverter_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_inverter_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_inverter_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_module.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_output_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_output_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_output_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_output_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_station_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_station_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_station_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_station_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_tree.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_weather_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_weather_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_weather_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_predict_weather_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\qrc_power_prediction.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_custom_delegate.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_inverter_group_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_inverter_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_inverter_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_inverter_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_inverter_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_module.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_output_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_output_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_output_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_output_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_station_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_station_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_station_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_station_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_tree.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_weather_model.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_weather_table.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_weather_table_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_predict_weather_widget.cpp" />
+    <ClCompile Include="predict_inverter_model.cpp" />
+    <ClCompile Include="predict_inverter_table.cpp" />
+    <ClCompile Include="predict_inverter_group_table_widget.cpp" />
+    <ClCompile Include="predict_inverter_table_widget.cpp" />
+    <ClCompile Include="predict_inverter_widget.cpp" />
+    <ClCompile Include="predict_module.cpp" />
+    <ClCompile Include="predict_output_model.cpp" />
+    <ClCompile Include="predict_output_table.cpp" />
+    <ClCompile Include="predict_output_table_widget.cpp" />
+    <ClCompile Include="predict_output_widget.cpp" />
+    <ClCompile Include="predict_station_model.cpp" />
+    <ClCompile Include="predict_station_table.cpp" />
+    <ClCompile Include="predict_station_widget.cpp" />
+    <ClCompile Include="predict_weather_model.cpp" />
+    <ClCompile Include="predict_weather_table.cpp" />
+    <ClCompile Include="predict_weather_table_widget.cpp" />
+    <ClCompile Include="predict_weather_widget.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_addstationdialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_addstationdialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="addstationdialog.cpp">
+      <Filter>form\addstation</Filter>
+    </ClCompile>
+    <ClCompile Include="predict_tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="predict_station_table_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="predict_datainfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="predict_define.h" />
+    <ClInclude Include="define.h" />
+    <ClInclude Include="predict_datainfo.h" />
+    <ClInclude Include="GeneratedFiles\ui_addstationdialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="predict_output_table_widget.h" />
+    <CustomBuild Include="predict_inverter_table_widget.h" />
+    <CustomBuild Include="predict_inverter_group_table_widget.h" />
+    <CustomBuild Include="predict_weather_table_widget.h" />
+    <CustomBuild Include="predict_station_table_widget.h" />
+    <CustomBuild Include="predict_output_model.h" />
+    <CustomBuild Include="predict_output_table.h" />
+    <CustomBuild Include="predict_output_widget.h" />
+    <CustomBuild Include="predict_weather_model.h" />
+    <CustomBuild Include="predict_weather_table.h" />
+    <CustomBuild Include="predict_weather_widget.h" />
+    <CustomBuild Include="predict_custom_delegate.h" />
+    <CustomBuild Include="predict_station_table.h" />
+    <CustomBuild Include="predict_station_model.h" />
+    <CustomBuild Include="predict_inverter_table.h" />
+    <CustomBuild Include="predict_inverter_model.h" />
+    <CustomBuild Include="predict_station_widget.h" />
+    <CustomBuild Include="predict_inverter_widget.h" />
+    <CustomBuild Include="predict_module.h" />
+    <CustomBuild Include="GeneratedFiles\debug\moc_predefs.h.cbt" />
+    <CustomBuild Include="GeneratedFiles\release\moc_predefs.h.cbt" />
+    <CustomBuild Include="power_prediction.qrc" />
+    <CustomBuild Include="addstationdialog.ui">
+      <Filter>form\addstation</Filter>
+    </CustomBuild>
+    <CustomBuild Include="addstationdialog.h">
+      <Filter>form\addstation</Filter>
+    </CustomBuild>
+    <CustomBuild Include="predict_tree.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="powerprediction.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="powerprediction_zh-CN.ts" />
+    <None Include="images\add.jpg" />
+    <None Include="images\add1.jpg" />
+    <None Include="images\close_group.png" />
+    <None Include="images\data_pic.jpg" />
+    <None Include="images\device.png" />
+    <None Include="images\document-save-all.png" />
+    <None Include="images\document-save.png" />
+    <None Include="images\group.jpg" />
+    <None Include="images\list-add.png" />
+    <None Include="images\list-remove.png" />
+    <None Include="images\minus.jpg" />
+    <None Include="images\open_group.png" />
+    <None Include="images\powerpredict.png" />
+    <None Include="images\powerpredictitem.png" />
+    <None Include="images\rename_1.png" />
+    <None Include="images\run-build.png" />
+    <None Include="images\save.jpg" />
+    <None Include="images\setting.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="form">
+      <UniqueIdentifier>{300bf710-0602-495b-9f37-788587396c3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{95a1ccfc-8716-4247-b8f2-19a52c1557b8}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{4f94470f-0e12-4eb4-b9d9-8f5d22245fc7}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="form\addstation">
+      <UniqueIdentifier>{83d65bec-e7fb-4fad-973a-b24b5f568220}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

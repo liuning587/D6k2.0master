@@ -26,13 +26,13 @@
 #include "scadastudiodefine.h"
 #include "logdefine.h"
 
-#include <qscrollbar.h>
-#include <QTcpServer>
-#include <QTcpSocket>
+
+#include <QScrollBar>
 #include <QTabWidget>
 #include <QHeaderView>
 #include <QMenu>
 #include <QClipboard>
+#include <QTimerEvent>
 
 /*! \fn CSysOutDock::CSysOutDock(QWidget *parent)
 ********************************************************************************************************* 
@@ -44,10 +44,10 @@
 ** \date 2015年11月16日 
 ** \note 
 ********************************************************************************************************/
-CSysOutDock::CSysOutDock(QWidget *parent)
-	: QDockWidget(parent)
+CSysOutDock::CSysOutDock(CUiLog &uilog,QWidget *parent)
+	:m_UiLog(uilog), QDockWidget(parent)
 {	
-	this->setWindowTitle(QStringLiteral("系统输出"));
+	this->setWindowTitle(tr("Output"));
 	
 	setFeatures(DockWidgetFeature::AllDockWidgetFeatures);
 
@@ -59,15 +59,7 @@ CSysOutDock::CSysOutDock(QWidget *parent)
 
 	setWidget(m_pMessageTab);
 
-	m_pTcpServer = new QTcpServer(this);
-
-	////!todo 此处需要注意，如果程序多开的话，可能会导致监听失败  LiJin 2017.6.14
-	//bool bRet = m_pTcpServer->listen(QHostAddress::Any, 19999); //监听任何连上19999端口的ip  
-	//Q_ASSERT(bRet);
-
-	//connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(newConnection())); //新连接信号触发，调用newConnect()槽函数，这个跟信号函数一样，其实你可以随便取。
-
-	//createCommandView();
+	m_nLogTimerId = startTimer(800);
 }
 
 /*! \fn CSysOutDock::~CSysOutDock()
@@ -84,21 +76,47 @@ CSysOutDock::~CSysOutDock()
 
 }
 
-void CSysOutDock::AddItem(MSG_LOG &log, QColor &color /*= QColor()*/)
+void  CSysOutDock::timerEvent(QTimerEvent *pEvent)
 {
-	m_pLogModel->AddItem(log, color);
-}
+	if (pEvent->timerId() == m_nLogTimerId)
+	{
+		size_t nCnt = m_UiLog.GetLogCount();
+		bool bRet = false;
+		std::shared_ptr<CMsgLog> pLog;
 
+		if (nCnt)
+		{
+			while (nCnt)
+			{
+				bRet = m_UiLog.TakeMsgLog(pLog);
+				if (bRet)
+				{
+					m_pLogModel->AddItem(pLog);
+				}
+				nCnt = m_UiLog.GetLogCount();
+			}
+		}
+	}
+}
 void CSysOutDock::resizeEvent(QResizeEvent *event)
 {
-	m_pLogView->setColumnWidth(0, m_pLogView->horizontalHeader()->width() * 3 / 30);
-	m_pLogView->setColumnWidth(1, m_pLogView->horizontalHeader()->width() * 3 / 30);
-	m_pLogView->setColumnWidth(2, m_pLogView->horizontalHeader()->width() * 15 / 30);
-	m_pLogView->setColumnWidth(3, m_pLogView->horizontalHeader()->width() * 3 / 30);
-	m_pLogView->setColumnWidth(4, m_pLogView->horizontalHeader()->width() * 3 / 30);
-	m_pLogView->setColumnWidth(5, m_pLogView->horizontalHeader()->width() * 3 / 30);
+// 	m_pLogView->setColumnWidth(0, m_pLogView->horizontalHeader()->width() * 3 / 30);
+// 	m_pLogView->setColumnWidth(1, m_pLogView->horizontalHeader()->width() * 3 / 30);
+// 	m_pLogView->setColumnWidth(2, m_pLogView->horizontalHeader()->width() * 15 / 30);
+// 	m_pLogView->setColumnWidth(3, m_pLogView->horizontalHeader()->width() * 3 / 30);
+// 	m_pLogView->setColumnWidth(4, m_pLogView->horizontalHeader()->width() * 3 / 30);
+// 	m_pLogView->setColumnWidth(5, m_pLogView->horizontalHeader()->width() * 3 / 30);
+//	QDockWidget::resizeEvent(event);
 
-	QDockWidget::resizeEvent(event);
+	Q_UNUSED(event);
+	m_pLogView->setColumnWidth(0, m_pLogView->horizontalHeader()->width() / 30);
+	m_pLogView->setColumnWidth(1, m_pLogView->horizontalHeader()->width() / 15);
+	m_pLogView->setColumnWidth(2, m_pLogView->horizontalHeader()->width() / 15);
+	m_pLogView->setColumnWidth(3, m_pLogView->horizontalHeader()->width() / 15);
+	m_pLogView->setColumnWidth(4, m_pLogView->horizontalHeader()->width() * 9 / 30);
+	m_pLogView->setColumnWidth(5, m_pLogView->horizontalHeader()->width() * 10 / 30);
+	m_pLogView->setColumnWidth(6, m_pLogView->horizontalHeader()->width() / 15);
+	m_pLogView->setColumnWidth(7, m_pLogView->horizontalHeader()->width() / 15);
 }
 
 /*! \fn void CSysOutDock::createCommandView()
@@ -112,15 +130,15 @@ void CSysOutDock::resizeEvent(QResizeEvent *event)
 ********************************************************************************************************/
 void CSysOutDock::CreateCommandView()
 {
-	m_commandView = new CSystemOutputView(this);
+	m_pCommandView = new CSystemOutputView(this);
 
-	m_commandModel = new CSystemOutputModel(this);
+	m_pCommandModel = new CSystemOutputModel(this);
 
-	m_commandView->setModel(m_commandModel);
+	m_pCommandView->setModel(m_pCommandModel);
 
-	m_commandView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pCommandView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-	m_pMessageTab->addTab(m_commandView, QIcon(":/images/new.png"), "CommandT");
+	m_pMessageTab->addTab(m_pCommandView, QIcon(":/images/new.png"), "CommandT");
 }
 
 /*! \fn void CSysOutDock::createLogCommandView()
@@ -146,6 +164,7 @@ void CSysOutDock::CreateLogCommandView()
 
 	m_pMessageTab->addTab(m_pLogView, QIcon(":/images/new.png"), tr("Log"));
 }
+#if 0
 /*! \fn void CSysOutDock::newConnection()
 ********************************************************************************************************* 
 ** \brief CSysOutDock::newConnection 
@@ -161,7 +180,6 @@ void CSysOutDock::newConnection()
 
 	connect((QObject *)newsocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 }
-
 /*! \fn void CSysOutDock::readyRead()
 ********************************************************************************************************* 
 ** \brief CSysOutDock::readyRead 
@@ -186,6 +204,7 @@ void CSysOutDock::readyRead()
 		qba = local->read(sizeof(MSG_LOG));
 	}	 
 }
+#endif
 
 void CSysOutDock::ModelRowsInserted(const QModelIndex & parent, int start, int end)
 {

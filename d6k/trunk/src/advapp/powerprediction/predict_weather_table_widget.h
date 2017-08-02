@@ -29,6 +29,7 @@ public:
 	public slots:
 	//…Ë÷√∞Û∂®÷µ 
 	void Slot_SetBindValue();
+	void itemChanged(QTableWidgetItem *item);
 private:
 
 	CWeatherData*    m_pWeatherItem;

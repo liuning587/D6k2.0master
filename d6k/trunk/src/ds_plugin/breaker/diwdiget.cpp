@@ -148,19 +148,19 @@ void CDiWdiget::Slot_UpdateData()
 //设置定值
 void CDiWdiget::Slot_SetDevData()
 {
-	QList<int> lstRows = GetSelectRows();
-	if (lstRows.count() == 0)
-	{
-		return;
-	}
+// 	QList<int> lstRows = GetSelectRows();
+// 	if (lstRows.count() == 0)
+// 	{
+// 		return;
+// 	}
 
 	DBG_GET_MEAS devData;
 	devData.header0 = 0xAA;
 	devData.header1 = 0x55;
-	devData.msgLeg.SetAddr(1 + sizeof(DBG_GET_MEAS::MEAS_DATA) *lstRows.count());   //长度包括功能码
+	devData.msgLeg.SetAddr(1 + sizeof(DBG_GET_MEAS::MEAS_DATA) *ui.tableWidget->rowCount());   //长度包括功能码
 	devData.type = DBG_CODE_SET_DICFG;
 
-	for (int i = 0; i < lstRows.count(); i++)
+	for (int i = 0; i < ui.tableWidget->rowCount(); i++)
 	{
 		devData.m_data[i].infoaddr = ui.tableWidget->item(i, 1)->text().toInt();
 

@@ -15,7 +15,7 @@ struct MailBoxConf
 	int MailNum; //! ” œ‰»›¡ø 
 };
 
-static std::array<MailBoxConf, 10> s_arrMailBoxs =
+static std::array<MailBoxConf, 11> s_arrMailBoxs =
 {
 	"DBG_SVC", 0, 100, 
 	"DB_SVC", 0, 100, 
@@ -25,6 +25,7 @@ static std::array<MailBoxConf, 10> s_arrMailBoxs =
 	"ALARM_INGRAPH", 0, 1000, 
 	"ALARM_SCD_WIN",0,1000,
 	"ALARM_SCD_INGRAPH",0,1000,
+	"RT_GRAPH",0,1000,
 	"LOGIC_SVC", 0, 100, 
 	"SCD_DBG_SVC", 0, 100
 };

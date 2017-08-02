@@ -83,3 +83,9 @@ bool CBreakSender::OnSendSoeRequest(DEG_GET_SOE * pSeoRequest)
 	return m_pSocketConnect->WriteSocketData((char*)(pSeoRequest), sizeof(DEG_GET_SOE));
 
 }
+
+bool CBreakSender::OnSendSoeClearRequestr(DEG_SOE_CLEAR &dgbData)
+{
+	qDebug() << QByteArray((char*)(&dgbData), sizeof(DEG_SOE_CLEAR)).toHex();
+	return m_pSocketConnect->WriteSocketData((char*)(&dgbData), sizeof(DEG_SOE_CLEAR));
+}

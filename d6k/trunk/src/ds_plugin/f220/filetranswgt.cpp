@@ -2,6 +2,7 @@
 #include "commthread.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDir>
 
 QString g_FileName = "";
 
@@ -25,6 +26,7 @@ CFileTransWgt::CFileTransWgt(CCommThread *pCommunicate, QWidget *parent)
 CFileTransWgt::~CFileTransWgt()
 {
 }
+
 
 void CFileTransWgt::SendUpdateFile(const QString & fileName, const QString & tDir)
 {
@@ -75,7 +77,8 @@ void CFileTransWgt::SendUpdateFile(const QString & fileName, const QString & tDi
 
 		tCatalogRequest.m_fileInfo = tReadAction;
 
-		m_pCommuncate->SendCatalogRequest(tCatalogRequest);
+
+		//m_pCommuncate->SendCatalogRequest(tCatalogRequest);
 		//Slot_CheckDeviceTable();
 
 		FILE_ATTR_INFO tWriteAction;
@@ -282,7 +285,7 @@ void CFileTransWgt::Slot_upLoadItems()
 
 		tCatalogRequest.m_fileInfo = tReadAction;
 
-		m_pCommuncate->SendCatalogRequest(tCatalogRequest);
+		//m_pCommuncate->SendCatalogRequest(tCatalogRequest);
 		//Slot_CheckDeviceTable();
 
 		FILE_ATTR_INFO tWriteAction;
@@ -389,7 +392,13 @@ void CFileTransWgt::Slot_UpdateConform(int nFlag)
 {
 	Q_UNUSED(nFlag);
 
-	QString strFilename = qApp->applicationDirPath() + "/ini/pluginconfig.xml";
-	QString strPath = "/config";
-	SendUpdateFile(strFilename, strPath);
+
+	QDir tDir(qApp->applicationDirPath() + "/ini/f220/updatefile/");
+	QFileInfoList lstFiles = tDir.entryInfoList(QDir::Files);
+
+	for (int i = 0; i < lstFiles.count(); i++)
+	{
+		SendUpdateFile(qApp->applicationDirPath() + "/ini/f220/updatefile/" + lstFiles.at(i).fileName(), "");
+
+	}
 }

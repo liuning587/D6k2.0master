@@ -24,8 +24,8 @@ CDebugWidget::CDebugWidget(CNetManager *pNetManager, QWidget *parent)
 	ui.tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	InitData();
 	//ÓÒ»÷²Ëµ¥
-	ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui.tableWidget, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
+	//ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	//connect(ui.tableWidget, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
 
 }
 

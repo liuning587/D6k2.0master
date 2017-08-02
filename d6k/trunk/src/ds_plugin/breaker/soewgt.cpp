@@ -53,16 +53,16 @@ CSoeWgt::~CSoeWgt()
 }
 
 //处理action数据
-void CSoeWgt::AnaylseActionData(SOE_ACTION_INFO *pAction)
+int CSoeWgt::AnaylseActionData(SOE_ACTION_INFO *pAction)
 {
 	Q_ASSERT(pAction);
 	if (pAction == nullptr)
 	{
-		return;
+		return 0;
 	}
 
-	//1位code位   2为soe事件类型 和动作状态为
-	int nDataNum = (pAction->msgLeg.GetAddr()-1-sizeof(SOE_INFO_HEADER)-2) / sizeof(SOE_ACTION_INFO::DEG_ACTION_ITEM);
+	//最多10个故障值
+	int nDataNum = 10;
 
 	QTableWidgetItem *pItem0 = new QTableWidgetItem;
 	pItem0->setText(pAction->m_Time.Dump());
@@ -99,6 +99,12 @@ void CSoeWgt::AnaylseActionData(SOE_ACTION_INFO *pAction)
 
 	for (int i=0; i<nDataNum; i++)
 	{
+		if (pAction->m_data[i].dataType.GetAddr() == 0xffff)
+		{
+			//最后一个侧值
+			nDataNum = i+1;
+			break;
+		}
 		if (pPointTable.find(pAction->m_data[i].dataType.GetAddr()) != pPointTable.end())
 		{
 			strDefalut += "   " + pPointTable.at(pAction->m_data[i].dataType.GetAddr())->m_strName + "=" + QString::number(*(int*)pAction->m_data[i].measData ) + pPointTable.at(pAction->m_data[i].dataType.GetAddr())->m_strUnit;
@@ -113,6 +119,7 @@ void CSoeWgt::AnaylseActionData(SOE_ACTION_INFO *pAction)
 	ui.tableWidget->setItem(0, 2, pItem2);
 	ui.tableWidget->setItem(0, 3, pItem3);
 
+	return nDataNum * sizeof(SOE_ACTION_INFO::DEG_ACTION_ITEM) + sizeof(CPTimeMs) + 1 + 2; //1为类型   2为soe类型and动作状态
 }
 
 void CSoeWgt::AnayseIoData(SOE_IO_INFO * pIO)
@@ -120,6 +127,9 @@ void CSoeWgt::AnayseIoData(SOE_IO_INFO * pIO)
 	const std::map<int, std::shared_ptr<CDIDOInfo> > &pDiPointTable = GetBreakerModuleApi()->GetPointTable()->GetDIInfo();
 
 	const std::map<int, std::shared_ptr<CDIDOInfo> > &pDoPointTable = GetBreakerModuleApi()->GetPointTable()->GetDOInfo();
+
+	const std::map<int, std::shared_ptr<CSOFTSTRAP> > &pSoftPointTable = GetBreakerModuleApi()->GetPointTable()->GetSoftInfo();
+
 
 	QTableWidgetItem *pItem0 = new QTableWidgetItem;
 	pItem0->setText(pIO->m_Time.Dump());
@@ -151,7 +161,19 @@ void CSoeWgt::AnayseIoData(SOE_IO_INFO * pIO)
 	{
 		//虚拟点
 		pItem1->setText(QStringLiteral("虚拟点"));
-		pItem2->setText(QString::number(pIO->m_cID));
+
+		for (auto item : pSoftPointTable)
+		{
+			if (item.second->m_nOwnId == pIO->m_cID)
+			{
+				pItem2->setText(item.second->m_strName);
+				break;
+			}
+			else
+			{
+				pItem2->setText(QString::number(pIO->m_cID));
+			}
+		}
 	}
 	else
 	{
@@ -270,7 +292,7 @@ void CSoeWgt::Slot_SoeUpdate(int nType)
 //情况表格
 void CSoeWgt::Slot_ClearTable()
 {
-	QTableWidget *pCurrentWgt = (QTableWidget*)sender()->parent()->parent();
+	QTableWidget *pCurrentWgt = (QTableWidget*)sender()->parent();
 
 	if (pCurrentWgt != nullptr)
 	{
@@ -293,8 +315,9 @@ void CSoeWgt::Slot_ContextMenuRequest(const QPoint & point)
 	pMenu->deleteLater();
 }
 
+#include <QDebug>
 //更新数据
-void CSoeWgt::Slot_RecvNewRealTimeData(DEG_SOE_DETAIL &tSoeDetail)
+void CSoeWgt::Slot_RecvNewRealTimeData(DEG_SOE_DETAIL tSoeDetail)
 {
 	//数据长度，减去code字段
 	int nDataLength = tSoeDetail.msgLeg.GetAddr() - 1;
@@ -305,40 +328,60 @@ void CSoeWgt::Slot_RecvNewRealTimeData(DEG_SOE_DETAIL &tSoeDetail)
 		return;
 	}
 
-	if (tSoeDetail.SOEDATA[0] == SOE_ACTION)
+	//位移计算
+	int nOffSet = 0;
+	char *pStart = tSoeDetail.SOEDATA;
+
+	while (nOffSet <nDataLength)
 	{
-		/*!< 保护动作事件 */
-		SOE_ACTION_INFO *pAction = (SOE_ACTION_INFO *)(&tSoeDetail);
-		AnaylseActionData(pAction);
+		pStart = tSoeDetail.SOEDATA + nOffSet;
+
+		if (pStart[0] == SOE_ACTION)
+		{
+			/*!< 保护动作事件 */
+			SOE_ACTION_INFO *pAction = (SOE_ACTION_INFO *)(pStart - sizeof(DBG_HEADER));
+			nOffSet += AnaylseActionData(pAction);
+		}
+		else if (pStart[0] == SOE_DIEVENT)
+		{
+			/*!< 开入变位事件 */
+			SOE_IO_INFO *pAction = (SOE_IO_INFO *)(pStart - sizeof(DBG_HEADER));
+			AnayseIoData(pAction);
+			nOffSet += sizeof(CPTimeMs) + 1 + 3;  //1soe类型  3实际的三个字段
+		}
+		else if (pStart[0] == SOE_ABNORMAL)
+		{
+			/*!< 异常事件 */
+			SOE_ID_INFO *pAction = (SOE_ID_INFO *)(pStart - sizeof(DBG_HEADER));
+			AnalyseAbnormalData(pAction);
+			nOffSet += sizeof(CPTimeMs) + 1 + 1;  //1soe类型  1实际的1个字段
+
+		}
+		else if (pStart[0] == SOE_RUN)
+		{
+			/*!< 运行事件 */
+			SOE_ID_INFO *pAction = (SOE_ID_INFO *)(pStart - sizeof(DBG_HEADER));
+			AnalyseRuningData(pAction);
+			nOffSet += sizeof(CPTimeMs) + 1 + 1;  //1soe类型  1实际的1个字段
+
+		}
+		else if (pStart[0] == SOE_WAVE_FILE)
+		{
+			/*!< 录波事件 */
+			SOE_ID_INFO *pAction = (SOE_ID_INFO *)(pStart - sizeof(DBG_HEADER));
+			AnalyseRecordData(pAction);
+			nOffSet += sizeof(CPTimeMs) + 1 + 1;  //1soe类型  1实际的1个字段
+		}
+		else if (pStart[0] == SOE_TRACE)
+		{
+			/*!< 调试信息 */
+			SOE_ID_INFO *pAction = (SOE_ID_INFO *)(pStart - sizeof(DBG_HEADER));
+			nOffSet += sizeof(CPTimeMs) + 1 + 1;  //1soe类型  1实际的1个字段
+
+		}
 	}
-	else if (tSoeDetail.SOEDATA[0] == SOE_DIEVENT)
-	{
-		/*!< 开入变位事件 */
-		SOE_IO_INFO *pAction = (SOE_IO_INFO *)(&tSoeDetail);
-		AnayseIoData(pAction);
-	}
-	else if (tSoeDetail.SOEDATA[0] == SOE_ABNORMAL)
-	{
-		/*!< 异常事件 */
-		SOE_ID_INFO *pAction = (SOE_ID_INFO *)(&tSoeDetail);
-		AnalyseAbnormalData(pAction);
-	}
-	else if (tSoeDetail.SOEDATA[0] == SOE_RUN)
-	{
-		/*!< 运行事件 */
-		SOE_ID_INFO *pAction = (SOE_ID_INFO *)(&tSoeDetail);
-		AnalyseRuningData(pAction);
-	}
-	else if (tSoeDetail.SOEDATA[0] == SOE_WAVE_FILE)
-	{
-		/*!< 录波事件 */
-		SOE_ID_INFO *pAction = (SOE_ID_INFO *)(&tSoeDetail);
-		AnalyseRecordData(pAction);
-	}
-	else if (tSoeDetail.SOEDATA[0] == SOE_TRACE)
-	{
-		/*!< 调试信息 */
-	}
+
+
 
 	
 }

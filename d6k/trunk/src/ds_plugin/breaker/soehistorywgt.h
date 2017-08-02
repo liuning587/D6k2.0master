@@ -12,6 +12,7 @@ class QProgressBar;
 class QTableWidgetItem;
 class QFtp;
 class QFile;
+class QProcess;
 
 class CSoeHistoryWgt : public QWidget
 {
@@ -59,10 +60,12 @@ public:
 	void SetFtpDir(const QString &strFtpDIr);
 	//
 	void FtpDownLoadFile(const QString &strFilename);
+	//调用录波软件
+	void StartWaveExe(const QString &strFilename);
 public slots:
 
 //收取详细信息
-    void Slot_RecvNewRealTimeData(DEG_SOE_DETAIL &tSoeDetail);
+    void Slot_RecvNewRealTimeData(DEG_SOE_DETAIL tSoeDetail);
 
 	//清除
 	void Slot_ClearTable();
@@ -80,6 +83,8 @@ public slots:
 	void Slot_DownloadProcess(qint64 bytesReceived, qint64 bytesTotal);
 	//error
 	void Slot_FtpDone(bool);
+	//保存历史事件
+	void SaveHistoryEvent();
 
 private:
 	Ui::CSoeHistoryWgt ui;
@@ -113,5 +118,5 @@ private:
 	QStringList m_lstFilelst;
 	//文件
 	QFile *m_pDownLoadFile;
-
+	QProcess *m_pCommProcess;
 };

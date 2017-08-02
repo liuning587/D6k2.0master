@@ -27,11 +27,12 @@ CApduSender::CApduSender(QObject *parent):
     m_k  = 0;
     m_w = 0;
     m_nSendNum = 0;
+	m_nStartNode = 0;
 
 	m_pFileTransfor = new QTimer(this);
 	//
 	connect(m_pFileTransfor, SIGNAL(timeout()), this, SLOT(Slot_FileTransPort()));
-	m_pFileTransfor->setInterval(1000);
+	m_pFileTransfor->setInterval(50);
 	m_nDevIndex = 0;
 	m_pDevTimer = new QTimer(this);
 	m_pDevTimer->setInterval(1000);
@@ -150,7 +151,7 @@ int CApduSender::Send_I(char *pBuff, int nLen)
     FormatAPCI(pBuff,nLen);
 
     //是否能发送
-    if (m_pComm104Pln->m_k >= DEFAULT_MAX_K_VALUE)  //大于设定的值将不发送I帧格式数据
+    if (m_pComm104Pln->m_k > DEFAULT_MAX_K_VALUE)  //大于设定的值将不发送I帧格式数据
     {
         return SEND_ERROR_K;
     }
@@ -738,23 +739,26 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 		//当前数据在所节点
 		int nSetIndex = 0;
 		//数据个数
-
+		int nNumbers = 0;
 		//数据长度
 		int nPagLength = sizeof(APCI) + sizeof(ASDU_BASE) + sizeof(ASDUADDR2) + sizeof(unsigned char);
 		
 
 		for (int i = 0; i < pRequestDz->m_lstData.count(); i++)
 		{
-
 			if (nPagLength + nSetIndex + sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength >= 255)
 			{
-				m_nDevIndex = i;
+				m_nDevIndex = nNumbers;
 				Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
 				//memset(buf, 0, 255);
 				nSetIndex = 0;
 				m_pDevTimer->start();
 				return true;
 			}
+
+			nNumbers++;
+			pAsdudz->vsq = nNumbers;
+
 			//信息体地址
 			INFOADDR3 *pAddr = (INFOADDR3*)(buf+nPagLength+nSetIndex);
 
@@ -1374,6 +1378,9 @@ bool CApduSender::OnSendWriteFileAction(const FILE_ATTR_INFO& fileAttr)
 	*/
 	m_btWriteData = fileAttr.m_btArrayData;
 
+	m_nStartNode = 0;
+ 
+
 	char buf[255] = { 0 };
 
 	//读文件激活
@@ -1404,6 +1411,8 @@ bool CApduSender::OnSendWriteFileAction(const FILE_ATTR_INFO& fileAttr)
 	 
 	//文件大小
 	INFOADDR4 *infoFileSize = (INFOADDR4*)(pReadActionData + 2 + fileAttr.m_cFileNameLength+sizeof(INFOADDR4));
+	infoFileSize->SetAddr(fileAttr.m_FileSize);
+
 
 	int nResult = Send_I(buf, sizeof(FILE_BASE) + 2 + fileAttr.m_cFileNameLength + sizeof(INFOADDR4)*2);
 
@@ -1427,6 +1436,7 @@ bool CApduSender::OnSendWriteFileData()
 	//分包发送文件
 	if (m_btWriteData.isEmpty())
 	{
+		m_nStartNode = 0;
 		m_pFileTransfor->stop();
 		return true;
 	}
@@ -1471,7 +1481,7 @@ bool CApduSender::OnSendWriteFileData()
 		infoFileID->SetAddr(0);
 		//数据段号
 		INFOADDR4 *infoNodeID = (INFOADDR4*)(pReadActionData + 1 + sizeof(INFOADDR4));
-		infoNodeID->SetAddr(i);
+		infoNodeID->SetAddr(m_nStartNode);
 
 		//后续标识
 		int nResult = 0;
@@ -1482,32 +1492,38 @@ bool CApduSender::OnSendWriteFileData()
 			//最后一个包
 			pReadActionData[1 + sizeof(INFOADDR4)*2] = 0;
 			//
-			strcpy(pReadActionData + 2 + sizeof(INFOADDR4) * 2, m_btWriteData.mid(i*nMaxDataSize));
+
+			memcpy(pReadActionData + 2 + sizeof(INFOADDR4) * 2, m_btWriteData.mid(i*nMaxDataSize), m_btWriteData.size());
 
 			//pReadActionData[2 + sizeof(INFOADDR4) * 2 + nMaxDataSize] = checkAllData(m_btWriteData.mid(i*nMaxDataSize, nMaxDataSize).data(), nMaxDataSize);
 
 			nCurrentLength = m_btWriteData.size() - nMaxDataSize*i;
 
 			//和校验
-			pReadActionData[2 + sizeof(INFOADDR4) * 2 + nMaxDataSize] = checkAllData(m_btWriteData.mid(i*nMaxDataSize).data(), nCurrentLength);
+			//pReadActionData[2 + sizeof(INFOADDR4) * 2 + nMaxDataSize] = checkAllData(m_btWriteData.mid(i*nMaxDataSize).data(), nCurrentLength);
 
 			m_btWriteData.clear();
 
 		}
 		else
 		{
+			qDebug() << m_btWriteData.mid(i*nMaxDataSize, nMaxDataSize).toHex();
+
 			//中间包
 			pReadActionData[1 + sizeof(INFOADDR4)*2] = 1;
 
-			strcpy(pReadActionData +2 + sizeof(INFOADDR4) * 2, m_btWriteData.mid(i*nMaxDataSize,nMaxDataSize));
+			memcpy(pReadActionData +2 + sizeof(INFOADDR4) * 2,m_btWriteData.mid(i*nMaxDataSize,nMaxDataSize).data(),nMaxDataSize);
 
 			//和校验
-			pReadActionData[2 + sizeof(INFOADDR4) * 2 + nMaxDataSize] = checkAllData(m_btWriteData.mid(i*nMaxDataSize, nMaxDataSize).data(),nMaxDataSize);
+			//pReadActionData[2 + sizeof(INFOADDR4) * 2 + nMaxDataSize] = checkAllData(m_btWriteData.mid(i*nMaxDataSize, nMaxDataSize).data(),nMaxDataSize);
 			nCurrentLength = nMaxDataSize;
 
 			m_btWriteData.remove(0, i*nMaxDataSize+ nMaxDataSize);
+			m_nStartNode += nMaxDataSize;
 		}
-
+		qDebug() << QByteArray(pReadActionData, 100).toHex();
+		qDebug() << QByteArray(buf, sizeof(FILE_BASE) + 2 + sizeof(INFOADDR4) * 2 + nCurrentLength + 1).toHex();
+		
 		nResult = Send_I(buf, sizeof(FILE_BASE) + 2 + sizeof(INFOADDR4) * 2 + nCurrentLength + 1);
 
 		
@@ -1538,6 +1554,7 @@ void CApduSender::ClearDataInfo()
 
 void CApduSender::Slot_OnSendMidDevData()
 {
+
 	if (m_nDevIndex == m_WriteDevInfo.m_lstData.count())
 	{
 		m_pDevTimer->stop();
@@ -1576,18 +1593,22 @@ void CApduSender::Slot_OnSendMidDevData()
 	//数据长度
 	int nPagLength = sizeof(APCI) + sizeof(ASDU_BASE) + sizeof(ASDUADDR2) + sizeof(unsigned char);
 
-
+	//当前发送个数
+	int nNumbers = 0;
 	for (int i = m_nDevIndex; i < pRequestDz->m_lstData.count(); i++)
 	{
-
 		if (nPagLength + nSetIndex + sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength >= 255)
 		{
 			Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
 			//memset(buf, 0, 255);
 			nSetIndex = 0;
-			m_nDevIndex = i;
+			m_nDevIndex = nNumbers;
 			return;
 		}
+
+		nNumbers++;
+		pAsdudz->vsq = nNumbers;
+
 		//信息体地址
 		INFOADDR3 *pAddr = (INFOADDR3*)(buf + nPagLength + nSetIndex);
 
@@ -1656,6 +1677,13 @@ void CApduSender::Slot_OnSendMidDevData()
 
 void CApduSender::Slot_FileTransPort()
 {
+	if (m_pComm104Pln->m_k > DEFAULT_MAX_K_VALUE)  //大于设定的值将不发送I帧格式数据
+	{
+		qDebug() << "ggggggggggggggggg";
+		return;
+	}
+	qDebug() << "m_kkkkkkkkkkkkkkk:"<< m_pComm104Pln->m_k;
+
 	OnSendWriteFileData();
 }
 

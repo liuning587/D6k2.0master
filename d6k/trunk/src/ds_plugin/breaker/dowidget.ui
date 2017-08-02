@@ -33,7 +33,7 @@
      </column>
      <column>
       <property name="text">
-       <string>值</string>
+       <string>开出脉冲时间(毫秒)</string>
       </property>
      </column>
      <column>

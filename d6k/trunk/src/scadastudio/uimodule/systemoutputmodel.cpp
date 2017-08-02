@@ -23,7 +23,8 @@
 #include "systemoutputmodel.h"
 #include "logdefine.h"
 #include "uimodule/systemoutputview.h"
-
+#include "log/logimpl.h"
+#include "log/msglog.h"
 #include <QDebug>
 
 /*! \fn CSystemOutputModel::CSystemOutputModel(QObject *parent, int rowCount, int colCount)
@@ -46,15 +47,25 @@ CSystemOutputModel::CSystemOutputModel(QObject *parent, int rowCount, int colCou
 	Q_UNUSED(colCount);
 	
 	//QTextCodec::setCodecForCStrings(QTextCodec::codecForName("GBK"));
-	this->m_rowCount = 0;
-	this->m_colCount = colCount;
+	this->m_nRowCount = 0;
+	this->m_nColCount = colCount;
 
-	m_horizontal_header_list.append(tr("date"));
-	m_horizontal_header_list.append(QStringLiteral("time"));
-	m_horizontal_header_list.append(QStringLiteral("desc"));
-	m_horizontal_header_list.append(QStringLiteral("module"));
-	m_horizontal_header_list.append(QStringLiteral("thread id"));
-	m_horizontal_header_list.append(QStringLiteral("process id"));
+	m_lstHeader.append(("!"));
+	m_lstHeader.append((tr("Index")));
+	m_lstHeader.append(tr("Date"));
+	m_lstHeader.append(tr("Time"));
+	m_lstHeader.append(tr("Module Name"));
+
+	m_lstHeader.append(tr("Comment"));
+	m_lstHeader.append(tr("Process ID"));
+	m_lstHeader.append(tr("Thread ID"));
+
+// 	m_lstHeader.append(tr("date"));
+// 	m_lstHeader.append(QStringLiteral("time"));
+// 	m_lstHeader.append(QStringLiteral("desc"));
+// 	m_lstHeader.append(QStringLiteral("module"));
+// 	m_lstHeader.append(QStringLiteral("thread id"));
+// 	m_lstHeader.append(QStringLiteral("process id"));
 }
 /*! \fn CSystemOutputModel::~CSystemOutputModel()
 ********************************************************************************************************* 
@@ -83,7 +94,7 @@ int	CSystemOutputModel::columnCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
 
-	return m_colCount;
+	return m_nColCount;
 }
 
 /*! \fn int CSystemOutputModel::rowCount(const QModelIndex &parent) const
@@ -99,7 +110,7 @@ int	CSystemOutputModel::columnCount(const QModelIndex &parent) const
 int CSystemOutputModel::rowCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
-	return (int)m_items.size();
+	return  static_cast <int>  (m_arrLogs.size());
 }
 
 /*! \fn QVariant CSystemOutputModel::data(const QModelIndex &index, int role) const
@@ -115,13 +126,16 @@ int CSystemOutputModel::rowCount(const QModelIndex &parent) const
 ********************************************************************************************************/
 QVariant CSystemOutputModel::data(const QModelIndex &index, int role) const
 {
-	if (!index.isValid()) { return QVariant(); }
-
-
-	if (Qt::BackgroundColorRole == role)
+	if (!index.isValid()) 
 	{
-		//return  QVariant(QColor(Qt::black));
+		return QVariant(); 
 	}
+
+
+// 	if (Qt::BackgroundColorRole == role)
+// 	{
+// 		//return  QVariant(QColor(Qt::black));
+// 	}
 
 	/*
 	if(Qt::FontRole == role)
@@ -129,105 +143,75 @@ QVariant CSystemOutputModel::data(const QModelIndex &index, int role) const
 	return QVariant(CConfig::Instance().GetUIFont());
 	}
 	*/
-
-	//if (Qt::TextColorRole == role)
-	//{
-	//	int nRow = index.row();
-	//	int nCol = index.column();
-
-	//	if (nCol == 2 || nCol == 1)
-	//	{
-	//		if (nRow >= m_items.size() || nRow<0)
-	//			return QVariant();
-
-	//		CDataItem* pItem = m_items[nRow];
-
-	//		return  QVariant(pItem->m_color);
-	//	}
-	//}
-
 	if (Qt::DisplayRole == role)
 	{
 		int nRow = index.row();
 		int nCol = index.column();
 
-		if (nRow >= m_items.size() || nRow<0)
+		if (nRow >= m_arrLogs.size() || nRow < 0)
 			return QVariant();
 
-		CDataItem* pItem = m_items[nRow];
-
-		if (nCol == Date)
+		std::shared_ptr<CMsgLog> pLog = m_arrLogs[nRow];
+		Q_ASSERT(pLog != nullptr);
+		if (pLog != nullptr)
 		{
-			return tr(pItem->m_strDate.c_str());
+			if (nCol == COL_LEVEL)
+			{
+				return pLog->m_nLevel;
+			}
+			else if (nCol == COL_INDEX)
+			{
+				return pLog->m_nIndex;
+			}
+			else if (nCol == COL_DATE)
+			{
+				return pLog->m_tmLog.date().toString("yyyy-MM-dd");
+			}
+			else if (nCol == COL_TIME)
+			{
+				return pLog->m_tmLog.time().toString("hh:mm:ss.zzz");
+			}
+			else if (nCol == COL_MODULE)
+			{
+				return QString::fromLocal8Bit(pLog->m_szModuleName.c_str());
+			}
+			else if (nCol == COL_COMMENT)
+			{
+				return QString::fromLocal8Bit(pLog->m_szLogText.c_str());
+			}
+			else if (nCol == COL_PROCESS)
+			{
+				return pLog->m_nProcessId;
+			}
+			else if (nCol == COL_THREAD)
+			{
+				return pLog->m_nThreadId;
+			}
+			return QVariant();
 		}
-		else if (nCol == Time)
-		{
-			return tr(pItem->m_strTime.c_str());
-		}
-		else if (nCol == Tag)
-		{
-			//QString strMsg = QString::fromLocal8Bit((char*)(pItem->m_strMsg).c_str());
-			//return strMsg;
-			return pItem->m_strTag.c_str();
-		}
-		else if (nCol == Type)
-		{
-			return pItem->m_strType.c_str();
-		}
-		else if (nCol == ThreadId)
-		{
-			return pItem->m_nThreadID;
-		}
-		else if (nCol == ProcessID)
-		{
-			return pItem->m_nProcessID;
-		}
-
-		return QVariant();
 	}
-	else if (Qt::DisplayRole == role)
+	if (Qt::TextColorRole == role)
 	{
-		int nRow = index.row();
-		int nCol = index.column();
 
-		if (nRow >= m_items.size() || nRow < 0)
-			return QVariant();
-
-		CDataItem* pItem = m_items[nRow];
-
-		if (nCol == Date)
-		{
-			return tr(pItem->m_strDate.c_str());
-		}
-		else if (nCol == Time)
-		{
-			return tr(pItem->m_strTime.c_str());
-		}
-		else if (nCol == Tag)
-		{
-			//QString strMsg = QString::fromLocal8Bit((char*)(pItem->m_strMsg).c_str());
-			//return strMsg;
-			return pItem->m_strTag.c_str();
-		}
-		else if (nCol == Type)
-		{
-			return pItem->m_strType.c_str();
-		}
-		else if (nCol == ThreadId)
-		{
-			return pItem->m_nThreadID;
-		}
-		else if (nCol == ProcessID)
-		{
-			return pItem->m_nProcessID;
-		}
-
-		return QVariant();
 	}
-
+ 
 	return QVariant();
-}
+} 
 
+void CSystemOutputModel::AddItem(std::shared_ptr<CMsgLog> pLog)
+{
+	Q_ASSERT(pLog);
+	if (pLog == nullptr)
+		return;
+
+//	std::shared_ptr<CMsgLog>ptrLog = std::make_shared<CMsgLog>(pLog);
+	size_t nRow = m_arrLogs.size();
+
+	beginInsertRows(QModelIndex(), (int)nRow, (int)nRow);
+	m_arrLogs.push_back(pLog);
+	endInsertRows();
+}
+#if 0
 /*! \fn int  CSystemOutputModel::AddItem(MSG_LOG &log, QColor color)
 ********************************************************************************************************* 
 ** \brief CSystemOutputModel::AddItem 
@@ -267,6 +251,8 @@ int  CSystemOutputModel::AddItem(const MSG_LOG &log, QColor& color)
 	return (int)m_items.size();
 }
 
+#endif
+
 /*! \fn void CSystemOutputModel::ClearAll()
 ********************************************************************************************************* 
 ** \brief CSystemOutputModel::ClearAll 
@@ -278,22 +264,9 @@ int  CSystemOutputModel::AddItem(const MSG_LOG &log, QColor& color)
 ********************************************************************************************************/
 void CSystemOutputModel::ClearAll()
 {
-	std::vector <CDataItem*>::iterator iter = m_items.begin();
-	for (; iter != m_items.end();)
-	{
-		CDataItem* pItem = *iter;
-		if (pItem == NULL)
-		{
-			++iter;
-			continue;
-		}
-
-
-		delete pItem;
-		pItem = NULL;
-
-		iter = m_items.erase(iter);
-	}
+	beginResetModel();
+	m_arrLogs.clear();
+	endResetModel();
 }
 
 /*! \fn QVariant CSystemOutputModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -314,8 +287,8 @@ QVariant CSystemOutputModel::headerData(int section, Qt::Orientation orientation
 	{
 		if (orientation == Qt::Horizontal) // 水平表头  
 		{
-			if (m_horizontal_header_list.size() > section)
-				return m_horizontal_header_list[section];
+			if (m_lstHeader.size() > section)
+				return m_lstHeader[section];
 			else
 				return section + 1;
 		}

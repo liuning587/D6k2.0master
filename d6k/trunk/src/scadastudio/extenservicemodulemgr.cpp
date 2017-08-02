@@ -198,7 +198,7 @@ bool CExtendServiceModuleMgr::LoadPlugInXml()
 	{
 		PluginXml.close(); 
 		// logÏÂ
-		QString szLog = "Open [ " + szXmlPath + " ] failed";
+		QString szLog = QObject::tr("Open [ ") + szXmlPath + QObject::tr(" ] failed");
 
 		LogString(szLog.toStdString().c_str(), 1);
 		return false;

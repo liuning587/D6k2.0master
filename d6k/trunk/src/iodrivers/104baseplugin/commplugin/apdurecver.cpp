@@ -876,7 +876,7 @@ void CApduRecver::OnRecvSetBinaryDPAck(char* pBuff, int nLength)
 		}
 		else
 		{
-            emit Signal_ControlFeedBack(0, telectrl.m_nDataID, 0, QString::number(nRecvAckCot));
+            emit Signal_ControlFeedBack(1, telectrl.m_nDataID, 0, QString::number(nRecvAckCot));
 			telectrl.m_nCtrlType = -1;
 		}
 	
@@ -963,7 +963,19 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 		else if (tDevData.nTagType == 4)
 		{
 			//string
+			
 			tDevData.strValue = QString::fromLocal8Bit(pBuff + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2,tDevData.nLength);
+
+			if (tDevData.nAddress == 32779 || tDevData.nAddress == 32778)
+			{
+				tDevData.strValue = QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 2],2,16, QLatin1Char('0')).toUpper() + "-"
+					+ QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 3], 2, 16, QLatin1Char('0')).toUpper() + "-"
+					+ QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 4], 2, 16, QLatin1Char('0')).toUpper() + "-"
+					+ QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 5], 2, 16, QLatin1Char('0')).toUpper() + "-"
+					+ QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 6], 2, 16, QLatin1Char('0')).toUpper() + "-"
+					+ QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 7], 2, 16, QLatin1Char('0')).toUpper();
+			}
+
 		}
 		else if (tDevData.nTagType == 1)
 		{

@@ -14,6 +14,8 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QFile>
+#include <QProcess>
+#include <QDateTime>
 #include "qftp.h"
 
 CSoeHistoryWgt::CSoeHistoryWgt(CNetManager *pNetManager, QWidget *parent)
@@ -28,6 +30,11 @@ CSoeHistoryWgt::CSoeHistoryWgt(CNetManager *pNetManager, QWidget *parent)
 
 	m_pNetManager = pNetManager;
 	m_pFtp = new QFtp(this);
+	m_pCommProcess = new QProcess(this);
+
+	connect(m_pFtp, SIGNAL(dataTransferProgress(qint64, qint64)), this, SLOT(Slot_DownloadProcess(qint64, qint64)));
+	connect(m_pFtp, SIGNAL(done(bool)), this, SLOT(Slot_FtpDone(bool)));
+
 
 	m_pDownLoadFile = new QFile(this);
 
@@ -68,12 +75,50 @@ CSoeHistoryWgt::CSoeHistoryWgt(CNetManager *pNetManager, QWidget *parent)
 
 	InitProcessBar();
 
+	//排序
+	QHeaderView *headerGoods = ui.tableWidget->horizontalHeader();
+	//SortIndicator为水平标题栏文字旁边的三角指示器
+	headerGoods->setSortIndicator(0, Qt::AscendingOrder);
+	headerGoods->setSortIndicatorShown(true);
+	headerGoods->setSectionsClickable(true);
+	connect(headerGoods, SIGNAL(sectionClicked(int)), ui.tableWidget, SLOT(sortByColumn(int)));
+
+	QHeaderView *headerGoods2 = ui.tableWidget_2->horizontalHeader();
+	//SortIndicator为水平标题栏文字旁边的三角指示器
+	headerGoods2->setSortIndicator(0, Qt::AscendingOrder);
+	headerGoods2->setSortIndicatorShown(true);
+	headerGoods2->setSectionsClickable(true);
+	connect(headerGoods2, SIGNAL(sectionClicked(int)), ui.tableWidget_2, SLOT(sortByColumn(int)));
+
+	QHeaderView *headerGoods3 = ui.tableWidget_3->horizontalHeader();
+	//SortIndicator为水平标题栏文字旁边的三角指示器
+	headerGoods3->setSortIndicator(0, Qt::AscendingOrder);
+	headerGoods3->setSortIndicatorShown(true);
+	headerGoods3->setSectionsClickable(true);
+	connect(headerGoods3, SIGNAL(sectionClicked(int)), ui.tableWidget_3, SLOT(sortByColumn(int)));
+
+	//
+	QHeaderView *headerGoods4 = ui.tableWidget_4->horizontalHeader();
+	//SortIndicator为水平标题栏文字旁边的三角指示器
+	headerGoods4->setSortIndicator(0, Qt::AscendingOrder);
+	headerGoods4->setSortIndicatorShown(true);
+	headerGoods4->setSectionsClickable(true);
+	connect(headerGoods4, SIGNAL(sectionClicked(int)), ui.tableWidget_4, SLOT(sortByColumn(int)));
+
+	QHeaderView *headerGoods5 = ui.tableWidget_5->horizontalHeader();
+	//SortIndicator为水平标题栏文字旁边的三角指示器
+	headerGoods5->setSortIndicator(0, Qt::AscendingOrder);
+	headerGoods5->setSortIndicatorShown(true);
+	headerGoods5->setSectionsClickable(true);
+	connect(headerGoods5, SIGNAL(sectionClicked(int)), ui.tableWidget_5, SLOT(sortByColumn(int)));
+
 }
 
 CSoeHistoryWgt::~CSoeHistoryWgt()
 {
 	m_pFtp->deleteLater();
 	m_pDownLoadFile->deleteLater();
+	m_pCommProcess->deleteLater();
 }
 
 //发送请求数据
@@ -122,9 +167,13 @@ void CSoeHistoryWgt::Slot_ContextMenuRequest(const QPoint & point)
 		QAction *pReadAct = new QAction(QStringLiteral("读取历史事件"), (QTableWidget*)sender());
 		pMenu->addAction(pReadAct);
 
+		QAction *pSaveAct = new QAction(QStringLiteral("保存历史事件"), (QTableWidget*)sender());
+		pMenu->addAction(pSaveAct);
+
 
 		connect(pClearAct, SIGNAL(triggered()), this, SLOT(Slot_UpdateNumInfo()));
 		connect(pReadAct, SIGNAL(triggered()), this, SLOT(Slot_BeginReadHistorySoe()));
+		connect(pSaveAct, SIGNAL(triggered()), this, SLOT(SaveHistoryEvent()));
 
 		pMenu->exec(QCursor::pos());
 		pMenu->deleteLater();
@@ -204,8 +253,33 @@ void CSoeHistoryWgt::Slot_ItemDoubleClicked(QTableWidgetItem *item)
 
 void CSoeHistoryWgt::Slot_DownloadProcess(qint64 bytesReceived, qint64 bytesTotal)
 {
-	qDebug() << "1111111:" << bytesReceived;
-	qDebug() << "22222222:" << bytesTotal;
+	if (bytesReceived == bytesTotal)
+	{
+		if (bytesTotal == 0)
+		{
+			return;
+		}
+
+		m_pDownLoadFile->close();
+
+		if (m_lstFilelst.isEmpty())
+		{
+			return;
+		}
+		QString strFilename = m_lstFilelst.first().split(".").first();
+
+		m_lstFilelst.removeFirst();
+
+		if (m_lstFilelst.count() == 0)
+		{
+			//全部下载完成
+			StartWaveExe(qApp->applicationDirPath() + LB_FILE_DIR + strFilename + ".cfg");
+			return;
+		}
+
+		FtpDownLoadFile(m_lstFilelst.first());
+
+	}
 }
 
 
@@ -217,24 +291,103 @@ void CSoeHistoryWgt::Slot_FtpDone(bool bFlag)
 	}
 	else
 	{
-		m_pDownLoadFile->close();
-		
-
-		if (m_lstFilelst.isEmpty())
-		{
-			return;
-		}
-
-		m_lstFilelst.removeFirst();
-
-		if (m_lstFilelst.count() == 0)
-		{
-			return;
-		}
-
-		FtpDownLoadFile(m_lstFilelst.first());
 	}
 
+}
+
+//保存历史事件
+void CSoeHistoryWgt::SaveHistoryEvent()
+{
+	QString fileName = qApp->applicationDirPath() + LB_HSITORY_DIR + QDateTime::currentDateTime().toString("yyyyMmddhhmmss") + ".csv";
+
+	//打开.csv文件
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		qDebug() << QStringLiteral("文件写入失败");
+		return;
+	}
+
+	QTextStream out(&file);
+	//获取数据
+
+	//1111111111
+	out << QStringLiteral("SOE时间,") << QStringLiteral("事件类型,") << QStringLiteral("动作状态,") << QStringLiteral("故障侧值,")  << "\n";//表头          
+																 //获取表格内容
+	int row = ui.tableWidget->rowCount();//表格总行数
+
+	for (int i = 0; i < row; i++)
+	{
+		for (int col = 0; col < 4; col++)
+		{
+			QString string = ui.tableWidget->item(i, col)->text();
+			out << string.remove("\n").remove("\r") << ",";// 写入文件
+		}
+		out << "\n";
+	}
+
+	//2222222222
+	out << QStringLiteral("SOE时间,") << QStringLiteral("遥信类型,") << QStringLiteral("变位名称,") << QStringLiteral("变位类型,") << "\n";//表头          
+																															 //获取表格内容
+	int row2 = ui.tableWidget_2->rowCount();//表格总行数
+
+	for (int i = 0; i < row2; i++)
+	{
+		for (int col = 0; col < 4; col++)
+		{
+			QString string = ui.tableWidget_2->item(i, col)->text();
+			out << string.remove("\n").remove("\r") << ",";// 写入文件
+		}
+		out << "\n";
+	}
+
+	//3333333333333
+	out << QStringLiteral("SOE时间,") << QStringLiteral("异常信息,")<< "\n";//表头          
+																															 //获取表格内容
+	int row3 = ui.tableWidget_3->rowCount();//表格总行数
+
+	for (int i = 0; i < row3; i++)
+	{
+		for (int col = 0; col < 2; col++)
+		{
+			QString string = ui.tableWidget_3->item(i, col)->text();
+			out << string.remove("\n").remove("\r") << ",";// 写入文件
+		}
+		out << "\n";
+	}
+
+	//4444444
+	out << QStringLiteral("SOE时间,") << QStringLiteral("运行信息,") << "\n";//表头          
+																	   //获取表格内容
+	int row4 = ui.tableWidget_4->rowCount();//表格总行数
+
+	for (int i = 0; i < row4; i++)
+	{
+		for (int col = 0; col < 2; col++)
+		{
+			QString string = ui.tableWidget_4->item(i, col)->text();
+			out << string.remove("\n").remove("\r") << ",";// 写入文件
+		}
+		out << "\n";
+	}
+
+	//555555555
+	out << QStringLiteral("SOE时间,") << QStringLiteral("录波文件名,") << "\n";//表头          
+																	   //获取表格内容
+	int row5 = ui.tableWidget_5->rowCount();//表格总行数
+
+	for (int i = 0; i < row5; i++)
+	{
+		for (int col = 0; col < 2; col++)
+		{
+			QString string = ui.tableWidget_5->item(i, col)->text();
+			out << string.remove("\n").remove("\r") << ",";// 写入文件
+		}
+		out << "\n";
+	}
+
+	QMessageBox::information(this, QStringLiteral("导出数据成功"), QStringLiteral("信息已保存在%1！").arg(fileName), QStringLiteral("确定"));
+	file.close();
 }
 
 //处理action数据
@@ -308,6 +461,8 @@ void CSoeHistoryWgt::AnayseIoData(SOE_IO_INFO * pIO)
 
 	const std::map<int, std::shared_ptr<CDIDOInfo> > &pDoPointTable = GetBreakerModuleApi()->GetPointTable()->GetDOInfo();
 
+	const std::map<int, std::shared_ptr<CSOFTSTRAP> > &pSoftPointTable = GetBreakerModuleApi()->GetPointTable()->GetSoftInfo();
+
 	QTableWidgetItem *pItem0 = new QTableWidgetItem;
 	pItem0->setText(pIO->m_Time.Dump());
 
@@ -338,7 +493,20 @@ void CSoeHistoryWgt::AnayseIoData(SOE_IO_INFO * pIO)
 	{
 		//虚拟点
 		pItem1->setText(QStringLiteral("虚拟点"));
-		pItem2->setText(QString::number(pIO->m_cID));
+
+		for (auto item : pSoftPointTable)
+		{
+			if (item.second->m_nOwnId == pIO->m_cID)
+			{
+				pItem2->setText(item.second->m_strName);
+				break;
+			}
+			else
+			{
+				pItem2->setText(QString::number(pIO->m_cID));
+			}
+		}
+		
 	}
 	else
 	{
@@ -421,7 +589,10 @@ void CSoeHistoryWgt::AnalyseRecordData(SOE_ID_INFO * pSoeInfo)
 	pItem0->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
 	QTableWidgetItem *pItem1 = new QTableWidgetItem;
-	QString strData = QString::number(pSoeInfo->m_cType) + ".cfg   " + QString::number(pSoeInfo->m_cType) + ".dat";
+	char buff[128];
+	sprintf(buff, "%.2d", pSoeInfo->m_cType);
+
+	QString strData = QString(buff) + ".cfg   " + QString(buff) + ".dat";
 	pItem1->setText(strData);
 	pItem1->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
@@ -606,8 +777,11 @@ void CSoeHistoryWgt::FtpDownLoadFile(const QString &strFilename)
 	};
 
 	//QFile *pDownFile = new QFile(qApp->applicationDirPath() + LB_FILE_DIR + m_lstFilelst.first(), this);
-
-	m_pDownLoadFile->close();
+	if (m_pDownLoadFile->isOpen())
+	{
+		m_pDownLoadFile->close();
+	}
+	
 	m_pDownLoadFile->setFileName(qApp->applicationDirPath() + LB_FILE_DIR + m_lstFilelst.first());
 
 	if (m_pDownLoadFile->open(QIODevice::WriteOnly))
@@ -615,12 +789,27 @@ void CSoeHistoryWgt::FtpDownLoadFile(const QString &strFilename)
 		m_pFtp->get(m_strDir + strFilename, m_pDownLoadFile);
 	}
 
- 	connect(m_pFtp, SIGNAL(dataTransferProgress(qint64, qint64)), this, SLOT(Slot_DownloadProcess(qint64, qint64)));
-	connect(m_pFtp, SIGNAL(done(bool)), this, SLOT(Slot_FtpDone(bool)));
+}
+
+void CSoeHistoryWgt::StartWaveExe(const QString &strFilename)
+{
+	//调用录波软件
+	QString strRun = qApp->applicationDirPath() + LB_EXEC_FILE;
+
+	QFile tRunFile(strRun);
+	if (!tRunFile.exists())
+	{
+		QMessageBox::warning(0, tr("Warning"), tr("can not find :%1").arg(strRun));
+		return;
+	}
+
+	m_pCommProcess->setWorkingDirectory(qApp->applicationDirPath() + LB_EXEC_DIR);
+	m_pCommProcess->start(strRun, QStringList(strFilename));
+
 }
 
 //更新数据
-void CSoeHistoryWgt::Slot_RecvNewRealTimeData(DEG_SOE_DETAIL &tSoeDetail)
+void CSoeHistoryWgt::Slot_RecvNewRealTimeData(DEG_SOE_DETAIL tSoeDetail)
 {
 	//数据长度，减去code字段
 	int nDataLength = tSoeDetail.msgLeg.GetAddr() - 1;

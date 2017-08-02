@@ -2,6 +2,7 @@
 #include "commplugin.h"
 #include "apdusender.h"
 #include <QDateTime>
+#include <QTimer>
 
 CCommThread::CCommThread(QObject *parent)
 	: QThread(parent)
@@ -23,11 +24,22 @@ CCommThread::CCommThread(QObject *parent)
 	qRegisterMetaType<QList<Catalog_Info>>("QList<Catalog_Info>&");
 	qRegisterMetaType<ASDUGZ>("ASDUGZ");
 	qRegisterMetaType<ASDU211_UPDATE>("ASDU211_UPDATE&");
+
+	m_nTimerConnect = new QTimer;
+	m_nTimerConnect->setInterval(1000);
+	m_nTimerConnect->setSingleShot(true);
+	connect(m_nTimerConnect,SIGNAL(timeout()),this,SLOT(Solt_Connect()));
 }
 
 CCommThread::~CCommThread()
 {
+	quit();
+	wait();
+}
 
+void CCommThread::Solt_Connect()
+{
+	emit Signal_ConnectSocket();
 }
 
 //开启线程
@@ -205,11 +217,24 @@ void CCommThread::SendReadActionRequest(FILE_ATTR_INFO &ReadAction)
 
 void CCommThread::SendConnectRequest()
 {
-	emit Signal_ConnectSocket();
+	//
+	if (this->isRunning())
+	{
+		this->quit();
+		this->wait();
+	}
+	this->start();
+	
+	//m_nTimerConnect->start();
 }
 
 void CCommThread::SendDisConnectRequest()
 {
+	if (this->isRunning())
+	{
+		this->quit();
+		this->wait();
+	}
 	emit Signal_DisConnectSocket();
 }
 

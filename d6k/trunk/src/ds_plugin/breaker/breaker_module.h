@@ -27,6 +27,7 @@ class CRealtimeActionWgt;
 class CRealtimeAbnormalWgt;
 class CRealtimeSoftWgt;
 class CSoeHistoryWgt;
+class CSoeClearWgt;
 
 //点表
 #define  POINT_TABLE_FILE_NAME  "/ini/breaker/DA-R791-Point.txt"
@@ -36,8 +37,13 @@ class CSoeHistoryWgt;
 #define  BASE_INFO_FILE_NAME    "/ini/breaker/baseInfo.ini"
 //录波文件目录
 #define  LB_FILE_DIR "/ini/breaker/lbFile/"
+//录波可执行文件
+#define  LB_EXEC_DIR "/ini/breaker/lbexe/"
+#define  LB_EXEC_FILE "/ini/breaker/lbexe/NWA.exe"
+#define  LB_HSITORY_DIR "/ini/breaker/lbHistory/"
 
 #define  TIMER_INTERVAL_GET_MEAS 1000   //定时发送查询数据
+#define  TIMER_INTERVAL_GET_DEBUG 3000   //定时发送调试数据
 
 CBreakerModule *GetBreakerModuleApi();
 
@@ -102,11 +108,17 @@ public:
 		return m_pRealSoftWgt;
 	}
 
+	//获取soe描述
+	QString GetSoeDestr(int nType);
+
 	//停止定时器
 	void StopTimer();
 
 	void StartTimer();
 
+
+	//
+	void SendSoeClearRequest(int nType);
 
 public slots:
     void Slot_SocketConnectSuccess();
@@ -114,6 +126,8 @@ public slots:
 	void Slot_SocketError(QString errString);
 	//定时发送
 	void Slot_TimerSendRequest();
+	//定时发送调试数据
+	void Slot_DebugSendRequest();
 	//系统信息
 	void Slot_RecvSysInfo(DBG_GET_SYS_INFO& sysInfo);
 
@@ -132,7 +146,14 @@ public slots:
 	void Slot_DisConnectSocket();
 	//help
 	void Slot_Help();
-	
+	//信号复归
+	void Slot_Reset();
+	//soe  clear
+	void Slot_SoeClear();
+	//soe清空操作
+	void Slot_SoeClearAck();
+	//login设置
+	void Slot_LoginManager();
 
 private:
 	//模块加载工具
@@ -179,10 +200,16 @@ private:
 	QMap<int, QWidget*> m_IndexWgt;
 	//
 	QMap<QWidget*, int> m_WgtIndex;
-	//定时获取数据
+	//定时获取数据  测量数据
 	QTimer *m_pTimer;
+	//定时获取数据  调试数据
+	QTimer *m_pDebugTimer;
 	//遥控状态  0  1
 	int m_nRemoterControl;
 	//遥控执行  分  和
 	int m_nRemoteStauts;
+	//
+	CSoeClearWgt *m_pSoeClearWgt;
+	//
+	QList<int> m_ClearSoeLst;
 };

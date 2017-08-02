@@ -1,5 +1,4 @@
-#include <QMenuBar>
-#include <QToolBar>
+
 #include "scadastudio/uimgr.h"
 #include "scadastudio/treewidget.h"
 #include "scadastudio/quoteItem.h"
@@ -11,11 +10,17 @@
 #include "scadastudiodefine.h"
 #include "fesmodule.h"
 
+#include "log/logimpl.h"
+
+#include <QMenuBar>
+#include <QToolBar>
+#include <QComboBox>
+
+
 IMainWindow *GetGlobalCoreUI()
 {
 	return new CUIMgr();
 }
-
 
 CUIMgr::CUIMgr()
 	:m_pTopProjectItem(nullptr), m_pTreeModel(nullptr), m_pTreeWidget(nullptr), m_pTabWidget(nullptr), m_pAttri(nullptr), m_pExtendServiceTopItem(nullptr)
@@ -105,7 +110,7 @@ void CUIMgr::CreateDock()
 	addDockWidget(Qt::RightDockWidgetArea, m_pRightDock);
 
 	//
-	m_pSysOutDock = new CSysOutDock(this);
+	m_pSysOutDock = new CSysOutDock(CLogImpl::GetInstance()->GetUiLog(), this);
 	m_pSysOutDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetFloatable);
 	m_pSysOutDock->setAllowedAreas(Qt::AllDockWidgetAreas);
 
@@ -159,7 +164,6 @@ void CUIMgr::CreateMenus()
 ** \date 2015Äê11ÔÂ13ÈÕ
 ** \note
 ********************************************************************************************************/
-#include <QComboBox>
 void CUIMgr::CreateToolBar()
 {
 	//m_pFileToolBar = addToolBar(tr("File"));
@@ -547,7 +551,7 @@ CRightDock *CUIMgr::GetRightDock()
 
 bool CUIMgr::AddSysOutItem(MSG_LOG & msg, QColor color)
 {
-	m_pSysOutDock->AddItem(msg, color);
+//	m_pSysOutDock->AddItem(msg, color);
 
 	return true;
 }

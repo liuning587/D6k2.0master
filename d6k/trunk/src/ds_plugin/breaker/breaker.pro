@@ -5,25 +5,86 @@
 TEMPLATE = lib
 TARGET = breaker
 DESTDIR = ../../../bin
-QT += core widgets gui
+QT += core network widgets gui
 CONFIG += debug
-DEFINES += _WINDOWS WIN64 _WINDOWS WIN64 WIN64 QT_DLL QT_WIDGETS_LIB BREAKER_LIB QT_WIDGETS_LIB QT_WIDGETS_LIB
+DEFINES += _WINDOWS WIN64 _WINDOWS WIN64 _WINDOWS WIN64 WIN64 QT_DLL QT_WIDGETS_LIB BREAKER_LIB QT_WIDGETS_LIB QT_WIDGETS_LIB QT_WIDGETS_LIB QT_NETWORK_LIB
 INCLUDEPATH += . \
-    . \
     ./GeneratedFiles \
-    . \
     ./GeneratedFiles/Debug \
     ./../../../include \
     ./GeneratedFiles/debug \
     $(QTDIR)/mkspecs/win32-msvc2015 \
-    ./GeneratedFiles/debug \
-    $(QTDIR)/mkspecs/win32-msvc2015
+    $(QTDIR)/mkspecs/win32-msvc2015 \
+    ./GeneratedFiles \
+    ./communicate
+LIBS += -l../../../lib/Qt5Ftpd
 DEPENDPATH += .
 MOC_DIR += ./GeneratedFiles/debug
 OBJECTS_DIR += debug
 UI_DIR += ./GeneratedFiles
 RCC_DIR += ./GeneratedFiles
-HEADERS += ./breaker_global.h \
+HEADERS += ./analysepointtable.h \
+    ./breaker_data.h \
+    ./breaker_global.h \
     ./breaker_module.h \
-    ../../../include/devicestudio/plugin_module.h
-SOURCES += ./breaker_module.cpp
+    ../../../include/devicestudio/plugin_module.h \
+    ./configdatawgt.h \
+    ./soehistorywgt.h \
+    ./realtimesoftwgt.h \
+    ./realtimeabnormalwgt.h \
+    ./realtimeactionwgt.h \
+    ./realtimedowgt.h \
+    ./realtimediwgt.h \
+    ./soewgt.h \
+    ./softwidget.h \
+    ./diwdiget.h \
+    ./dowidget.h \
+    ./debugwidget.h \
+    ./datatimeeditwgt.h \
+    ./sysdevwgt.h \
+    ./protectdevwgt.h \
+    ./analogwgt.h \
+    ./communicate/dbg_cache.h \
+    ./communicate/socketconnect.h \
+    ./communicate/breakrecver.h \
+    ./communicate/breaksender.h \
+    ./communicate/netmanager.h
+SOURCES += ./analogwgt.cpp \
+    ./analysepointtable.cpp \
+    ./breaker_module.cpp \
+    ./datatimeeditwgt.cpp \
+    ./debugwidget.cpp \
+    ./diwdiget.cpp \
+    ./dowidget.cpp \
+    ./protectdevwgt.cpp \
+    ./realtimeabnormalwgt.cpp \
+    ./realtimeactionwgt.cpp \
+    ./realtimediwgt.cpp \
+    ./realtimedowgt.cpp \
+    ./realtimesoftwgt.cpp \
+    ./soehistorywgt.cpp \
+    ./soewgt.cpp \
+    ./softwidget.cpp \
+    ./sysdevwgt.cpp \
+    ./configdatawgt.cpp \
+    ./communicate/breakrecver.cpp \
+    ./communicate/breaksender.cpp \
+    ./communicate/dbg_cache.cpp \
+    ./communicate/netmanager.cpp \
+    ./communicate/socketconnect.cpp
+FORMS += ./configdatawgt.ui \
+    ./analogwgt.ui \
+    ./protectdevwgt.ui \
+    ./sysdevwgt.ui \
+    ./diwdiget.ui \
+    ./dowidget.ui \
+    ./debugwidget.ui \
+    ./softwidget.ui \
+    ./soewgt.ui \
+    ./realtimediwgt.ui \
+    ./realtimedowgt.ui \
+    ./realtimeactionwgt.ui \
+    ./realtimeabnormalwgt.ui \
+    ./realtimesoftwgt.ui \
+    ./datatimeeditwgt.ui \
+    ./soehistorywgt.ui

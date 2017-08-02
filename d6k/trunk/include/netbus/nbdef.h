@@ -215,8 +215,9 @@ extern "C"
 		COT_EVENT  = 4 ,        //事件信息上送
 		COT_SUB    = 5 ,        //订阅信息上送
 
-		COT_SETVAL = 6 ,        //设值数据下发
-		COT_REDATA = 7 ,        //请求数据
+		COT_SETVAL = 6 ,          //设值数据下发
+		COT_RTSETVAL = 7 ,        //设值数据下发
+		COT_REDATA   = 8 ,        //请求数据
 	};
 
 	

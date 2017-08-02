@@ -432,6 +432,7 @@ bool CCommPlugin::OnTimerRecv(int nFrameType)
 	case TYPE_S:
 	{
 		//重启t3
+		m_pTimerOut1->stop();
 		m_pTimerOut3->start();
 	}
 	break;
@@ -495,14 +496,14 @@ bool CCommPlugin::OnKwRecv(int nFrameType, int nRecvNum)
     case TYPE_I:
     {
         m_w += 1;
-        if(nRecvNum > m_nSendNum)
-        {
-            m_k = 1;
-        }
-        else
-        {
-            m_k = m_nSendNum - nRecvNum;
-        }
+        //if(nRecvNum > m_nSendNum)
+        //{
+            m_k = 0;
+       // }
+        //else
+       // {
+       //     m_k = m_nSendNum - nRecvNum;
+       // }
 		//当收到的包 数量达到DEFAULT_MAX_W_VALUE时,发送S格式消息
 		if (m_w >= DEFAULT_MAX_W_VALUE)
         {
@@ -512,14 +513,14 @@ bool CCommPlugin::OnKwRecv(int nFrameType, int nRecvNum)
         break;
     case TYPE_S:
     {
-        if(nRecvNum > m_nSendNum)
-        {
-            m_k = 1;
-        }
-        else
-        {
-            m_k = m_nSendNum - nRecvNum;
-        }
+        //if(nRecvNum > m_nSendNum)
+        //{
+            m_k = 0;
+       // }
+        //else
+       // {
+       //     m_k = m_nSendNum - nRecvNum;
+       // }
     }
         break;
     default:
@@ -812,6 +813,13 @@ void CCommPlugin::Slot_TimeOutT0()
 	m_pTimerSyncTimeMsg->stop();
 	m_pTimerKwhMsg->stop();
 
+	m_k = 0;
+	m_w = 0;
+	m_bIsRunning = false;
+	m_nRecvNum = 0;
+	m_nSendNum = 0;
+	this->StopRun();
+
 	this->StartRun(m_strIP, m_iPort);
 }
 /*********************************************************************************************************
@@ -826,6 +834,7 @@ void CCommPlugin::Slot_TimeOutT0()
 ********************************************************************************************************/
 void CCommPlugin::Slot_TimeOutT1()
 {
+	emit Signal_SocketError("trying connect TCP server2.....");
 	//t1超时 认为tcp连接发生错误 重新建立连接
 	m_k = 0;
 	m_w = 0;
@@ -838,7 +847,10 @@ void CCommPlugin::Slot_TimeOutT1()
 	m_pTimerOut2->stop();
 	m_pTimerOut3->stop();
 
-	QThread::msleep(500);
+	m_pTimeGeneralSendMsg->stop();
+	m_pTimerSyncTimeMsg->stop();
+	m_pTimerKwhMsg->stop();
+	//QThread::msleep(500);
 	this->StartRun(m_strIP, m_iPort);
 
 }
@@ -922,6 +934,7 @@ void CCommPlugin::Slot_ReadCatalogRequest(FILE_CATALOG_REQUEST_1 &catalogRequest
 
 void CCommPlugin::Slot_WriteAction(FILE_ATTR_INFO &tFileInfo)
 {
+	m_pApduSender->m_nStartNode = 0;
 	m_pApduSender->OnSendWriteFileAction(tFileInfo);
 }
 

@@ -314,7 +314,7 @@ CFtuModule::~CFtuModule()
     m_pHistory->deleteLater();
     m_pCmdHistory->deleteLater();
 	m_pFileTransWgt->deleteLater();
-// 	delete m_pWebDevice;
+ 	//m_pWebDevice->deleteLater();
 }
 
 bool CFtuModule::CommMsgLog(const char *pszModuleName, const char *pMsg, int nMsgLen, unsigned int nMsgType, const char * pMsgSubType, const char *pSource, const char *pDesc)

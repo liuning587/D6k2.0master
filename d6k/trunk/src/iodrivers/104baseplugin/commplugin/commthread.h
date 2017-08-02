@@ -7,6 +7,7 @@
 #include "asdu_info.h"
 
 class CFtuModule;
+class QTimer;
 
 class CCommThread : public QThread
 {
@@ -160,6 +161,8 @@ signals:
 public slots:
     void Slot_ConnectSuccess(QString strLocalInfo);
 
+	void Solt_Connect();
+
 private:
 	//开启线程
 	void run();
@@ -187,6 +190,8 @@ private:
 	int m_nTime2;
 	//time3
 	int m_nTime3;
+	//imte
+	QTimer *m_nTimerConnect;
 };
 
 #endif // COMMTHREAD_H

@@ -51,8 +51,8 @@ extern "C"
 		MSG_EVT_SETVAL = 0X10,  //!< 设值
 		MSG_EVT6 = 0X20,        //!< SOE事件
 		MSG_EVT7 = 0X40,        //!< 遥控事件
-		MSG_EVT_RT_SETVAL = 0X80,        //!< 遥控反校事件
-		MSG_EVT9 = 0X0100,
+		MSG_EVT8 = 0X80,        
+		MSG_EVT_RT_SETVAL = 0X0100, //!< 遥控反校事件
 		MSG_EVT10 = 0X0200,
 		MSG_EVT11 = 0X0400,
 		MSG_EVT12 = 0X0800,
@@ -64,7 +64,7 @@ extern "C"
 		| MSG_EVT_DIAG | MSG_EVT_OPER
 		| MSG_EVT_SETVAL | MSG_EVT6
 		| MSG_EVT7 | MSG_EVT_RT_SETVAL
-		| MSG_EVT9 | MSG_EVT10
+		| MSG_EVT_RT_SETVAL | MSG_EVT10
 		| MSG_EVT11 | MSG_EVT12
 		| MSG_EVT13 | MSG_EVT14
 		| MSG_EVT15 | MSG_EVT16,

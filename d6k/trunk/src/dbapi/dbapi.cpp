@@ -6,21 +6,21 @@
 #include <QVariant>
 #include <QMutexLocker>
 
-QMutex dbapi::m_mutex;
+QMutex CDB_API::m_mutex;
 
-dbapi::dbapi(QString strConnName)
+CDB_API::CDB_API(QString strConnName)
 {
 	QMutexLocker locker(&m_mutex);
 
 	m_strConnName = strConnName;
 }
 
-dbapi::~dbapi()
+CDB_API::~CDB_API()
 {
 	QMutexLocker locker(&m_mutex);
 }
 
-bool dbapi::open(const QString &strDns, const QString &strUserName, const QString &strPassword, int nType, int timeout)
+bool CDB_API::open(const QString &strDns, const QString &strUserName, const QString &strPassword, int nType, int timeout)
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -66,7 +66,7 @@ bool dbapi::open(const QString &strDns, const QString &strUserName, const QStrin
 	return true;
 }
 
-QString dbapi::lastError()
+QString CDB_API::lastError()
 {
 
 	QMutexLocker locker(&m_mutex);
@@ -74,7 +74,7 @@ QString dbapi::lastError()
 	return m_strError;
 }
 
-bool dbapi::exec(const QString &strSql)
+bool CDB_API::exec(const QString &strSql)
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -90,42 +90,42 @@ bool dbapi::exec(const QString &strSql)
 	}
 }
 
-QSqlQuery& dbapi::getSqlQuery()
+QSqlQuery& CDB_API::getSqlQuery()
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_query;
 }
 
-int dbapi::getFieldCounts()
+int CDB_API::getFieldCounts()
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_query.record().count();
 }
 
-int dbapi::getFieldIndex(QString &strFieldName)
+int CDB_API::getFieldIndex(QString &strFieldName)
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_query.record().indexOf(strFieldName);
 }
 
-bool dbapi::next()
+bool CDB_API::next()
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_query.next();
 }
 
-QVariant dbapi::getValue(int nPos)
+QVariant CDB_API::getValue(int nPos)
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_query.value(nPos);
 }
 
-QVariant dbapi::getValue(QString strFieldName)
+QVariant CDB_API::getValue(QString strFieldName)
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -134,42 +134,42 @@ QVariant dbapi::getValue(QString strFieldName)
 	return m_query.value(nIndex);
 }
 
-bool dbapi::transaction()
+bool CDB_API::transaction()
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_dbQt.transaction();
 }
 
-bool dbapi::commit()
+bool CDB_API::commit()
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_dbQt.commit();
 }
 
-bool dbapi::rollback()
+bool CDB_API::rollback()
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_dbQt.rollback();
 }
 
-bool dbapi::prepare(QString &strSql)
+bool CDB_API::prepare(QString &strSql)
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_query.prepare(strSql);
 }
 
-void dbapi::bindValue(QString strField, QVariant varValue)
+void CDB_API::bindValue(QString strField, QVariant varValue)
 {
 	QMutexLocker locker(&m_mutex);
 
 	m_query.bindValue(strField, varValue);
 }
 
-bool dbapi::exec()
+bool CDB_API::exec()
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -185,28 +185,28 @@ bool dbapi::exec()
 	}
 }
 
-void dbapi::addBindValue(QVariant varValue)
+void CDB_API::addBindValue(QVariant varValue)
 {
 	QMutexLocker locker(&m_mutex);
 
 	m_query.addBindValue(varValue);
 }
 
-void dbapi::bindValue(int &nPos, QVariant varValue)
+void CDB_API::bindValue(int &nPos, QVariant varValue)
 {
 	QMutexLocker locker(&m_mutex);
 
 	m_query.bindValue(nPos, varValue);
 }
 
-void dbapi::addBatchBindValue(QVariantList &varList)
+void CDB_API::addBatchBindValue(QVariantList &varList)
 {
 	QMutexLocker locker(&m_mutex);
 
 	m_query.addBindValue(varList);
 }
 
-bool dbapi::execBatch()
+bool CDB_API::execBatch()
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -222,7 +222,7 @@ bool dbapi::execBatch()
 	}
 }
 
-bool dbapi::getFieldType(QString strTable, QString strFieldAlasName, QString strFieldName, CVarinfo &info)
+bool CDB_API::getFieldType(QString strTable, QString strFieldAlasName, QString strFieldName, CVarinfo &info)
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -287,21 +287,21 @@ bool dbapi::getFieldType(QString strTable, QString strFieldAlasName, QString str
 	return true;
 }
 
-QString dbapi::trimmed(QString &strData) const
+QString CDB_API::trimmed(QString &strData) const
 {
 	QMutexLocker locker(&m_mutex);
 
 	return strData.trimmed();
 }
 
-QString dbapi::getFieldName(int nPos)
+QString CDB_API::getFieldName(int nPos)
 {
 	QMutexLocker locker(&m_mutex);
 
 	return m_query.record().fieldName(nPos);
 }
 
-bool dbapi::getVec(QString strSql, TwoVec &vec)
+bool CDB_API::getVec(QString strSql, TwoVec &vec)
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -335,7 +335,7 @@ bool dbapi::getVec(QString strSql, TwoVec &vec)
 
 #include <QStringList>
 
-void dbapi::close()
+void CDB_API::close()
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -344,7 +344,7 @@ void dbapi::close()
 	m_dbQt.close();
 }
 
-bool dbapi::getFieldsTypeFromTable(QString strTable, std::vector<CVarinfo> &info)
+bool CDB_API::getFieldsTypeFromTable(QString strTable, std::vector<CVarinfo> &info)
 {
 	QMutexLocker locker(&m_mutex);
 

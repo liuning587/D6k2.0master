@@ -496,22 +496,83 @@ void CPredictTree::Slot_DoubleClicked(const QModelIndex &index)
 	{
 		case POWER_PREDICT_ITEM_TYPE:
 		{
+			//场站基本信息station
+			CStationData *pStation = reinterpret_cast<CStationData *>(index.data(POINTERDATA).toLongLong());
+			Q_ASSERT(pStation);
+			if (!pStation)
+			{
+				return;
+			}
+
+			CTabWidget* pTabWidget = m_pUi->GetTabWidget();
+			Q_ASSERT(pTabWidget);
+
+			CBasicStationWidget* pWidget = new CBasicStationWidget(pTabWidget, m_pCore);
+
+			pWidget->AddToTableCtrl(pStation, staName);
+
+			pWidget->deleteLater();
+			//？
+			//m_pUi->GetTabWidget()->setCurrentWidget(pWidget);
+
 			break;
 		}
 		case POWER_PREDICT_STATION_TYPE:
 		{
 			//CPlantInfo* pItem = reinterpret_cast<CPlantInfo*>(index.data(POWER_PREDICT_STATION_TYPE).toLongLong());
 			
-			CPlantInfo* pItem = reinterpret_cast<CPlantInfo*>(index.data(POINTERDATA).toLongLong());
+/*			CPlantInfo* pItem = reinterpret_cast<CPlantInfo*>(index.data(POINTERDATA).toLongLong());
 
 			CTabWidget* pTabWidget = m_pUi->GetTabWidget();
 			Q_ASSERT(pTabWidget);
 
-			CPredictStationWidget* pWidget = new CPredictStationWidget(pTabWidget, m_pCore);
+			CPredictStationStaticWidget* pWidget = new CPredictStationStaticWidget(pTabWidget, m_pCore);
 
 			pWidget->AddToTableCtrl(pItem,staName);
 
-			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);			
+			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);*/			
+
+			break;
+		}
+		case POWER_PREDICT_STATION_STATIC_TYPE:
+		{
+			//STATION STATIC
+			CPlantInfo* pItem = reinterpret_cast<CPlantInfo*>(index.data(POINTERDATA).toLongLong());
+			Q_ASSERT(pItem);
+			if (!pItem)
+			{
+				return;
+			}
+
+			CTabWidget* pTabWidget = m_pUi->GetTabWidget();
+			Q_ASSERT(pTabWidget);
+
+			CPredictStationStaticWidget* pWidget = new CPredictStationStaticWidget(pTabWidget, m_pCore);
+
+			pWidget->AddToTableCtrl(pItem, staName);
+
+			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);
+
+			break;
+		}
+		case POWER_PREDICT_STATION_DYNATIC_TYPE:
+		{
+			//STATION DYNAMIC
+			CPlantInfo* pItem = reinterpret_cast<CPlantInfo*>(index.data(POINTERDATA).toLongLong());
+			Q_ASSERT(pItem);
+			if (!pItem)
+			{
+				return;
+			}
+
+			CTabWidget* pTabWidget = m_pUi->GetTabWidget();
+			Q_ASSERT(pTabWidget);
+
+			CPredictStationDynaticWidget* pWidget = new CPredictStationDynaticWidget(pTabWidget, m_pCore);
+
+			pWidget->AddToTableCtrl(pItem, staName);
+
+			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);
 
 			break;
 		}
@@ -536,6 +597,8 @@ void CPredictTree::Slot_DoubleClicked(const QModelIndex &index)
 
 			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);
 
+			pWidget->deleteLater();
+
 			break;
 		}
 		case POWER_PREDICT_WEATHER_TYPE:
@@ -553,6 +616,8 @@ void CPredictTree::Slot_DoubleClicked(const QModelIndex &index)
 
 			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);
 
+			pWidget->deleteLater();
+
 			break;
 		}
 		case POWER_PREDICT_PREDICT_TYPE:
@@ -569,6 +634,8 @@ void CPredictTree::Slot_DoubleClicked(const QModelIndex &index)
 			pWidget->AddToTableCtrl(pItem,staName);
 
 			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);
+
+			pWidget->deleteLater();
 
 			break;
 		}

@@ -13,7 +13,7 @@ CBreakRecver::CBreakRecver(CSocketConnect *pSocket, QObject *parent)
 	}
 	qRegisterMetaType<DBG_GET_SYS_INFO>("DBG_GET_SYS_INFO&");
 	qRegisterMetaType<DBG_GET_MEAS>("DBG_GET_MEAS&");
-	qRegisterMetaType<DEG_SOE_DETAIL>("DEG_SOE_DETAIL&");
+	qRegisterMetaType<DEG_SOE_DETAIL>("DEG_SOE_DETAIL");
 }
 
 CBreakRecver::~CBreakRecver()
@@ -26,6 +26,8 @@ bool CBreakRecver::OnReceive(char *pBuff, int nLen)
 	{
 		return false;
 	}
+
+	qDebug() << QByteArray(pBuff,nLen).toHex();
 
 	if (!m_dbgCache.IsEmpty())
 	{
@@ -203,6 +205,18 @@ bool CBreakRecver::AnalyseDbg(char *pBuff, int nLen)
 		OnRcvSysAck(pBuff, nLen);
 		break;
 	}
+	case DBG_CODE_SIGNALRESET:
+	{
+		//信号复归
+		OnRecvReset(pBuff, nLen);
+		break;
+	}
+	case DBG_CODE_ClearSOE:
+	{
+		//清空soe
+		OnRecvClearSoeAck(pBuff, nLen);
+		break;
+	}
 	default:
 		break;
 		
@@ -353,6 +367,44 @@ void CBreakRecver::OnRecvRemoteContrlAck(char * pBuff, int nLen)
 		//成功
 		GetBreakerModuleApi()->WriteRunLog("Breaker", "操作成功", 1);
 		emit Signal_RemoteControlAck();;
+	}
+	else
+	{
+		//失败
+		QString strValue = tr("操作失败,错误码:%1").arg(pTimeAck->m_AddResult);
+		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+	}
+}
+
+//信号复归
+void CBreakRecver::OnRecvReset(char *pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+	TIME_SET_ACK_INFO *pTimeAck = (TIME_SET_ACK_INFO*)(pBuff);
+	if (pTimeAck->m_Result == 0)
+	{
+		//成功
+		GetBreakerModuleApi()->WriteRunLog("Breaker", "信号复归成功", 1);
+	}
+	else
+	{
+		//失败
+		QString strValue = tr("信号复归失败,错误码:%1").arg(pTimeAck->m_AddResult);
+		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+	}
+}
+
+void CBreakRecver::OnRecvClearSoeAck(char *pBuff, int nLen)
+{
+	Q_UNUSED(nLen);
+	TIME_SET_ACK_INFO *pTimeAck = (TIME_SET_ACK_INFO*)(pBuff);
+
+	qDebug() << QByteArray(pBuff,nLen).toHex();
+	if (pTimeAck->m_Result == 0)
+	{
+		//成功
+		GetBreakerModuleApi()->WriteRunLog("Breaker", "操作成功", 1);
+		emit Signal_SeoClearSuccess();
 	}
 	else
 	{

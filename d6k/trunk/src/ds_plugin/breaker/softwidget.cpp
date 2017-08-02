@@ -82,7 +82,7 @@ void CSoftWidget::Slot_RecvNewRealTimeData(DEG_SOFT_INFO &tMeas)
 	int nRecvData = *(int *)tMeas.measData;
 	QString strValue = QString::number(nRecvData, 2);
 
-	for (int i = 0; i < ui.tableWidget->rowCount(); i++)
+	for (int i = ui.tableWidget->rowCount()-1; i >=0; i--)
 	{
 		if (strValue.length() > i)
 		{
@@ -136,11 +136,11 @@ void CSoftWidget::Slot_UpdateData()
 //设置定值
 void CSoftWidget::Slot_SetDevData()
 {
-	QList<int> lstRows = GetSelectRows();
-	if (lstRows.count() == 0)
-	{
-		return;
-	}
+// 	QList<int> lstRows = GetSelectRows();
+// 	if (lstRows.count() == 0)
+// 	{
+// 		return;
+// 	}
 
 	DEG_SOFT_INFO devData;
 	devData.header0 = 0xAA;
@@ -149,7 +149,7 @@ void CSoftWidget::Slot_SetDevData()
 	devData.type = DBG_CODE_SET_SOFTSTRAP;
 
 	QString strValue;
-	for (int i = 0; i < lstRows.count(); i++)
+	for (int i = 0; i < ui.tableWidget->rowCount(); i++)
 	{
 		strValue.append(ui.tableWidget->item(i, 4)->text());
 	}
@@ -192,7 +192,7 @@ QList<int> CSoftWidget::GetSelectRows()
 	return lstSelectRows;
 }
 
-
+#include <QDebug>
 int CSoftWidget::ParseBinary(char const * const binaryString, int size)
 {
 	//将字符串的二进制数字取出，减去48，转换为int型，并保存在新的数组binary内。
@@ -209,7 +209,11 @@ int CSoftWidget::ParseBinary(char const * const binaryString, int size)
 
 	for (int i = 0; i < size; i++)
 	{
-		parseBinary += pow((*(binary + i) * 2.0), i);
+		if (binary[i] != 0)
+		{
+			parseBinary += pow((binary[i] * 2.0), i);
+		}
+		
 	}
 
 	return parseBinary;

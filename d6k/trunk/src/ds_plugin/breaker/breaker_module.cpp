@@ -27,6 +27,8 @@
 #include "realtimesoftwgt.h"
 #include "datatimeeditwgt.h"
 #include "soehistorywgt.h"
+#include "soe_clearwgt.h"
+#include "logic_manager.h"
 
 #include <QStandardItemModel>
 #include <QTimer>
@@ -102,6 +104,10 @@ void CBreakerModule::Init(IMainModule *pMainModule)
 	m_pTimer->setInterval(TIMER_INTERVAL_GET_MEAS);
 	connect(m_pTimer,SIGNAL(timeout()),this,SLOT(Slot_TimerSendRequest()));
 
+	m_pDebugTimer = new QTimer(this);
+	m_pDebugTimer->setInterval(TIMER_INTERVAL_GET_DEBUG);
+	connect(m_pDebugTimer, SIGNAL(timeout()), this, SLOT(Slot_DebugSendRequest()));
+
 	//初始化数据结构
 	CreateTreeItem();
 	connect(m_pMainWindow->GetLeftTree(), SIGNAL(clicked(const QModelIndex &)), this, SLOT(Slot_ClickLeftTreeItem(const QModelIndex &)));
@@ -139,6 +145,8 @@ void CBreakerModule::Init(IMainModule *pMainModule)
 	//soehistory
 	m_pSoeHistory = new CSoeHistoryWgt(m_pNetManager);;
 
+	m_pSoeClearWgt = new CSoeClearWgt;
+
 	connect(m_pNetManager->GetSocket(),SIGNAL(Signal_ConnectSuccess()),this,SLOT(Slot_SocketConnectSuccess()));
 	connect(m_pNetManager->GetSocket(), SIGNAL(Signal_SocketError(QString)), this, SLOT(Slot_SocketError(QString)));
 	connect(m_pNetManager->GetRecver(),SIGNAL(Signal_SysInfo(DBG_GET_SYS_INFO&)),this,SLOT(Slot_RecvSysInfo(DBG_GET_SYS_INFO&)));
@@ -158,19 +166,23 @@ void CBreakerModule::Init(IMainModule *pMainModule)
 	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SoftDev(DEG_SOFT_INFO&)), m_pSoft, SLOT(Slot_RecvNewRealTimeData(DEG_SOFT_INFO&)));
 
 	//soe
-	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SoeDetailInfo(DEG_SOE_DETAIL&)), m_pSoe, SLOT(Slot_RecvNewRealTimeData(DEG_SOE_DETAIL&)));
+	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SoeDetailInfo(DEG_SOE_DETAIL)), m_pSoe, SLOT(Slot_RecvNewRealTimeData(DEG_SOE_DETAIL)));
 	connect(m_pAnalogWgt,SIGNAL(Signal_SeoInfo(int)),m_pSoe,SLOT(Slot_SoeUpdate(int)));
 
 	//soehisoty
-	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SoeDetailInfo(DEG_SOE_DETAIL&)), m_pSoeHistory, SLOT(Slot_RecvNewRealTimeData(DEG_SOE_DETAIL&)));
+	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SoeDetailInfo(DEG_SOE_DETAIL)), m_pSoeHistory, SLOT(Slot_RecvNewRealTimeData(DEG_SOE_DETAIL)));
 
 
 	//遥控
 	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_RemoteControlAck()), this, SLOT(Slot_RemoteContrExec()));
 
+	//soe清空操作
+	connect(m_pNetManager->GetRecver(), SIGNAL(Signal_SeoClearSuccess()), this, SLOT(Slot_SoeClearAck()));
 	//初始化数据
 	InitConnectData();
 	InitMenu();
+	//展开树
+	m_pMainWindow->GetLeftTree()->expandAll();
 }
 
 void CBreakerModule::UnInit()
@@ -179,6 +191,7 @@ void CBreakerModule::UnInit()
 	m_pAnalogWgt->deleteLater();
 	delete m_pPointTable;
 	m_pTimer->deleteLater();
+	m_pDebugTimer->deleteLater();
 	m_pProtectDev->deleteLater();
 	m_pSysDev->deleteLater();
 	m_pDi->deleteLater();
@@ -188,6 +201,7 @@ void CBreakerModule::UnInit()
 	m_pAbnormalWgt->deleteLater();
 	m_pRealSoftWgt->deleteLater();
 	m_pSoeHistory->deleteLater();
+	m_pSoeClearWgt->deleteLater();
 }
 
 void CBreakerModule::CreateTreeItem()
@@ -340,14 +354,29 @@ void CBreakerModule::InitMenu()
 	QAction *pRemoteControlAct = new QAction(tr("遥控(R)"), pPlcMenu);
 	pPlcMenu->addAction(pRemoteControlAct);
 
+	//信号复归
+	QAction *pResetAct = new QAction(tr("信号复归(G)"), pPlcMenu);
+	pPlcMenu->addAction(pResetAct);
+	//清空
+	QAction *pClearAce = new QAction(tr("清除SOE事件(E)"), pPlcMenu);
+	pPlcMenu->addAction(pClearAce);
+
+	QMenu *pSysMenu = m_pMainWindow->menuBar()->addMenu(tr("系统管理(S)"));
+	QAction *pLoginAct = new QAction(tr("设置登录密码(P)"), pSysMenu);
+	pSysMenu->addAction(pLoginAct);
+
+	connect(pLoginAct, SIGNAL(triggered()), this, SLOT(Slot_LoginManager()));
 
 	QMenu *pHelpMenu = m_pMainWindow->menuBar()->addMenu(tr("帮助(H)"));
 	QAction *pHelpAct = new QAction(tr("关于(A)"), pHelpMenu);
 	pHelpMenu->addAction(pHelpAct);
 
 
+
 	connect(pTimeAct, SIGNAL(triggered()), this, SLOT(Slot_SetDeviceTime()));
 	connect(pRemoteControlAct, SIGNAL(triggered()), this, SLOT(SLot_RemoteControl()));
+	connect(pResetAct, SIGNAL(triggered()), this, SLOT(Slot_Reset()));
+	connect(pClearAce, SIGNAL(triggered()), this, SLOT(Slot_SoeClear()));
 
 	connect(pConnectAct, SIGNAL(triggered()), this, SLOT(Slot_ConnectToSocket()));
 	connect(pDisConnectAct, SIGNAL(triggered()), this, SLOT(Slot_DisConnectSocket()));
@@ -428,19 +457,21 @@ void CBreakerModule::SendRequest(int nRequestType)
 void CBreakerModule::StopTimer()
 {
 	m_pTimer->stop();
+	m_pDebugTimer->stop();
 }
 
 void CBreakerModule::StartTimer()
 {
 	m_pTimer->start();
+	m_pDebugTimer->start();
 }
 
 void CBreakerModule::Slot_SocketConnectSuccess()
 {
 	//清空数据
 	m_pSoeHistory->ClearNums();
+	m_ClearSoeLst.clear();
 
-	m_pTimer->start();
 	SendRequest(DBG_CODE_GET_SYS_INFO);
 
 	m_pNetManager->GetSender()->SetSoeType(-1);
@@ -449,6 +480,7 @@ void CBreakerModule::Slot_SocketConnectSuccess()
 	
 	WriteRunLog("Breaker", strInfo.toLocal8Bit().data(), 1);
 	m_pTimer->start();
+	m_pDebugTimer->start();
 }
 
 void CBreakerModule::Slot_SocketError(QString errString)
@@ -460,6 +492,11 @@ void CBreakerModule::Slot_SocketError(QString errString)
 void CBreakerModule::Slot_TimerSendRequest()
 {
 	SendRequest(DBG_CODE_GET_MEAS);
+}
+
+void CBreakerModule::Slot_DebugSendRequest()
+{
+	SendRequest(DBG_CODE_GET_DEBUG_DATA);
 }
 
 void CBreakerModule::Slot_RecvSysInfo(DBG_GET_SYS_INFO& sysInfo)
@@ -807,7 +844,7 @@ void CBreakerModule::Slot_RemoteContrExec()
 			dbgControl.msgLeg.SetAddr(4);
 			dbgControl.type = DBG_CODE_RM_CTRL;
 
-			dbgControl.m_ControlType = 0;
+			dbgControl.m_ControlType = 1;
 			dbgControl.m_ControlObj = 0;
 			dbgControl.m_Order = m_nRemoteStauts;
 
@@ -834,6 +871,153 @@ void CBreakerModule::Slot_DisConnectSocket()
 
 void CBreakerModule::Slot_Help()
 {
-	QMessageBox::information(0, tr("关于"), tr("中压直流调试软件V1.0"));
+	QMessageBox::information(0, tr("关于"), tr("中压直流断路器控制调试软件V1.0"));
 }
 
+void CBreakerModule::Slot_Reset()
+{
+	QString strValue = tr("发送信号复归请求");
+
+	WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+
+	SendRequest(DBG_CODE_SIGNALRESET);
+}
+
+void CBreakerModule::Slot_SoeClear()
+{
+	m_ClearSoeLst.clear();
+	//soe clear
+	if (m_pSoeClearWgt->exec())
+	{
+		//
+		if (m_pSoeClearWgt->GetAbnormal())
+		{
+			m_ClearSoeLst.append(SOE_ABNORMAL);
+		}
+
+		if (m_pSoeClearWgt->GetAction())
+		{
+			m_ClearSoeLst.append(SOE_ACTION);
+		}
+
+		if (m_pSoeClearWgt->GetDIDo())
+		{
+			m_ClearSoeLst.append(SOE_DIEVENT);
+		}
+
+		if (m_pSoeClearWgt->GetDebug())
+		{
+			m_ClearSoeLst.append(SOE_TRACE);
+		}
+
+		if (m_pSoeClearWgt->GetRun())
+		{
+			m_ClearSoeLst.append(SOE_RUN);
+		}
+
+		if (m_pSoeClearWgt->GetWarve())
+		{
+			m_ClearSoeLst.append(SOE_WAVE_FILE);
+		}
+	}
+
+	if (m_ClearSoeLst.count() != 0)
+	{
+		//开始发送数据
+		SendSoeClearRequest(m_ClearSoeLst.first());
+		QString strValue;
+		strValue = GetSoeDestr(m_ClearSoeLst.first());
+		m_ClearSoeLst.removeFirst();
+
+		WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+
+	}
+}
+
+void CBreakerModule::Slot_SoeClearAck()
+{
+	//清空操作
+	if (m_ClearSoeLst.count() != 0)
+	{
+		//开始发送数据
+		SendSoeClearRequest(m_ClearSoeLst.first());
+		QString strValue;
+		strValue = GetSoeDestr(m_ClearSoeLst.first());
+		m_ClearSoeLst.removeFirst();
+
+		WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
+
+	}
+}
+
+void CBreakerModule::Slot_LoginManager()
+{
+	CLogicManager *pLogicManager = new CLogicManager;
+	if (pLogicManager->exec())
+	{
+		//
+	}
+	pLogicManager->deleteLater();
+}
+
+void CBreakerModule::SendSoeClearRequest(int nType)
+{
+	DEG_SOE_CLEAR dbgHeader;
+	dbgHeader.header0 = 0xAA;
+	dbgHeader.header1 = 0x55;
+
+	dbgHeader.msgLeg.SetAddr(2);
+	//获取系统信息
+	dbgHeader.type = DBG_CODE_ClearSOE;
+	//
+	dbgHeader.m_SoeType = nType;
+
+	m_pNetManager->GetSender()->OnSendSoeClearRequestr(dbgHeader);
+
+}
+
+
+//获取soe描述
+QString CBreakerModule::GetSoeDestr(int nType)
+{
+	QString strDes;
+
+	switch (nType)
+	{
+	case SOE_ACTION:
+	{
+		strDes = tr("发送清空动作事件命令");
+		break;
+	}
+	case SOE_DIEVENT:
+	{
+		strDes = tr("发送清空变位事件命令");
+		break;
+	}
+	case SOE_ABNORMAL:
+	{
+		strDes = tr("发送清空异常事件命令");
+		break;
+	}
+	case SOE_RUN:
+	{
+		strDes = tr("发送清空运行事件命令");
+		break;
+	}
+	case SOE_WAVE_FILE:
+	{
+		strDes = tr("发送清空录波事件命令");
+		break;
+	}
+	case SOE_TRACE:
+	{
+		strDes = tr("发送清空调试信息命令");
+		break;
+	}
+	default:
+		break;
+	}
+
+	return strDes;
+
+}

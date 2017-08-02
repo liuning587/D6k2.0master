@@ -28,16 +28,20 @@ CBackground::CBackground()
 {
 	m_clrBackground = QColor(255, 255, 255);
 	m_nSnapGridGap = 20;
+#ifdef  HMI_SDK_LIB
+	m_bShowGrid = false;
+	m_bShowCoord = false;
+#else
 	m_bShowGrid = true;
 	m_bShowCoord = true;
+#endif
+	
 	m_nGradiendMode = 0;
 	m_nBrushStyle = 1;
 	m_pfImage = QPoint(0, 0);
 	m_bTiling = false;
 	m_bStretch = false;
 	m_szImage = QSize(0,0);
-
-	//	m_rcBackground.setRect(0, 0, 1600, 800);
 }
 
 CBackground::~CBackground()

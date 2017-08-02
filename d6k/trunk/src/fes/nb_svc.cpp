@@ -197,8 +197,16 @@ void CNetbusSvc::TransEmails()
 
 			m_pBuf->MsgPath = TO_SERVER;
 			m_pBuf->MsgType = 1;
-			m_pBuf->FuncCode = COT_ALARM;
 
+			if (msg.Type == MSG_EVT_RT_SETVAL)
+			{
+				m_pBuf->FuncCode = COT_RTSETVAL;
+			}
+			else
+			{
+				m_pBuf->FuncCode = COT_ALARM;
+			}
+			
 			m_pBuf->SrcOccNo=m_pNetConfig->MyNodeOccNo;
 
 			size_t nSize = EMSG_BUF_HEAD_SIZE + sizeof DMSG;

@@ -11,10 +11,10 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 {
 	QStringList headStringList;
 
-	headStringList << "ID" << "NAME" << "Type" << "SelectPoint";
+	headStringList << "ID" << "NAME" << QObject::tr("Description") <<"Type" << "SelectPoint";
 
 	this->setRowCount(8);
-	this->setColumnCount(4);
+	this->setColumnCount(5);
 	this->setHorizontalHeaderLabels(headStringList);
 
 	QTableWidgetItem *newItem_0 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_nID));
@@ -97,130 +97,180 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 	newItem_17->setFlags(newItem_17->flags() & (~Qt::ItemIsEditable));
 	this->setItem(7, 1, newItem_17);
 
+
+
+
+	QTableWidgetItem *pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(newItem_10->flags() | (Qt::ItemIsEditable));
+	this->setItem(0, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_DirectRadiation.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(1, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ScattRadiation.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(newItem_12->flags() | (Qt::ItemIsEditable));
+	this->setItem(2, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AvergWindDirect.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(3, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AvergWindSpeed.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(4, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AirTemperature.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(5, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_RelativeHumdty.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(6, 2, pTmp);
+
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AirPressure.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(7, 2, pTmp);
+
+
+
+
+
 	QTableWidgetItem *newItem_20 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_nType));
 	newItem_20->setTextAlignment(Qt::AlignCenter);
 	newItem_20->setFlags(newItem_20->flags() & (~Qt::ItemIsEditable));
-	this->setItem(0, 2, newItem_20);
+	this->setItem(0, 3, newItem_20);
 
 	QTableWidgetItem *newItem_21 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_DirectRadiation.m_nType));
 	newItem_21->setTextAlignment(Qt::AlignCenter);
 	newItem_21->setFlags(newItem_21->flags() & (~Qt::ItemIsEditable));
-	this->setItem(1, 2, newItem_21);
+	this->setItem(1, 3, newItem_21);
 
 	QTableWidgetItem *newItem_22 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ScattRadiation.m_nType));
 	newItem_22->setTextAlignment(Qt::AlignCenter);
 	newItem_22->setFlags(newItem_22->flags() & (~Qt::ItemIsEditable));
-	this->setItem(2, 2, newItem_22);
+	this->setItem(2, 3, newItem_22);
 
 	QTableWidgetItem *newItem_23 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AvergWindDirect.m_nType));
 	newItem_23->setTextAlignment(Qt::AlignCenter);
 	newItem_23->setFlags(newItem_23->flags() & (~Qt::ItemIsEditable));
-	this->setItem(3, 2, newItem_23);
+	this->setItem(3, 3, newItem_23);
 
 	QTableWidgetItem *newItem_24 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AvergWindSpeed.m_nType));
 	newItem_24->setTextAlignment(Qt::AlignCenter);
 	newItem_24->setFlags(newItem_24->flags() & (~Qt::ItemIsEditable));
-	this->setItem(4, 2, newItem_24);
+	this->setItem(4, 3, newItem_24);
 
 	QTableWidgetItem *newItem_25 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AirTemperature.m_nType));
 	newItem_25->setTextAlignment(Qt::AlignCenter);
 	newItem_25->setFlags(newItem_25->flags() & (~Qt::ItemIsEditable));
-	this->setItem(5, 2, newItem_25);
+	this->setItem(5, 3, newItem_25);
 
 	QTableWidgetItem *newItem_26 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_RelativeHumdty.m_nType));
 	newItem_26->setTextAlignment(Qt::AlignCenter);
 	newItem_26->setFlags(newItem_26->flags() & (~Qt::ItemIsEditable));
-	this->setItem(6, 2, newItem_26);
+	this->setItem(6, 3, newItem_26);
 
 	QTableWidgetItem *newItem_27 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AirPressure.m_nType));
 	newItem_27->setTextAlignment(Qt::AlignCenter);
 	newItem_27->setFlags(newItem_27->flags() & (~Qt::ItemIsEditable));
-	this->setItem(7, 2, newItem_27);
+	this->setItem(7, 3, newItem_27);
 
 	QTableWidgetItem *newItem_30 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_szLinkedTagName));
 	newItem_30->setTextAlignment(Qt::AlignCenter);
 	newItem_30->setFlags(newItem_30->flags() & (~Qt::ItemIsEditable));
-	this->setItem(0, 3, newItem_30);
+	this->setItem(0, 4, newItem_30);
 
 	QTableWidgetItem *newItem_31 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_DirectRadiation.m_szLinkedTagName));
 	newItem_31->setTextAlignment(Qt::AlignCenter);
 	newItem_31->setFlags(newItem_31->flags() & (~Qt::ItemIsEditable));
-	this->setItem(1, 3, newItem_31);
+	this->setItem(1, 4, newItem_31);
 
 	QTableWidgetItem *newItem_32 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ScattRadiation.m_szLinkedTagName));
 	newItem_32->setTextAlignment(Qt::AlignCenter);
 	newItem_32->setFlags(newItem_32->flags() & (~Qt::ItemIsEditable));
-	this->setItem(2, 3, newItem_32);
+	this->setItem(2, 4, newItem_32);
 
 	QTableWidgetItem *newItem_33 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AvergWindDirect.m_szLinkedTagName));
 	newItem_33->setTextAlignment(Qt::AlignCenter);
 	newItem_33->setFlags(newItem_33->flags() & (~Qt::ItemIsEditable));
-	this->setItem(3, 3, newItem_33);
+	this->setItem(3, 4, newItem_33);
 
 	QTableWidgetItem *newItem_34 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AvergWindSpeed.m_szLinkedTagName));
 	newItem_34->setTextAlignment(Qt::AlignCenter);
 	newItem_34->setFlags(newItem_34->flags() & (~Qt::ItemIsEditable));
-	this->setItem(4, 3, newItem_34);
+	this->setItem(4, 4, newItem_34);
 
 	QTableWidgetItem *newItem_35 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AirTemperature.m_szLinkedTagName));
 	newItem_35->setTextAlignment(Qt::AlignCenter);
 	newItem_35->setFlags(newItem_35->flags() & (~Qt::ItemIsEditable));
-	this->setItem(5, 3, newItem_35);
+	this->setItem(5, 4, newItem_35);
 
 	QTableWidgetItem *newItem_36 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_RelativeHumdty.m_szLinkedTagName));
 	newItem_36->setTextAlignment(Qt::AlignCenter);
 	newItem_36->setFlags(newItem_36->flags() & (~Qt::ItemIsEditable));
-	this->setItem(6, 3, newItem_36);
+	this->setItem(6, 4, newItem_36);
 
 	QTableWidgetItem *newItem_37 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_AirPressure.m_szLinkedTagName));
 	newItem_37->setTextAlignment(Qt::AlignCenter);
 	newItem_37->setFlags(newItem_37->flags() & (~Qt::ItemIsEditable));
-	this->setItem(7, 3, newItem_37);
+	this->setItem(7, 4, newItem_37);
 
 	QPushButton *pushButton = new QPushButton("");
 	pushButton->setFlat(true);
-	this->setCellWidget(0, 3, pushButton);
+	this->setCellWidget(0, 4, pushButton);
 	connect(pushButton, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_1 = new QPushButton("");
 	pushButton_1->setFlat(true);
-	this->setCellWidget(1, 3, pushButton_1);
+	this->setCellWidget(1, 4, pushButton_1);
 	connect(pushButton_1, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_2 = new QPushButton("");
 	pushButton_2->setFlat(true);
-	this->setCellWidget(2, 3, pushButton_2);
+	this->setCellWidget(2, 4, pushButton_2);
 	connect(pushButton_2, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_3 = new QPushButton("");
 	pushButton_3->setFlat(true);
-	this->setCellWidget(3, 3, pushButton_3);
+	this->setCellWidget(3, 4, pushButton_3);
 	connect(pushButton_3, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_4 = new QPushButton("");
 	pushButton_4->setFlat(true);
-	this->setCellWidget(4, 3, pushButton_4);
+	this->setCellWidget(4, 4, pushButton_4);
 	connect(pushButton_4, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_5 = new QPushButton("");
 	pushButton_5->setFlat(true);
-	this->setCellWidget(5, 3, pushButton_5);
+	this->setCellWidget(5, 4, pushButton_5);
 	connect(pushButton_5, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_6 = new QPushButton("");
 	pushButton_6->setFlat(true);
-	this->setCellWidget(6, 3, pushButton_6);
+	this->setCellWidget(6, 4, pushButton_6);
 	connect(pushButton_6, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	QPushButton *pushButton_7 = new QPushButton("");
 	pushButton_7->setFlat(true);
-	this->setCellWidget(7, 3, pushButton_7);
+	this->setCellWidget(7, 4, pushButton_7);
 	connect(pushButton_7, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	setColumnWidth(0, 100);
 	setColumnWidth(1, 250);
-	setColumnWidth(2, 100);
-	setColumnWidth(3, 300);
+	setColumnWidth(2, 250);
+	setColumnWidth(3, 100);
+	setColumnWidth(4, 300);
+
+	connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(itemChanged(QTableWidgetItem *)));
 }
 
 QString CWeatherTableWidget::GetBindValue()
@@ -257,6 +307,59 @@ QString CWeatherTableWidget::GetBindValue()
 	return "";
 }
 
+void CWeatherTableWidget::itemChanged(QTableWidgetItem * item)
+{
+	CPPPointInfo  m_TotalRadiation;  //! 总辐射
+	CPPPointInfo  m_DirectRadiation; //! 垂直辐射
+	CPPPointInfo  m_ScattRadiation;  //! 散射辐射
+	CPPPointInfo  m_AvergWindDirect; //! 平均风向
+	CPPPointInfo  m_AvergWindSpeed;  //! 平均风速
+	CPPPointInfo  m_AirTemperature;  //! 空气温度
+	CPPPointInfo  m_RelativeHumdty;  //! 相对湿度
+	CPPPointInfo  m_AirPressure;     //! 气压
+	
+	if (item->column() == 2 && item->row() == 0)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_TotalRadiation.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 1)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_DirectRadiation.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 2)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_ScattRadiation.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 3)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_AvergWindDirect.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 4)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_AvergWindSpeed.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 5)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_AirTemperature.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 6)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_RelativeHumdty.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 7)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_AirPressure.m_strDescription = item->text();
+	}
+}
+
 void CWeatherTableWidget::Slot_SetBindValue()
 {
 	QString strBindValue = GetBindValue();
@@ -277,7 +380,7 @@ void CWeatherTableWidget::Slot_SetBindValue()
 
 	for (int i = 0; i < rowCount(); i++)
 	{
-		if (this->cellWidget(i, 3) == pushBtn)
+		if (this->cellWidget(i, 4) == pushBtn)
 		{
 			m_pWeatherItem->m_vecTableInfo[i].m_szLinkedTagName = strBindValue;
 		}

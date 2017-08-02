@@ -33,6 +33,8 @@
 #include "totalselectdialog.h"
 #include "extenservicemodulemgr.h"
 
+#include "log/logimpl.h"
+
 #include <QtGlobal>
 #include <QThread>
 #include <QApplication>
@@ -80,15 +82,15 @@ CCore::CCore(QObject *parent)
 	:m_pUi(NULL), m_pProjMgr(NULL), m_pModuleMgr(NULL), /*m_pOutClient(NULL),*/ m_pExtendServiceModuleMgr(nullptr)
 {
 	Q_UNUSED(parent);
+
+	CLogImpl::GetInstance()->CreateLog("ScadaStudio");
 	
 	m_pUi = new CUIMgr();
 
 	m_pProjMgr = new CProjMgr(this);
 
 	m_pModuleMgr = new CModuleMgr(this);
-
-//	m_pOutClient = new COutputMessagerClient(this);
-
+	
 	m_pExtendServiceModuleMgr = new CExtendServiceModuleMgr(this);
 
 	connect(m_pUi, SIGNAL(DeleteCore()), this, SLOT(DeleteCoreSlot()));
@@ -129,6 +131,8 @@ CCore::~CCore()
 		delete m_pExtendServiceModuleMgr;
 		m_pExtendServiceModuleMgr = nullptr;
 	}
+
+	CLogImpl::GetInstance()->DestroyLog("ScadaStudio");
 }
 
 /*! \fn IMainWindow *CCore::GetUIMgr()
@@ -461,7 +465,7 @@ bool CCore::LogMsg(const char *pszMoudleName,const char *szLogTxt, int nLevel)
 	{
 		szModuleName = pszMoudleName;
 	}
-
+#if 0
 	MSG_LOG log;
 	memset(&log, 0, sizeof(log));
 
@@ -480,9 +484,13 @@ bool CCore::LogMsg(const char *pszMoudleName,const char *szLogTxt, int nLevel)
 
 	int nCount = sizeof(MSG_LOG);
 
+#endif
+
 	//m_pOutClient->sendData(reinterpret_cast<char*>(&log), nCount);
 
-	m_pUi->AddSysOutItem(log);
+ //	m_pUi->AddSysOutItem(log);
+
+	return CLogImpl::GetInstance()->LogMsg(szModuleName.c_str(), szLogTxt, nLevel);
 
 	//delete pSendData;
 	//pSendData = nullptr;
@@ -542,7 +550,7 @@ IModule *CCore::GetModule(const char *szTxt)
 		return nullptr;
 	}
 
-	auto pModule = m_pModuleMgr->GetModule(szTxt);
+	IModule* pModule = m_pModuleMgr->GetModule(szTxt);
 	Q_ASSERT(pModule);
 	if (!pModule)
 	{

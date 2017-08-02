@@ -1,6 +1,8 @@
 #ifndef IPROJMGR_H
 #define IPROJMGR_H
 
+#include <QString>
+
 class QXmlStreamReader;
 class QDomDocument;
 class QFile;
