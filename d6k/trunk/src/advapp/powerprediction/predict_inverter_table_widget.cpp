@@ -216,9 +216,23 @@ void CInverterTableWidget::Slot_SetBindValue()
 
 	for (int i = 0; i < rowCount(); i++)
 	{
-		if (this->cellWidget(i, 3) == pushBtn)
+		if (this->cellWidget(i, 4) == pushBtn && i == 0)
 		{
 			m_pInverterItem->m_vecTableInfo[i].m_szLinkedTagName = strBindValue;
+			m_pInverterItem->m_ActPower.m_szLinkedTagName = strBindValue;
+			item(i, 4)->setText(strBindValue);
+		}
+		else if (this->cellWidget(i, 4) == pushBtn && i == 1)
+		{
+			m_pInverterItem->m_vecTableInfo[i].m_szLinkedTagName = strBindValue;
+			m_pInverterItem->m_ReactPower.m_szLinkedTagName = strBindValue;
+			item(i, 4)->setText(strBindValue);
+		}
+		else if (this->cellWidget(i, 4) == pushBtn && i == 2)
+		{
+			m_pInverterItem->m_vecTableInfo[i].m_szLinkedTagName = strBindValue;
+			m_pInverterItem->m_OpenState.m_szLinkedTagName = strBindValue;
+			item(i, 4)->setText(strBindValue);
 		}
 	}
 }

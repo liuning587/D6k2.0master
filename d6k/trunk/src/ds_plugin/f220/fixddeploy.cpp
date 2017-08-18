@@ -33,7 +33,7 @@ CFixdDeploy::CFixdDeploy(CCommThread *pCommunicate, IMainModule *pCore, const QS
 	}
 	m_pMainModule = pCore;
 	m_pCommunicate = pCommunicate;
-	connect(m_pCommunicate, SIGNAL(Signal_DevReadBack(QMap<int, short>)), this, SLOT(Slot_updateFixData(QMap<int, short>)));
+	//connect(m_pCommunicate, SIGNAL(Signal_DevReadBack(QMap<int, short>)), this, SLOT(Slot_updateFixData(QMap<int, short>)));
 	//定值设定
 	connect(m_pCommunicate, SIGNAL(Signal_devWriteBack(int, int, int)), this, SLOT(Slot_WriteFeedBack(int, int, int)));
 	//

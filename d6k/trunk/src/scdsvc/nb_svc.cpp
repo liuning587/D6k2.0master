@@ -57,7 +57,7 @@ public:
 	int     m_nType;
 	int8s   m_szTimeTag[MAX_CONTENT_LENGTH];
 	float   m_fVal;
-	int8s   m_szContent[MAX_CONTENT_LENGTH*2];
+	int8s   m_szContent[MAX_CONTENT_LENGTH * 2];
 };
 
 CNetbusSvc::CNetbusSvc(CScadaSvc* pServer, const std::string & szMailBoxName, int &nMailBoxID) : CBaseModule(pServer, szMailBoxName, nMailBoxID)
@@ -93,7 +93,6 @@ CNetbusSvc::~CNetbusSvc(void)
 ********************************************************************************************************/
 bool CNetbusSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 {
-	
 	CScadaSvc *pSvr = GetScadaSvc();
 	Q_ASSERT(pSvr);
 	if (pSvr)
@@ -166,11 +165,12 @@ bool CNetbusSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 void CNetbusSvc::Run()
 {
 	m_bQuit = false;
-	OpenPostOffice("SCADA");
-	int nID;
-	OpenMailBox("SCADA", "NB_SVC",&nID );
-	StartModule();
+	//	OpenPostOffice("SCADA");
 
+	bool bRet = OpenMailBox("SCADA", "NB_SVC", &m_nMailBoxID);
+	Q_ASSERT(bRet);
+
+	StartModule();
 }
 
 void CNetbusSvc::Shutdown()
@@ -178,9 +178,9 @@ void CNetbusSvc::Shutdown()
 	m_bQuit = true;
 	StopNetBus("SCADA");
 	StopModule();
+	//fixed by lijin 2017.8.11 
+	CloseMailBoxByID("SCADA", m_nMailBoxID);
 }
-
-
 /*! \fn void CNetbusSvc::TransScdEmails()
 *********************************************************************************************************
 ** \brief CNetbusSvc::TransScdEmails
@@ -206,17 +206,17 @@ void CNetbusSvc::TransScdEmails()
 		{
 			memset(m_pBuf, 0, EMSG_BUF_SIZE);
 			m_pBuf->MsgPath = TO_FES;
-			m_pBuf->MsgType =  1;
+			m_pBuf->MsgType = 1;
 			m_pBuf->FuncCode = COT_SETVAL;
 			m_pBuf->SrcOccNo = m_pNetConfig->MyNodeOccNo;
 			m_pBuf->DestOccNo = msg.SenderID;
 
 			size_t nSize = EMSG_BUF_HEAD_SIZE + sizeof DMSG;
-			
+
 			m_pBuf->MsgDataSize = nSize;
 
 			memcpy(m_pBuf->BuffData, &msg, qMin(sizeof DMSG, (size_t)EMSG_BUF_SIZE));
-						
+
 			int nRet = NBSendData("SCADA", reinterpret_cast<int8u*>(m_pBuf), nSize);
 
 			nCount = 0;
@@ -267,113 +267,113 @@ void CNetbusSvc::RecvNodeData()
 			{
 				switch (msg->FuncCode)
 				{
-				case COT_PERCYC:  //数据周期上传，当前只处理全数据上送的AI，DI
-				{
-					size_t nMsgHeadLen = sizeof EMSG_BUF_HEAD;
-
-					DATA_BASE *pBase;
-
-					if (msg)
+					case COT_PERCYC:  //数据周期上传，当前只处理全数据上送的AI，DI
 					{
-						size_t nSize = msg->MsgDataSize - nMsgHeadLen;
-						if (nSize < sizeof DATA_BASE)
+						size_t nMsgHeadLen = sizeof EMSG_BUF_HEAD;
+
+						DATA_BASE *pBase;
+
+						if (msg)
 						{
-							//TODO msg error，length error，不够一个数据包长度，认定为错误数据包
-							return;
-						}
-						else
-						{
-							pBase = (DATA_BASE*)(&msg->BuffData);
-							Q_ASSERT(pBase);
-							if (pBase)
+							size_t nSize = msg->MsgDataSize - nMsgHeadLen;
+							if (nSize < sizeof DATA_BASE)
 							{
-								if (pBase->m_nType == AIN_TYPE)
+								//TODO msg error，length error，不够一个数据包长度，认定为错误数据包
+								return;
+							}
+							else
+							{
+								pBase = (DATA_BASE*)(&msg->BuffData);
+								Q_ASSERT(pBase);
+								if (pBase)
 								{
-									for (int i = 0; i < pBase->m_nCount; ++i)
+									if (pBase->m_nType == AIN_TYPE)
 									{
-										fp64 fVal;
-										memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof fp64], sizeof fp64);
-										pSvr->GetDBSvc()->UpdateAinValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										for (int i = 0; i < pBase->m_nCount; ++i)
+										{
+											fp64 fVal;
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof fp64], sizeof fp64);
+											pSvr->GetDBSvc()->UpdateAinValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										}
 									}
-								}
-								else if (pBase->m_nType == DIN_TYPE)
-								{
-									for (int i = 0; i < pBase->m_nCount; ++i)
+									else if (pBase->m_nType == DIN_TYPE)
 									{
-										int8u fVal;
-										memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
-										pSvr->GetDBSvc()->UpdateDinValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										for (int i = 0; i < pBase->m_nCount; ++i)
+										{
+											int8u fVal;
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
+											pSvr->GetDBSvc()->UpdateDinValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										}
 									}
-								}
-								else if (pBase->m_nType == USERVAR_TYPE)
-								{
-									for (int i = 0; i < pBase->m_nCount; ++i)
+									else if (pBase->m_nType == USERVAR_TYPE)
 									{
-										fp64 fVal;
-										memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
-										pSvr->GetDBSvc()->UpdateUserVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										for (int i = 0; i < pBase->m_nCount; ++i)
+										{
+											fp64 fVal;
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
+											pSvr->GetDBSvc()->UpdateUserVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										}
 									}
-								}
-								else if (pBase->m_nType == SYSVAR_TYPE)
-								{
-									for (int i = 0; i < pBase->m_nCount; ++i)
+									else if (pBase->m_nType == SYSVAR_TYPE)
 									{
-										fp64 fVal;
-										memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
-										pSvr->GetDBSvc()->UpdateSysVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
-									} 
+										for (int i = 0; i < pBase->m_nCount; ++i)
+										{
+											fp64 fVal;
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
+											pSvr->GetDBSvc()->UpdateSysVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										}
+									}
 								}
 							}
 						}
+						break;
 					}
-					break;
-				}
-				case  COT_SPONT:  //数据突发上送，具体实现之后定义
-				{
-					break;
-				}
-				case COT_ALARM:   //收到告警信息 ，解析完发送出去，哪个模块订阅了自行发出
-				{
-					DMSG tMsg;
-					memcpy(&tMsg, (DMSG*)(&msg->BuffData),sizeof DMSG);
-					//报文首次解析成语音发布，并解析成告警邮件发送
-					bool bRet=ParaseAlarmEmails(&tMsg);	
-					
-					qDebug() << "RECVID::" << tMsg.RecverID << "SENDID::" << tMsg.SenderID;
-					if (!bRet)
+					case  COT_SPONT:  //数据突发上送，具体实现之后定义
 					{
-						//尚未有订阅事件发生
-						return ;
+						break;
 					}
-					break;
-				}
-				case COT_EVENT:   //事件也用作此用途
-				{
-					DMSG *pMailMsg;
-					pMailMsg = (DMSG*)(&msg->BuffData);
-					Q_ASSERT(pMailMsg);
-					if (pMailMsg)
+					case COT_ALARM:   //收到告警信息 ，解析完发送出去，哪个模块订阅了自行发出
 					{
-						SendMail("SCADA", pMailMsg, 0);
-					}
-					break;
-				}
-				case COT_SUB: //订阅数据上送，具体定义后续
-					break;
+						DMSG tMsg;
+						memcpy(&tMsg, (DMSG*)(&msg->BuffData), sizeof DMSG);
+						//报文首次解析成语音发布，并解析成告警邮件发送
+						bool bRet = ParaseAlarmEmails(&tMsg);
 
-				case COT_RTSETVAL:  //遥控反校 确认等指令上送 
-				{
-					DMSG *pMailMsg;
-					pMailMsg = (DMSG*)(&msg->BuffData);
-					Q_ASSERT(pMailMsg);
-					if (pMailMsg)
-					{
-						SendMail("SCADA", pMailMsg, 0);
+						qDebug() << "RECVID::" << tMsg.RecverID << "SENDID::" << tMsg.SenderID;
+						if (!bRet)
+						{
+							//尚未有订阅事件发生
+							return;
+						}
+						break;
 					}
-					break;
-				}
-				default:
-					break;
+					case COT_EVENT:   //事件也用作此用途
+					{
+						DMSG *pMailMsg;
+						pMailMsg = (DMSG*)(&msg->BuffData);
+						Q_ASSERT(pMailMsg);
+						if (pMailMsg)
+						{
+							SendMail("SCADA", pMailMsg, 0);
+						}
+						break;
+					}
+					case COT_SUB: //订阅数据上送，具体定义后续
+						break;
+
+					case COT_RTSETVAL:  //遥控反校 确认等指令上送 
+					{
+						DMSG *pMailMsg;
+						pMailMsg = (DMSG*)(&msg->BuffData);
+						Q_ASSERT(pMailMsg);
+						if (pMailMsg)
+						{
+							SendMail("SCADA", pMailMsg, 0);
+						}
+						break;
+					}
+					default:
+						break;
 				}
 			}
 		}
@@ -407,12 +407,12 @@ void  CNetbusSvc::FormatAiAlarmDesc(AINALARM_MSG* pMsg, QString& szDesc)
 	Q_ASSERT(pMsg);
 	if (!pMsg)
 	{
-		return ;
+		return;
 	}
 	AINALARM_MSG *pAlarmMsg = reinterpret_cast<AINALARM_MSG*> (pMsg);
 	if (pAlarmMsg)
 	{
-		szDesc =  QObject::tr("CurrentNode:%1").arg(pAlarmMsg->NodeOccNo);
+		szDesc = QObject::tr("CurrentNode:%1").arg(pAlarmMsg->NodeOccNo);
 		szDesc += QObject::tr("Occurs:") + GetEvtDescByCode(pAlarmMsg->EvtCode);
 		szDesc += QObject::tr("AlarmEvent:");
 		szDesc += QObject::tr("AIN:%1_Alarm:%2_AIN_ALARM_Limit:%3_Value:%4").arg(pAlarmMsg->OccNo).arg(pAlarmMsg->AlarmOccNo).arg(pAlarmMsg->AlarmLimitOccNo).arg(pAlarmMsg->Value);
@@ -424,12 +424,12 @@ void CNetbusSvc::FormatDiAlarmDesc(DINALARM_MSG* pMsg, QString& szDesc)
 	Q_ASSERT(pMsg);
 	if (!pMsg)
 	{
-		return ;
+		return;
 	}
 	DINALARM_MSG *pAlarmMsg = reinterpret_cast<DINALARM_MSG*> (pMsg);
 	if (pAlarmMsg)
 	{
-		szDesc =  QObject::tr("CurrentNode:%1").arg(pAlarmMsg->NodeOccNo);
+		szDesc = QObject::tr("CurrentNode:%1").arg(pAlarmMsg->NodeOccNo);
 		szDesc += QObject::tr("Occurs:") + GetEvtDescByCode(pAlarmMsg->EvtCode);
 		szDesc += QObject::tr("AlarmEvent:");
 		szDesc += QObject::tr("DIN:%1_Alarm:%2_DIN_ALARM_Limit:%3_Value:%4").arg(pAlarmMsg->OccNo).arg(pAlarmMsg->AlarmOccNo).arg(pAlarmMsg->AlarmLimitOccNo).arg(pAlarmMsg->Value);
@@ -447,7 +447,7 @@ void CNetbusSvc::FormatDiagAlarmDesc(DIAG_MSG* pMsg, QString& szDesc)
 	DIAG_MSG *pDiagMsg = reinterpret_cast<DIAG_MSG*> (pMsg);
 	if (pDiagMsg)
 	{
-		szDesc =  QObject::tr("Node:%1").arg(pDiagMsg->NodeOccNo);
+		szDesc = QObject::tr("Node:%1").arg(pDiagMsg->NodeOccNo);
 		szDesc += QObject::tr("Channel:%1").arg(pDiagMsg->ChannelOccNo);
 		szDesc += QObject::tr("Device:%1").arg(pDiagMsg->DeviceOccNo);
 		szDesc += QObject::tr("Occurs:") + QString::fromLocal8Bit((char*)pDiagMsg->ExtraData);
@@ -459,13 +459,13 @@ void CNetbusSvc::FormatNormalAlarmDesc(ALARM_MSG* pMsg, QString& szDesc)
 	Q_ASSERT(pMsg);
 	if (!pMsg)
 	{
-		return ;
+		return;
 	}
 
 	ALARM_MSG *pAlarmMsg = reinterpret_cast<ALARM_MSG*> (pMsg);
 	if (pAlarmMsg)
 	{
-		szDesc =  QObject::tr("CurrentNode:%1").arg(pAlarmMsg->NodeOccNo);
+		szDesc = QObject::tr("CurrentNode:%1").arg(pAlarmMsg->NodeOccNo);
 		szDesc += QObject::tr(" Event:%1").arg(QString::fromLocal8Bit((char*)pAlarmMsg->ExtraData));
 	}
 }
@@ -477,14 +477,14 @@ void CNetbusSvc::FormatTimeStamp(TIMEPAK* pak, char* szTime)
 	{
 		return;
 	}
-	Q_ASSERT(szTime );
+	Q_ASSERT(szTime);
 	if (!szTime)
 	{
 		return;
 	}
 	QString str = QString("%1.%2.%3--%4:%5:%6::%7").arg(pak->Year).arg(pak->Month).arg(pak->Day).arg(pak->Hour).arg(pak->Minute).arg(pak->Second).arg(pak->Milliseconds);
 
-	strncpy (szTime , str.toLocal8Bit().data(),std::min((size_t)MAX_FILENAME_LENGTH,(size_t)str.length()));
+	strncpy(szTime, str.toLocal8Bit().data(), std::min((size_t)MAX_FILENAME_LENGTH, (size_t)str.length()));
 }
 
 bool  CNetbusSvc::ParaseAlarmEmails(DMSG* pMsg)
@@ -497,184 +497,184 @@ bool  CNetbusSvc::ParaseAlarmEmails(DMSG* pMsg)
 	QString szAlarmDesc;
 	switch (pMsg->Type)
 	{
-	case MSG_EVT_ANA:
-	{	
-		AINALARM_MSG *pAlarmMsg = reinterpret_cast<AINALARM_MSG*> (pMsg->Buff);
-		if (pAlarmMsg)
+		case MSG_EVT_ANA:
 		{
-			FormatAiAlarmDesc(pAlarmMsg, szAlarmDesc);
+			AINALARM_MSG *pAlarmMsg = reinterpret_cast<AINALARM_MSG*> (pMsg->Buff);
+			if (pAlarmMsg)
+			{
+				FormatAiAlarmDesc(pAlarmMsg, szAlarmDesc);
+			}
+			//形成语音告警
+			AIN_ALARM_LIMIT* pAinAlarmLimit = nullptr;
+			GetScadaSvc()->GetDBSvc()->GetAinAlarmLimitByOccNo(pAlarmMsg->NodeOccNo, pAlarmMsg->AlarmOccNo, &pAinAlarmLimit);
+			Q_ASSERT(pAinAlarmLimit);
+
+			//组织语音信息
+			CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
+			pAudio->m_bAck = pAinAlarmLimit->EnableAck;
+			pAudio->m_nAckType = pAinAlarmLimit->AckType;
+			pAudio->m_nPlayTimes = pAinAlarmLimit->PlaySoundTimes;
+			pAudio->m_nPriority = pAinAlarmLimit->Priority;
+			pAudio->m_bSoundEnable = (strlen(pAinAlarmLimit->SoundFile) == 0) ? true : false;
+			strncpy(pAudio->m_szSoundFile, pAinAlarmLimit->SoundFile, MAX_FILENAME_LENGTH);
+			pAudio->m_bSpeechTextEnable = true;
+			strncpy(pAudio->m_szSpeechText, szAlarmDesc.toLocal8Bit().data(), qMin(size_t(MAX_FILENAME_LENGTH * 4), (size_t)szAlarmDesc.length()));
+			pAudio->m_bBeepEnable = pAinAlarmLimit->Beep;
+
+			GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
+
+			CAlarmDataConfig msgInfo;
+			std::memset(&msgInfo, 0, sizeof CAlarmDataConfig);
+			msgInfo.m_nAlarmState = alarm_unconfim;
+			msgInfo.m_fVal = pAlarmMsg->Value;
+			msgInfo.m_nType = pMsg->Type;
+			strncpy(msgInfo.m_szContent, szAlarmDesc.toLocal8Bit().data(), qMin((size_t)MAX_CONTENT_LENGTH * 2, (size_t)szAlarmDesc.length()));
+			FormatTimeStamp(&pAlarmMsg->Tm, msgInfo.m_szTimeTag);
+
+			DMSG dmsg;
+			std::memset(&dmsg, 0, sizeof(DMSG));
+			dmsg.Type = MSG_EVT8;
+			dmsg.SenderID = 0;
+			int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
+			dmsg.RecverID = m_nNBSvcMailBoxID;
+			dmsg.Size = sizeof CAlarmDataConfig;
+			memcpy(dmsg.Buff, &msgInfo, std::min((size_t)dmsg.Size, sizeof CAlarmDataConfig));
+			return SendMail("SCADA", &dmsg, 0);
+
+			break;
 		}
-		//形成语音告警
-		AIN_ALARM_LIMIT* pAinAlarmLimit=nullptr;
-		GetScadaSvc()->GetDBSvc()->GetAinAlarmLimitByOccNo(pAlarmMsg->NodeOccNo, pAlarmMsg->AlarmOccNo, &pAinAlarmLimit);
-		Q_ASSERT(pAinAlarmLimit);
-
-		//组织语音信息
-		CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
-		pAudio->m_bAck = pAinAlarmLimit->EnableAck;
-		pAudio->m_nAckType = pAinAlarmLimit->AckType;
-		pAudio->m_nPlayTimes = pAinAlarmLimit->PlaySoundTimes;
-		pAudio->m_nPriority = pAinAlarmLimit->Priority;
-		pAudio->m_bSoundEnable = (strlen(pAinAlarmLimit->SoundFile)==0)?true:false;
-		strncpy (pAudio->m_szSoundFile,pAinAlarmLimit->SoundFile,MAX_FILENAME_LENGTH);
-		pAudio->m_bSpeechTextEnable = true;
-		strncpy(pAudio->m_szSpeechText,szAlarmDesc.toLocal8Bit().data(),qMin(size_t(MAX_FILENAME_LENGTH*4),(size_t)szAlarmDesc.length()));
-		pAudio->m_bBeepEnable = pAinAlarmLimit->Beep;
-
-		GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
-
-		CAlarmDataConfig msgInfo;
-		std::memset(&msgInfo, 0, sizeof CAlarmDataConfig);
-		msgInfo.m_nAlarmState= alarm_unconfim;
-		msgInfo.m_fVal = pAlarmMsg->Value;
-		msgInfo.m_nType = pMsg->Type;
-		strncpy(msgInfo.m_szContent,szAlarmDesc.toLocal8Bit().data(),qMin((size_t)MAX_CONTENT_LENGTH*2,(size_t)szAlarmDesc.length()));
-		FormatTimeStamp(&pAlarmMsg->Tm, msgInfo.m_szTimeTag);
-
-		DMSG dmsg;
-		std::memset(&dmsg, 0, sizeof(DMSG));
-		dmsg.Type = MSG_EVT8;
-		dmsg.SenderID = 0;
-		int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
-		dmsg.RecverID = m_nNBSvcMailBoxID;
-		dmsg.Size = sizeof CAlarmDataConfig;
-		memcpy(dmsg.Buff,&msgInfo,std::min((size_t)dmsg.Size,sizeof CAlarmDataConfig));
-		return SendMail("SCADA",&dmsg,0);
-
-		break;
-	}
-	case MSG_EVT_DIGI:
-	{
-		DINALARM_MSG *pAlarmMsg = reinterpret_cast<DINALARM_MSG*> (pMsg->Buff);
-		if (pAlarmMsg)
+		case MSG_EVT_DIGI:
 		{
-			FormatDiAlarmDesc(pAlarmMsg, szAlarmDesc);
+			DINALARM_MSG *pAlarmMsg = reinterpret_cast<DINALARM_MSG*> (pMsg->Buff);
+			if (pAlarmMsg)
+			{
+				FormatDiAlarmDesc(pAlarmMsg, szAlarmDesc);
+			}
+			//形成语音告警
+			DIN_ALARM_LIMIT* pDinAlarmLimit = nullptr;
+			GetScadaSvc()->GetDBSvc()->GetDinAlarmLimitByOccNo(pAlarmMsg->NodeOccNo, pAlarmMsg->AlarmLimitOccNo, &pDinAlarmLimit);
+			Q_ASSERT(pDinAlarmLimit);
+
+			//组织语音信息
+			CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
+			pAudio->m_bAck = pDinAlarmLimit->EnableAck;
+			pAudio->m_nAckType = pDinAlarmLimit->AckType;
+			pAudio->m_nPlayTimes = pDinAlarmLimit->PlaySoundTimes;
+			pAudio->m_nPriority = pDinAlarmLimit->Priority;
+			pAudio->m_bSoundEnable = (strlen(pDinAlarmLimit->SoundFile) == 0) ? false : true;
+			strncpy(pAudio->m_szSoundFile, pDinAlarmLimit->SoundFile, MAX_FILENAME_LENGTH);
+			pAudio->m_bSpeechTextEnable = true;
+			strncpy(pAudio->m_szSpeechText, szAlarmDesc.toLocal8Bit().data(), qMin(size_t(MAX_FILENAME_LENGTH * 4), (size_t)szAlarmDesc.length()));
+			pAudio->m_bBeepEnable = pDinAlarmLimit->Beep;
+
+			GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
+
+			//发出告警信息
+			CAlarmDataConfig msgInfo;
+			std::memset(&msgInfo, 0, sizeof CAlarmDataConfig);
+			msgInfo.m_nAlarmState = alarm_unconfim;
+			msgInfo.m_fVal = pAlarmMsg->Value;
+			msgInfo.m_nType = pMsg->Type;
+			strncpy(msgInfo.m_szContent, szAlarmDesc.toLocal8Bit().data(), qMin((size_t)MAX_CONTENT_LENGTH * 2, (size_t)szAlarmDesc.length()));
+			FormatTimeStamp(&pAlarmMsg->Tm, msgInfo.m_szTimeTag);
+
+			DMSG dmsg;
+			std::memset(&dmsg, 0, sizeof(DMSG));
+			dmsg.Type = MSG_EVT8;
+			dmsg.SenderID = 0;
+			int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
+			dmsg.RecverID = m_nNBSvcMailBoxID;
+			dmsg.Size = sizeof CAlarmDataConfig;
+			memcpy(dmsg.Buff, &msgInfo, std::min((size_t)dmsg.Size, sizeof CAlarmDataConfig));
+			return SendMail("SCADA", &dmsg, 0);
+
+			break;
 		}
-		//形成语音告警
-		DIN_ALARM_LIMIT* pDinAlarmLimit = nullptr;
-		GetScadaSvc()->GetDBSvc()->GetDinAlarmLimitByOccNo(pAlarmMsg->NodeOccNo, pAlarmMsg->AlarmLimitOccNo, &pDinAlarmLimit);
-		Q_ASSERT(pDinAlarmLimit);
-
-		//组织语音信息
-		CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
-		pAudio->m_bAck = pDinAlarmLimit->EnableAck;
-		pAudio->m_nAckType = pDinAlarmLimit->AckType;
-		pAudio->m_nPlayTimes = pDinAlarmLimit->PlaySoundTimes;
-		pAudio->m_nPriority = pDinAlarmLimit->Priority;
-		pAudio->m_bSoundEnable = (strlen(pDinAlarmLimit->SoundFile) == 0) ? false : true;
-		strncpy(pAudio->m_szSoundFile, pDinAlarmLimit->SoundFile, MAX_FILENAME_LENGTH);
-		pAudio->m_bSpeechTextEnable = true;
-		strncpy(pAudio->m_szSpeechText, szAlarmDesc.toLocal8Bit().data(), qMin(size_t(MAX_FILENAME_LENGTH * 4), (size_t)szAlarmDesc.length()));
-		pAudio->m_bBeepEnable = pDinAlarmLimit->Beep;
-
-		GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
-
-		//发出告警信息
-		CAlarmDataConfig msgInfo;
-		std::memset(&msgInfo, 0, sizeof CAlarmDataConfig);
-		msgInfo.m_nAlarmState = alarm_unconfim;
-		msgInfo.m_fVal = pAlarmMsg->Value;
-		msgInfo.m_nType = pMsg->Type;
-		strncpy(msgInfo.m_szContent, szAlarmDesc.toLocal8Bit().data(), qMin((size_t)MAX_CONTENT_LENGTH * 2, (size_t)szAlarmDesc.length()));
-		FormatTimeStamp(&pAlarmMsg->Tm, msgInfo.m_szTimeTag);
-
-		DMSG dmsg;
-		std::memset(&dmsg, 0, sizeof(DMSG));
-		dmsg.Type = MSG_EVT8;
-		dmsg.SenderID = 0;
-		int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
-		dmsg.RecverID = m_nNBSvcMailBoxID;
-		dmsg.Size = sizeof CAlarmDataConfig;
-		memcpy(dmsg.Buff, &msgInfo, std::min((size_t)dmsg.Size, sizeof CAlarmDataConfig));
-		return SendMail("SCADA", &dmsg, 0);
-
-		break;
-	}		
-	case MSG_EVT_DIAG:
-	{
-		DIAG_MSG *pDiagMsg = reinterpret_cast<DIAG_MSG*> (pMsg->Buff);
-		if (pDiagMsg)
+		case MSG_EVT_DIAG:
 		{
-			FormatDiagAlarmDesc(pDiagMsg, szAlarmDesc);
+			DIAG_MSG *pDiagMsg = reinterpret_cast<DIAG_MSG*> (pMsg->Buff);
+			if (pDiagMsg)
+			{
+				FormatDiagAlarmDesc(pDiagMsg, szAlarmDesc);
+			}
+			//形成语音告警
+			CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
+			pAudio->m_bAck = true;
+			pAudio->m_nAckType = AFTER_CONFIRM_DELETE;
+			pAudio->m_nPlayTimes = 1;
+			pAudio->m_nPriority = 1;
+			pAudio->m_bSoundEnable = false;
+			pAudio->m_bSpeechTextEnable = true;
+			strncpy(pAudio->m_szSpeechText, szAlarmDesc.toLocal8Bit().data(), qMin(size_t(MAX_FILENAME_LENGTH * 4), (size_t)szAlarmDesc.length()));
+			pAudio->m_bBeepEnable = false;
+
+			GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
+
+			//发出告警信息
+			CAlarmDataConfig msgInfo;
+			std::memset(&msgInfo, 0, sizeof CAlarmDataConfig);
+			msgInfo.m_nAlarmState = alarm_unconfim;
+			msgInfo.m_fVal = 1;
+			msgInfo.m_nType = pMsg->Type;
+			strncpy(msgInfo.m_szContent, szAlarmDesc.toLocal8Bit().data(), qMin((size_t)MAX_CONTENT_LENGTH * 2, (size_t)szAlarmDesc.length()));
+			FormatTimeStamp(&pDiagMsg->Tm, msgInfo.m_szTimeTag);
+
+			DMSG dmsg;
+			std::memset(&dmsg, 0, sizeof(DMSG));
+			dmsg.Type = MSG_EVT8;
+			dmsg.SenderID = 0;
+			int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
+			dmsg.RecverID = m_nNBSvcMailBoxID;
+			dmsg.Size = sizeof CAlarmDataConfig;
+			memcpy(dmsg.Buff, &msgInfo, std::min((size_t)dmsg.Size, sizeof CAlarmDataConfig));
+			return SendMail("SCADA", &dmsg, 0);
+			break;
 		}
-		//形成语音告警
-		CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
-		pAudio->m_bAck = true;
-		pAudio->m_nAckType = AFTER_CONFIRM_DELETE;
-		pAudio->m_nPlayTimes = 1;
-		pAudio->m_nPriority = 1;
-		pAudio->m_bSoundEnable = false ;
-		pAudio->m_bSpeechTextEnable = true;
-		strncpy(pAudio->m_szSpeechText, szAlarmDesc.toLocal8Bit().data(), qMin(size_t(MAX_FILENAME_LENGTH * 4), (size_t)szAlarmDesc.length()));
-		pAudio->m_bBeepEnable = false;
-
-		GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
-
-		//发出告警信息
-		CAlarmDataConfig msgInfo;
-		std::memset(&msgInfo, 0, sizeof CAlarmDataConfig);
-		msgInfo.m_nAlarmState = alarm_unconfim;
-		msgInfo.m_fVal = 1;
-		msgInfo.m_nType = pMsg->Type;
-		strncpy(msgInfo.m_szContent, szAlarmDesc.toLocal8Bit().data(), qMin((size_t)MAX_CONTENT_LENGTH * 2,(size_t) szAlarmDesc.length()));
-		FormatTimeStamp(&pDiagMsg->Tm, msgInfo.m_szTimeTag);
-
-		DMSG dmsg;
-		std::memset(&dmsg, 0, sizeof(DMSG));
-		dmsg.Type = MSG_EVT8;
-		dmsg.SenderID = 0;
-		int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
-		dmsg.RecverID = m_nNBSvcMailBoxID;
-		dmsg.Size = sizeof CAlarmDataConfig;
-		memcpy(dmsg.Buff, &msgInfo, std::min((size_t)dmsg.Size, sizeof CAlarmDataConfig));
-		return SendMail("SCADA", &dmsg, 0);
-		break;
-	}		
-	case MSG_EVT_OPER:
-		break;
-	case MSG_EVT_SETVAL:
-		break;
-	case MSG_EVT6:
-	case MSG_EVT7:
-	{
-		ALARM_MSG *pAlarmMsg = reinterpret_cast<ALARM_MSG*> (pMsg->Buff);
-		if (pAlarmMsg)
+		case MSG_EVT_OPER:
+			break;
+		case MSG_EVT_SETVAL:
+			break;
+		case MSG_EVT6:
+		case MSG_EVT7:
 		{
-			FormatNormalAlarmDesc(pAlarmMsg, szAlarmDesc);
+			ALARM_MSG *pAlarmMsg = reinterpret_cast<ALARM_MSG*> (pMsg->Buff);
+			if (pAlarmMsg)
+			{
+				FormatNormalAlarmDesc(pAlarmMsg, szAlarmDesc);
+			}
+			CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
+			pAudio->m_bAck = true;
+			pAudio->m_nAckType = AFTER_CONFIRM_DELETE;
+			pAudio->m_nPlayTimes = 1;
+			pAudio->m_nPriority = 1;
+			pAudio->m_bSoundEnable = false;
+			pAudio->m_bSpeechTextEnable = true;
+			strncpy(pAudio->m_szSpeechText, szAlarmDesc.toLocal8Bit().data(), qMin(size_t(MAX_FILENAME_LENGTH * 4), (size_t)szAlarmDesc.length()));
+			pAudio->m_bBeepEnable = false;
+
+			GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
+
+			CAlarmDataConfig msgInfo;
+			std::memset(&msgInfo, 0, sizeof CAlarmDataConfig);
+			msgInfo.m_nAlarmState = alarm_unconfim;
+			msgInfo.m_fVal = 1;
+			msgInfo.m_nType = pMsg->Type;
+			strncpy(msgInfo.m_szContent, szAlarmDesc.toLocal8Bit().data(), qMin((size_t)MAX_CONTENT_LENGTH * 2, (size_t)szAlarmDesc.length()));
+			FormatTimeStamp(&pAlarmMsg->Tm, msgInfo.m_szTimeTag);
+
+			DMSG dmsg;
+			std::memset(&dmsg, 0, sizeof(DMSG));
+			dmsg.Type = MSG_EVT8;
+			dmsg.SenderID = 0;
+			int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
+			dmsg.RecverID = m_nNBSvcMailBoxID;
+			dmsg.Size = sizeof CAlarmDataConfig;
+			memcpy(dmsg.Buff, &msgInfo, std::min((size_t)dmsg.Size, sizeof CAlarmDataConfig));
+			return SendMail("SCADA", &dmsg, 0);
+			break;
 		}
-		CAudioBaseData_DEF  pAudio = std::make_shared<CAudioBaseData>();
-		pAudio->m_bAck = true;
-		pAudio->m_nAckType = AFTER_CONFIRM_DELETE;
-		pAudio->m_nPlayTimes = 1;
-		pAudio->m_nPriority = 1;
-		pAudio->m_bSoundEnable = false;
-		pAudio->m_bSpeechTextEnable = true;
-		strncpy(pAudio->m_szSpeechText, szAlarmDesc.toLocal8Bit().data(), qMin(size_t(MAX_FILENAME_LENGTH * 4), (size_t)szAlarmDesc.length()));
-		pAudio->m_bBeepEnable = false;
-
-		GetScadaSvc()->GetAudioSvc()->AddAudioAlarmInfo(pAudio);
-
-		CAlarmDataConfig msgInfo;
-		std::memset(&msgInfo,0,sizeof CAlarmDataConfig);
-		msgInfo.m_nAlarmState = alarm_unconfim;
-		msgInfo.m_fVal = 1;
-		msgInfo.m_nType = pMsg->Type;
-		strncpy(msgInfo.m_szContent, szAlarmDesc.toLocal8Bit().data(), qMin((size_t)MAX_CONTENT_LENGTH * 2, (size_t)szAlarmDesc.length()));
-		FormatTimeStamp(&pAlarmMsg->Tm, msgInfo.m_szTimeTag);
-
-		DMSG dmsg;
-		std::memset(&dmsg, 0, sizeof(DMSG));
-		dmsg.Type = MSG_EVT8;
-		dmsg.SenderID = 0;
-		int m_nNBSvcMailBoxID = QueryMailBoxID("SCADA", "ALARM_SCD_WIN");
-		dmsg.RecverID = m_nNBSvcMailBoxID;
-		dmsg.Size = sizeof CAlarmDataConfig;
-		memcpy(dmsg.Buff, &msgInfo, std::min((size_t)dmsg.Size, sizeof CAlarmDataConfig));
-		return SendMail("SCADA", &dmsg, 0);
-		break;
-	}		
-	default:
-		break;
+		default:
+			break;
 	}
 
 	return true;

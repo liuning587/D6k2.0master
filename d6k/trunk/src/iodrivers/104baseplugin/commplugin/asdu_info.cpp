@@ -394,13 +394,13 @@ float ASDU13_SQ0::GetValue(int nIndex)
 {
 	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU13_SQ0)
 		return 0;
-	return m_data[nIndex].m_fValue;
+	return 0;
 }
 void ASDU13_SQ0::SetValue(int nIndex, float fValue)
 {
 	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU13_SQ0)
 		return;
-	m_data[nIndex].m_fValue = fValue;
+	//m_data[nIndex].m_fValue = fValue;
 }
 QDS ASDU13_SQ0::GetQDS(int nIndex)
 {
@@ -431,13 +431,13 @@ float ASDU13_SQ1::GetValue(int nIndex)
 {
 	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU13_SQ1)
 		return 0;
-	return m_data[nIndex].m_fValue;
+	return 0;
 }
 void ASDU13_SQ1::SetValue(int nIndex, float fValue)
 {
 	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU13_SQ1)
 		return;
-	m_data[nIndex].m_fValue = fValue;
+	//m_data[nIndex].m_fValue = fValue;
 }
 QDS ASDU13_SQ1::GetQDS(int nIndex)
 {
@@ -470,13 +470,13 @@ void ASDU14_SQ0::SetValue(int nIndex, float fValue)
 {
 	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU14_SQ0)
 		return;
-	m_data[nIndex].m_std = fValue;
+	//m_data[nIndex].m_std = fValue;
 }
 float ASDU14_SQ0::GetValue(int nIndex)
 {
 	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDU14_SQ0)
 		return 0;
-	return m_data[nIndex].m_std;
+	return 0;
 }
 void ASDU14_SQ0::SetTime(int nIndex)
 {
@@ -1313,4 +1313,66 @@ void ASDU112_ZOOM::SetItemCount(int nCount)
 int ASDU112_ZOOM::GetItemCount() const
 {
     return  vsq;
+}
+
+
+//////////////////////
+
+void ASDU_IEC::SetItemCount(int nCount)
+{
+	vsq = nCount | 0x80;
+}
+int ASDU_IEC::GetItemCount() const
+{
+	return  vsq & 0x7f; //应用数据单元数目
+}
+short ASDU_IEC::GetValue(int nIndex)
+{
+	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDUDZ_RD)
+		return 0;
+	return m_data[nIndex].m_nValue;
+}
+void ASDU_IEC::SetValue(int nIndex, short nValue)
+{
+	if (nIndex < 0 || nIndex >= MAX_DATA_PER_ASDUDZ_RD)
+		return;
+	m_data[nIndex].m_nValue = nValue;
+}
+
+int ASDU_IEC::GetAsduDzLength()
+{
+	int nSize = sizeof(ASDU_BASE) + GetItemCount() * sizeof(ASDUDZ_DATA) + sizeof(INFOADDR3);
+	return nSize;
+}
+
+void ASDU_DEVICE_IEC::SetItemCount(int nCount)
+{
+	vsq = nCount | 0x80;
+
+}
+
+int ASDU_DEVICE_IEC::GetItemCount() const
+{
+	return  vsq & 0x7f; //应用数据单元数目
+
+}
+
+int ASDU_DEVICE_IEC::GetValue(int nIndex)
+{
+	if (nIndex < 0 || nIndex >= MAX_DATA_ASDU_DEVICE_IEC)
+		return 0;
+	return m_data[nIndex].m_fValue;
+}
+
+void ASDU_DEVICE_IEC::SetValue(int nIndex, int fValue)
+{
+	if (nIndex < 0 || nIndex >= MAX_DATA_ASDU_DEVICE_IEC)
+		return;
+	m_data[nIndex].m_fValue = fValue;
+}
+
+int ASDU_DEVICE_IEC::GetAsduIec_Length()
+{
+	int nSize = sizeof(ASDU_BASE) + GetItemCount() * sizeof(ASDU_DEVICE_IEC_DATA) + sizeof(INFOADDR3);
+	return nSize;
 }

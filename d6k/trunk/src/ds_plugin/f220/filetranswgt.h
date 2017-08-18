@@ -36,4 +36,6 @@ private:
 	Ui::CFileTransWgt ui;
 	//
 	CCommThread *m_pCommuncate;
+	//文件保存的路径
+	QString m_strFilePath;
 };

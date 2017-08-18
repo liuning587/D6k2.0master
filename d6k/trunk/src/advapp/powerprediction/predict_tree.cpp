@@ -543,7 +543,7 @@ void CPredictTree::Slot_DoubleClicked(const QModelIndex &index)
 			{
 				return;
 			}
-
+			
 			CTabWidget* pTabWidget = m_pUi->GetTabWidget();
 			Q_ASSERT(pTabWidget);
 
@@ -573,6 +573,8 @@ void CPredictTree::Slot_DoubleClicked(const QModelIndex &index)
 			pWidget->AddToTableCtrl(pItem, staName);
 
 			m_pUi->GetTabWidget()->setCurrentWidget(pWidget);
+
+			pWidget->deleteLater();
 
 			break;
 		}

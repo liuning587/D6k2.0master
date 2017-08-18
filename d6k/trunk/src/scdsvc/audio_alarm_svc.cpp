@@ -147,22 +147,22 @@ void CAudioAlarmSvc::MainLoop()
 				}
 				switch (pData->m_nAckType)
 				{
-				case AFTER_CONFIRM_DELETE:
-				{
-					if (pData->m_bAck)
+					case AFTER_CONFIRM_DELETE:
 					{
-						AppendAlarmUnit(pData);
+						if (pData->m_bAck)
+						{
+							AppendAlarmUnit(pData);
+						}
+						m_arrAudioDataUint.pop_front();
+						break;
 					}
-					m_arrAudioDataUint.pop_front();
-					break;
-				}
-				case AFTER_PLAY_DELETE:
-				{
-					m_arrAudioDataUint.pop_front();
-					break;
-				}
-				default:
-					break;
+					case AFTER_PLAY_DELETE:
+					{
+						m_arrAudioDataUint.pop_front();
+						break;
+					}
+					default:
+						break;
 				}
 			}
 		}	

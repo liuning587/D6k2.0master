@@ -13,7 +13,7 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 
 	headStringList << "ID" << "NAME" << QObject::tr("Description") <<"Type" << "SelectPoint";
 
-	this->setRowCount(8);
+	this->setRowCount(9);
 	this->setColumnCount(5);
 	this->setHorizontalHeaderLabels(headStringList);
 
@@ -57,6 +57,13 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 	newItem_7->setFlags(newItem_7->flags() & (~Qt::ItemIsEditable));
 	this->setItem(7, 0, newItem_7);
 
+	QTableWidgetItem *pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ComponentTemperature.m_nID));
+	pTmp->setTextAlignment(Qt::AlignCenter);
+	pTmp->setFlags(pTmp->flags() & (~Qt::ItemIsEditable));
+	this->setItem(8, 0, pTmp);
+
+
+
 	QTableWidgetItem *newItem_10 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_szName));
 	newItem_10->setTextAlignment(Qt::LeftToRight);
 	newItem_10->setFlags(newItem_10->flags() & (~Qt::ItemIsEditable));
@@ -97,10 +104,13 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 	newItem_17->setFlags(newItem_17->flags() & (~Qt::ItemIsEditable));
 	this->setItem(7, 1, newItem_17);
 
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ComponentTemperature.m_szName));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(newItem_17->flags() & (~Qt::ItemIsEditable));
+	this->setItem(8, 1, pTmp);
 
 
-
-	QTableWidgetItem *pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_strDescription));
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_strDescription));
 	pTmp->setTextAlignment(Qt::LeftToRight);
 	pTmp->setFlags(newItem_10->flags() | (Qt::ItemIsEditable));
 	this->setItem(0, 2, pTmp);
@@ -140,6 +150,10 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
 	this->setItem(7, 2, pTmp);
 
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ComponentTemperature.m_strDescription));
+	pTmp->setTextAlignment(Qt::LeftToRight);
+	pTmp->setFlags(pTmp->flags() | (Qt::ItemIsEditable));
+	this->setItem(8, 2, pTmp);
 
 
 
@@ -184,6 +198,14 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 	newItem_27->setFlags(newItem_27->flags() & (~Qt::ItemIsEditable));
 	this->setItem(7, 3, newItem_27);
 
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ComponentTemperature.m_nType));
+	pTmp->setTextAlignment(Qt::AlignCenter);
+	pTmp->setFlags(pTmp->flags() & (~Qt::ItemIsEditable));
+	this->setItem(8, 3, pTmp);
+
+
+
+
 	QTableWidgetItem *newItem_30 = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_TotalRadiation.m_szLinkedTagName));
 	newItem_30->setTextAlignment(Qt::AlignCenter);
 	newItem_30->setFlags(newItem_30->flags() & (~Qt::ItemIsEditable));
@@ -224,6 +246,14 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 	newItem_37->setFlags(newItem_37->flags() & (~Qt::ItemIsEditable));
 	this->setItem(7, 4, newItem_37);
 
+	pTmp = new QTableWidgetItem(QString("%1").arg(m_pWeatherItem->m_ComponentTemperature.m_szLinkedTagName));
+	pTmp->setTextAlignment(Qt::AlignCenter);
+	pTmp->setFlags(pTmp->flags() & (~Qt::ItemIsEditable));
+	this->setItem(8, 4, pTmp);
+
+
+
+
 	QPushButton *pushButton = new QPushButton("");
 	pushButton->setFlat(true);
 	this->setCellWidget(0, 4, pushButton);
@@ -263,6 +293,11 @@ CWeatherTableWidget::CWeatherTableWidget(CWeatherData* weatherItem)
 	pushButton_7->setFlat(true);
 	this->setCellWidget(7, 4, pushButton_7);
 	connect(pushButton_7, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
+
+	QPushButton *pushButton_8 = new QPushButton("");
+	pushButton_8->setFlat(true);
+	this->setCellWidget(8, 4, pushButton_8);
+	connect(pushButton_8, SIGNAL(clicked()), this, SLOT(Slot_SetBindValue()));
 
 	setColumnWidth(0, 100);
 	setColumnWidth(1, 250);
@@ -317,46 +352,52 @@ void CWeatherTableWidget::itemChanged(QTableWidgetItem * item)
 	CPPPointInfo  m_AirTemperature;  //! 空气温度
 	CPPPointInfo  m_RelativeHumdty;  //! 相对湿度
 	CPPPointInfo  m_AirPressure;     //! 气压
-	
+	//组件温度
+
 	if (item->column() == 2 && item->row() == 0)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_TotalRadiation.m_strDescription = item->text();
+		m_pWeatherItem->m_TotalRadiation.m_strDescription = item->text();
 	}
 	else if (item->column() == 2 && item->row() == 1)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_DirectRadiation.m_strDescription = item->text();
+		m_pWeatherItem->m_DirectRadiation.m_strDescription = item->text();
 	}
 	else if (item->column() == 2 && item->row() == 2)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_ScattRadiation.m_strDescription = item->text();
+		m_pWeatherItem->m_ScattRadiation.m_strDescription = item->text();
 	}
 	else if (item->column() == 2 && item->row() == 3)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_AvergWindDirect.m_strDescription = item->text();
+		m_pWeatherItem->m_AvergWindDirect.m_strDescription = item->text();
 	}
 	else if (item->column() == 2 && item->row() == 4)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_AvergWindSpeed.m_strDescription = item->text();
+		m_pWeatherItem->m_AvergWindSpeed.m_strDescription = item->text();
 	}
 	else if (item->column() == 2 && item->row() == 5)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_AirTemperature.m_strDescription = item->text();
+		m_pWeatherItem->m_AirTemperature.m_strDescription = item->text();
 	}
 	else if (item->column() == 2 && item->row() == 6)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_RelativeHumdty.m_strDescription = item->text();
+		m_pWeatherItem->m_RelativeHumdty.m_strDescription = item->text();
 	}
 	else if (item->column() == 2 && item->row() == 7)
 	{
 		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
-		m_AirPressure.m_strDescription = item->text();
+		m_pWeatherItem->m_AirPressure.m_strDescription = item->text();
+	}
+	else if (item->column() == 2 && item->row() == 8)
+	{
+		m_pWeatherItem->m_vecTableInfo[item->row()].m_strDescription = item->text();
+		m_pWeatherItem->m_ComponentTemperature.m_strDescription = item->text();
 	}
 }
 

@@ -62,12 +62,17 @@ void CWeatherStationData::SetAirPressureTagname(const std::string& strAirPressur
 	m_strAirPressureTagname = strAirPressureTagname;
 }
 
+void CWeatherStationData::SetComponentDescriptionTagname(const std::string& strComponentDescription)
+{
+	m_strComponentDescription = strComponentDescription;
+}
+
 bool CWeatherStationData::Init()
 {
 	if (m_strTotalRadiationTagname.empty() || m_strDirectRadiationTagname.empty() ||
 		m_strScattRadiationTagname.empty() || m_strAvergWindDirectTagname.empty() ||
 		m_strAvergWindSpeedTagname.empty() || m_strAirTemperatureTagname.empty() ||
-		m_strRelativeHumdtyTagname.empty() || m_strAirPressureTagname.empty())
+		m_strRelativeHumdtyTagname.empty() || m_strAirPressureTagname.empty() || m_strComponentDescription.empty())
 	{
 		return false;
 	}
@@ -80,6 +85,7 @@ bool CWeatherStationData::Init()
 	m_pAirTemperature = std::make_shared<CAinData>(m_strAirTemperatureTagname);
 	m_pRelativeHumdty = std::make_shared<CAinData>(m_strRelativeHumdtyTagname);
 	m_pAirPressure = std::make_shared<CAinData>(m_strAirPressureTagname);
+	m_pComponentDescription = std::make_shared<CAinData>(m_strComponentDescription);
 
 	m_isInit = true;
 
@@ -347,6 +353,35 @@ bool CWeatherStationData::GetRealDataOfAirPressure(fp64* value)
 	}
 
 	*value = m_pAirPressure->GetValue();
+
+	return true;
+}
+
+bool CWeatherStationData::GetRealDataOfComponentDescription(fp64* value)
+{
+	Q_ASSERT(m_pComponentDescription && m_isInit);
+	if (m_pComponentDescription == nullptr)
+	{
+		// log
+		return false;
+	}
+
+	if (!m_isInit)
+	{
+		if (!Init())
+		{
+			// log
+			return false;
+		}
+	}
+
+	if (!m_pComponentDescription->GetRealTimeData())
+	{
+		// log
+		return false;
+	}
+
+	*value = m_pComponentDescription->GetValue();
 
 	return true;
 }

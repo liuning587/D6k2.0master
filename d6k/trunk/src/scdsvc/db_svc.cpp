@@ -643,6 +643,66 @@ bool CDbSvc::UpdateSysVarValue(int32u nNodeOccNo, int32u nOccNo, fp64 nVal)
 	return false;
 }
 
+/*! \fn bool CDbSvc::UpdateNode(NODE *pNode)
+********************************************************************************************************* 
+** \brief CDbSvc::UpdateNode 
+** \details 
+** \param pNode 
+** \return bool 
+** \author LiJin 
+** \date 2017年8月9日 
+** \note   
+********************************************************************************************************/
+bool CDbSvc::UpdateNode(NODE *pNode)
+{
+	// 节点状态，好像是由nb_svc维护
+	Q_ASSERT(pNode);
+	if (pNode == nullptr)
+		return false;
+
+
+
+	return true;
+}
+
+bool CDbSvc::UpdateChannel(int32u nNodeOccNo, CHANNEL *pChannel)
+{
+	Q_ASSERT(nNodeOccNo != INVALID_OCCNO  && nNodeOccNo <= MAX_NODE_OCCNO);
+	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
+	{
+		return false;
+	}
+	
+	auto it = m_mapFes.find(nNodeOccNo);
+
+	std::shared_ptr<CFesDB> pFes = nullptr;
+
+	if (it == m_mapFes.end())
+	{
+		return false;
+	}
+	else
+	{
+		pFes = it->second;
+		Q_ASSERT(pFes);
+		if (!pFes)
+		{
+			return false;
+		}
+	}
+
+
+
+	return true;
+}
+
+bool CDbSvc::UpdateDevice(int32u nNodeOccNo, DEVICE *pDevice)
+{
+	return true;
+}
+
+
+
 size_t CDbSvc::BuildAppDB(char* pAddr)
 {
 	Q_ASSERT(pAddr);

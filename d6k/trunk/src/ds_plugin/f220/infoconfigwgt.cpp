@@ -50,7 +50,7 @@ CInfoConfigWgt::CInfoConfigWgt(QWidget *parent)
 
     m_pLstProject = new QListWidget(this);
 
-	setFixedSize(500, 350);
+	//setFixedSize(500, 350);
 
 	InitWgt();
 	if (!InitCurrentPointTable())
@@ -77,7 +77,7 @@ void  CInfoConfigWgt::InitWgt()
 	QLabel *pLabelIP = new QLabel(tr("IP:        "), this);
 	QLabel *pLabelPort = new QLabel(tr("Port:      "), this);
 	QLabel *pLableDevice = new QLabel(tr("Device Type"), this);
-    QLabel *pLabelDeviceAddr = new QLabel(tr("Device Addr"),this);
+    QLabel *pLabelDeviceAddr = new QLabel(QStringLiteral("装置地址        "),this);
 
     QHBoxLayout *pProjectlayout = new QHBoxLayout;
     pProjectlayout->addWidget(pLableProject);
@@ -113,21 +113,21 @@ void  CInfoConfigWgt::InitWgt()
 	m_pComBoxDebiceType->setFixedWidth(240);
 
     //遥信地址
-    QLabel *pLableBinary = new QLabel(tr("Binary Addr"),this);
+    QLabel *pLableBinary = new QLabel(QStringLiteral("单点遥信起始地址"),this);
 	//双点遥信地址
-	QLabel *pLableDoubleBinary = new QLabel(tr("Double Addr"), this);
+	QLabel *pLableDoubleBinary = new QLabel(QStringLiteral("双点遥信起始地址"), this);
     //要测地址
-    QLabel *pLableAnalog = new QLabel(tr("Analog Addr"),this);
+    QLabel *pLableAnalog = new QLabel(QStringLiteral("遥测起始地址    "),this);
     //遥脉地址
-    QLabel *pLabelKwh = new QLabel(tr("Kwh Addr   "),this);
+    QLabel *pLabelKwh = new QLabel(QStringLiteral("遥脉起始地址    "),this);
     //遥控地址
-    QLabel *pLabelControl = new QLabel(tr("ControlAddr"),this);
+    QLabel *pLabelControl = new QLabel(QStringLiteral("遥控起始地址    "),this);
     //总召时间间隔
-    QLabel *pLabelGeneralCall = new QLabel(tr("GeneralCall"),this);
+    QLabel *pLabelGeneralCall = new QLabel(QStringLiteral("总召时间        "),this);
     //对时间隔
-    QLabel *pLabelSyncTime = new QLabel(tr("SyncTime   "),this);
+    QLabel *pLabelSyncTime = new QLabel(QStringLiteral("同步时间        "),this);
     //电度量召唤
-    QLabel *pLabelKwhTime = new QLabel(tr("KwhTime    "),this);
+    QLabel *pLabelKwhTime = new QLabel(QStringLiteral("电度时间        "),this);
 
     QHBoxLayout *pGrop1 = new QHBoxLayout;
     pGrop1->addWidget(pLableBinary);
@@ -251,7 +251,7 @@ void  CInfoConfigWgt::InitWgt()
 
 	pTabWgt->addTab(pbaseInfoWgt, tr("Base Info"));
     pTabWgt->addTab(pAddrWgt, tr("Addr Config"));
-	pTabWgt->addTab(pTimeWgt,tr("Time Set"));
+	pTabWgt->addTab(pTimeWgt,QStringLiteral("时间设置"));
     //pTabWgt->addTab(m_pRemotePonitTable, tr("FTP Bin Info"));
 
 	//pTabWgt->removeTab(2);
@@ -487,10 +487,14 @@ void CInfoConfigWgt::AnalyseXmlFile(QIODevice *pDevice)
             {
                 m_pBinaryStartAddr->setText(xmlReader.readElementText());
             }
-            else if (xmlReader.name().toString() == "AnalogAddr")
+            else if (xmlReader.name().toString() == "DoubleBinaryAddr")
             {
-                m_pAnalyStartAddr->setText(xmlReader.readElementText());
+                m_pDoubleBinaryStartAddr->setText(xmlReader.readElementText());
             }
+			else if (xmlReader.name().toString() == "AnalogAddr")
+			{
+				m_pAnalyStartAddr->setText(xmlReader.readElementText());
+			}
             else if (xmlReader.name().toString() == "KwhAddr")
             {
                 m_pKwhStartAddr->setText(xmlReader.readElementText());
@@ -621,6 +625,10 @@ void CInfoConfigWgt::WriteBaseInfo(QXmlStreamWriter &xmlWriter)
     xmlWriter.writeStartElement("BinaryAddr");
     xmlWriter.writeCharacters(m_pBinaryStartAddr->text());
     xmlWriter.writeEndElement();
+
+	xmlWriter.writeStartElement("DoubleBinaryAddr");
+	xmlWriter.writeCharacters(m_pDoubleBinaryStartAddr->text());
+	xmlWriter.writeEndElement();
 
     xmlWriter.writeStartElement("AnalogAddr");
     xmlWriter.writeCharacters(m_pAnalyStartAddr->text());

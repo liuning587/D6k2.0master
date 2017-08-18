@@ -26,7 +26,9 @@
 #include "realtime_view.h"
 #include "realtime_graph.h"
 #include "colour_define.h"
+#include "pushbtn_widget.h"
 #include "scadaapi/scdsvcapi.h"
+#include "fesapi/fescnst.h"
 #include "log/log.h"
 #include <QGridLayout>
 #include <QTableWidget>
@@ -39,6 +41,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QLibrary>
+#include <QComboBox>
 
 typedef QWidget *(*predict_widget)();
 typedef void(*predict_close)();
@@ -46,7 +49,8 @@ typedef void(*predict_close)();
 CMainFrame::CMainFrame(QWidget *pParent) :  QMainWindow(pParent)
 { 
 	m_pTabWidget = new QTabWidget(nullptr);
-	
+	m_nIndexLayer = 1;
+	m_bIsOrder = false;
 	m_pDockWidget = new QDockWidget(nullptr);
 	m_pDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea |Qt::BottomDockWidgetArea);
 	
@@ -94,7 +98,7 @@ bool CMainFrame::LoadAppDlls()
 	Q_ASSERT(pWidget);
 
 	m_pTabWidget->addTab(pWidget, tr("predict"));*/
-	
+	 
 	return true;   
 }
 /*! \fn CGraphTabView::~CGraphTabView()
@@ -199,6 +203,14 @@ void CMainFrame::InitToolBar()
 	connect(m_pNomalScreenAction, SIGNAL(triggered()), this, SLOT(slot_NormalScreenView()));	
 	pToolBar->addAction(m_pNomalScreenAction);
 
+	m_pComBox = new QComboBox;
+	connect(m_pComBox, SIGNAL(currentIndexChanged(int)),this,SLOT(slot_ComBoBoxChanged(int)));
+	for (int i = 0; i < 16;i++)
+	{
+		QString strLayerName = QString("Layer%1").arg(i+1);
+		m_pComBox->addItem(strLayerName);
+	}
+	pToolBar->addWidget(m_pComBox);
 }
 
 void CMainFrame::resizeEvent(QResizeEvent *event)
@@ -237,6 +249,8 @@ void  CMainFrame::AddView(CGraphFile * pGraphFile)
 
 	pView->setScene(pGraphFile->GetScene());
 
+	QObject::connect(pView, &CRealTimeView::sig_BtnOrderType, this, &CMainFrame::slot_BtnOrder);
+	
 	CRealTimeTask * pTask = new CRealTimeTask(pGraphFile);
 
 	m_arrTasks.push_back(pTask);
@@ -407,10 +421,67 @@ void CMainFrame::slot_NormalScreenView()
 	this->showNormal();
 }
 
+void CMainFrame::slot_ComBoBoxChanged(int nIndex)
+{
+	Q_ASSERT(nIndex >= 0);
+
+	int nMyIndex = m_pComBox->currentText().remove("Layer").toInt();
+
+	Q_ASSERT(nMyIndex > 0);
+
+	m_nIndexLayer = nMyIndex;
+}
+
+void CMainFrame::slot_BtnOrder(const QString& tagName, int nType)
+{
+	Q_ASSERT(!tagName.isEmpty());
+	if (!tagName.isEmpty())
+	{
+		return;
+	}
+
+	//当前命令还在继续执行，请稍等
+	if (m_bIsOrder)
+	{
+		QMessageBox::information(NULL, tr("wait"), tr("current order has not completed!!"));
+		return; 
+	}
+
+	int32u nNodeOccNo, nIddType, nOccNo, nFieldID;
+	bool bRet=::GetOccNoByTagName(tagName.toStdString().c_str(), &nNodeOccNo, &nIddType, &nOccNo, &nFieldID);
+	
+	Q_ASSERT(bRet);
+	if (!bRet)
+	{
+		return;
+	}
+
+	IO_VARIANT nVar;
+
+	switch (nType)
+	{
+	case CPushBtnWidget::BTN_PRESET:
+	{
+		int nIndex = OPER_TYPE_SELECT;
+		S_INT(&nVar, &nIndex);
+		break;
+	}		
+	case CPushBtnWidget::BTN_EXEC:
+	{
+		int nIndex = OPER_TYPE_EXEC;
+		S_INT(&nVar, &nIndex);
+		break;
+	}		
+	default:
+		break;
+	}
+	PutRTData(IDD_DOUT, nNodeOccNo, nOccNo, ATT_DOUT, &nVar, nullptr, nullptr);
+}
+
 void CMainFrame::InitMainWindow()
 {
 	QSplitter* pSplitter = new QSplitter(Qt::Horizontal);
-	//pSplitter->addWidget(m_pDockWidget);
+
 	pSplitter->addWidget(m_pTabWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea,m_pDockWidget);
@@ -457,3 +528,34 @@ void CMainFrame::SetCurrentFile(const QString& szName)
 
 	AddView(pGraphFile);
 }
+
+/*
+CBaseWidget* CMainFrame::HitTest(QPoint & pos, unsigned int nLayerIdx)
+{
+	Q_ASSERT(nLayerIdx > 0 && nLayerIdx <= CGraphFile::MAX_LAYER_CNT);
+	if (nLayerIdx == 0 || nLayerIdx > CGraphFile::MAX_LAYER_CNT)
+		return nullptr;
+	CRealTimeView* pView=dynamic_cast<CRealTimeView*>(m_pTabWidget->currentWidget());
+	Q_ASSERT(pView);
+	if (!pView)
+	{
+		return nullptr;
+	}
+	CGraphScene *pScene = dynamic_cast<CGraphScene*>(pView->scene());
+
+	Q_ASSERT(pScene);
+	if (pScene == nullptr)
+		return nullptr;
+
+	auto pGraphFile = pScene->GetGraphFile();
+	Q_ASSERT(pGraphFile);
+	if (pGraphFile == nullptr)
+		return nullptr;
+
+	auto pLayer = pGraphFile->GetLayer(m_nIndexLayer);
+	Q_ASSERT(pLayer);
+	if (pLayer == nullptr)
+		return nullptr;
+
+	return pLayer->HitTest(pos);
+}*/

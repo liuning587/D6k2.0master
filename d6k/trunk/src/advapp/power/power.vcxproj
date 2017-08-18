@@ -51,6 +51,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Sqld.lib;Qt5Xmld.lib;Qt5XmlPatternsd.lib;log.lib;scadaapi.lib;dbapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /y ..\..\..\bin\power.lib ..\..\..\lib</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

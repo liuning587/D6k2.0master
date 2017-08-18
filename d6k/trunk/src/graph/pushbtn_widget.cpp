@@ -21,6 +21,8 @@ CPushBtnWidget::CPushBtnWidget()
 CPushBtnWidget::CPushBtnWidget(QRectF rcPos, BTN_TYPE shape):CBaseWidget(rcPos)
 {
 	m_nObjType = 0;
+
+	m_eRemoteControyType = BTN_PRESET;
 	m_Shape = shape;
 
 	m_eRotateCenter = ROTATE_MIDCENTER;
@@ -1187,6 +1189,8 @@ void CPushBtnWidget::SaveBtnExecXml(std::shared_ptr<QXmlStreamWriter>pXmlWriter)
 	pXmlWriter->writeAttribute("Variable", m_strBtnBindValue);
 	pXmlWriter->writeAttribute("OrderType", QString::number(m_eExecType));
 
+	pXmlWriter->writeAttribute("RemoteControl",QString::number(m_eRemoteControyType));
+
 	pXmlWriter->writeStartElement("PressOrder");
 	SaveOrderXml(pXmlWriter, GetEventActionData(ACTION_PRESSED));
 	pXmlWriter->writeEndElement();
@@ -1280,6 +1284,7 @@ bool CPushBtnWidget::LoadXml(std::shared_ptr<QXmlStreamReader> pXmlReader)
 	//读取绑定值属性
 	m_strBtnBindValue = pXmlReader->attributes().value("Variable").toString();
 	m_eExecType = static_cast<BTN_EXEC_TYPE>(pXmlReader->attributes().value("OrderType").toInt());
+	m_eRemoteControyType = static_cast<BTN_REMOTE_CONTROL>(pXmlReader->attributes().value("RemoteControl").toInt());
 
 	//命令属性
 	while (!pXmlReader->atEnd())

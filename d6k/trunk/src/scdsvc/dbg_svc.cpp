@@ -23,7 +23,7 @@
 #include "log/log.h"
 #include <QObject> 
 #include <QString> 
-
+#include "libzmq/zmq.h"
 // #include "fesapi\fesapi.h"
 // #include "mail\mail.h"
 
@@ -72,19 +72,12 @@ bool CDbgSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 
 void CDbgSvc::Run()
 {
-// 	if (Mail::RecvMail(SMKEY_MAIL_DBGSVR, m_mailbuf, MAIL_BUF_SIZE)==K_FALSE)
-// 		return;
-// 
-// 	MSG_BASE* pMsgBase = (MSG_BASE*)m_mailbuf;
-
-//	int nType = pMsgBase->Type;
+ 
 }
 
 void CDbgSvc::Shutdown()
 {
-//	StopModule();
-
-//	Mail::DestroyMailBox(SMKEY_MAIL_DBGSVR);
+ 
 }
 
 

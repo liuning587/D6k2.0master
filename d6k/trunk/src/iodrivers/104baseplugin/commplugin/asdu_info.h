@@ -150,8 +150,10 @@ enum
     F_DR_TA_1 = 126,    // 目录
 	//扩展  
 	D_DV_RD_1 = 132,   //定值读取反馈  多值
+	D_DV_RD_2 = 133,
 	D_DV_WR_1 = 136,   //参数设置确认
-
+	D_DV_WR_2  = 137,   //参数设置浮点数
+	D_DV_WR_3 = 138,
 
 	D_FIX_SWITCH = 200,   //切换定值区
 	D_FIX_SEARCH = 201,   //获取定值区号
@@ -927,7 +929,7 @@ class ASDU13_SQ0 : public ASDU_BASE
 	{
 	public:
 		INFOADDR3 infoaddr;
-		float m_fValue;
+		char m_fValue[4];
 		QDS m_qds;
 	};
 	enum { MAX_DATA_PER_ASDU13_SQ0 = (MAX_ASDU_SIZE - sizeof(ASDU_BASE)) / sizeof(ASDU13_SQ0_DATA), };
@@ -959,7 +961,7 @@ public:
 	class ASDU13_SQ1_DATA
 	{
 	public:
-		float m_fValue;
+		char m_fValue[4];
 		QDS  m_qds;
 	};
 	enum { MAX_DATA_PER_ASDU13_SQ1 = (MAX_ASDU_SIZE - sizeof(ASDU_BASE) - sizeof(INFOADDR3)) / sizeof(ASDU13_SQ1_DATA), };
@@ -981,6 +983,29 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
+class ASDU_DEVICE_IEC : public ASDU_BASE
+{
+public:
+	class ASDU_DEVICE_IEC_DATA
+	{
+	public:
+		int m_fValue;
+	};
+	enum { MAX_DATA_ASDU_DEVICE_IEC = (MAX_ASDU_SIZE - sizeof(ASDU_BASE) - sizeof(INFOADDR3)) / sizeof(ASDU_DEVICE_IEC_DATA), };
+public:
+	INFOADDR3      infoaddr;
+	ASDU_DEVICE_IEC_DATA        m_data[MAX_DATA_ASDU_DEVICE_IEC];
+public:
+	void SetItemCount(int nCount);
+	int GetItemCount() const;
+public:
+	int GetValue(int nIndex);
+	void SetValue(int nIndex, int fValue);
+
+
+public:
+	int GetAsduIec_Length();
+};
 
 //////////////////////////////////////////////////////////////////////////
 //M_ME_TC_1:测量值，带时标的短浮点数(离散)
@@ -992,7 +1017,7 @@ private:
 	{
 	public:
 		INFOADDR3 m_infoaddr;
-		float m_std;
+		char m_std[4];
 		QDS m_qds;
 		CP24Time2a m_time;
 	};
@@ -1891,6 +1916,36 @@ public:
 	int GetItemCount() const;
 };
 
+//////iec  设置
+
+class ASDU_IEC : public ASDU_BASE
+{
+public:
+	class ASDUDZ_DATA
+	{
+	public:
+		//INFOADDR3      infoaddr;
+		int m_nValue;
+
+	};
+
+	enum { MAX_DATA_PER_ASDUDZ_RD = (MAX_ASDU_SIZE - sizeof(ASDU_BASE) - sizeof(INFOADDR3)) / sizeof(ASDUDZ_DATA), };
+public:
+	int GetAsduDzLength();
+
+public:
+	INFOADDR3      infoaddr;
+	ASDUDZ_DATA m_data[MAX_DATA_PER_ASDUDZ_RD];
+
+public:
+	void SetItemCount(int nCount);
+	int GetItemCount() const;
+public:
+	short GetValue(int nIndex);
+	void SetValue(int nIndex, short nValue);
+};
+//////end
+
 //定值设置   bool类型
 class ASDU203_B : public ASDU_BASE
 {
@@ -2055,6 +2110,32 @@ public:
 	unsigned short m_nAsduID;       //ASDU公共地址
 	//数据
 	QList<DEV_DATA> m_lstData;
+};
+
+
+
+//数据
+class IEC_DATA
+{
+public:
+	int nAddress;
+	float nValue;
+	int iQos;
+};
+//iec配置信息
+struct IEC_BASE
+{
+public:
+
+
+public:
+	int m_nCommandType;    // 102/132  48/136
+	unsigned short m_nCto;            //传送原因
+	int m_nQos;            //  1:选择预置参数   0:执行激活参数
+	unsigned short m_nAsduID;       //ASDU公共地址
+									//数据
+	QList<IEC_DATA> m_lstData;
+
 };
 
 // 死区

@@ -313,7 +313,6 @@ bool CFesDB::GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIA
 ** \date 2017年5月17日 
 ** \note 
 ********************************************************************************************************/
-
 bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
@@ -321,6 +320,19 @@ bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIA
 		return false;
 
 	bool bRet = false;
+
+	//! fixed by LiJin 2017.8.9
+	int32u nMyState = GetMyHostState();
+
+	if (nMyState != STATE_MAIN)
+	{// 如果本机不是主机，则不写入数据
+		QString szLog;
+		szLog = QString(QObject::tr("Node [%1] is't working on master! PutRtData [ %2 ].[ %3 ].[ %4 ] failed "))
+			.arg(m_nMyNodeOccNo).arg(nIddType).arg(nOccNo).arg(nFiledID);
+		LogMsg(szLog.toStdString().c_str(), 0);
+
+		return false;
+	}
 
 	switch (nIddType)
 	{

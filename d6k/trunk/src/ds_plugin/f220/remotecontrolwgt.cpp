@@ -168,18 +168,36 @@ void CRemoteControlWgt::InsertDataFromFeedBack(int iControlType, int iPointNum, 
         if (messReturn == QMessageBox::Yes)
         {
             m_pTimeOut->start();
-//             m_pTableModel->setItem(0, 5, new QStandardItem(tr("Exec Request")));
-//             //改编样式
-//             m_pTableModel->item(0, 0)->setBackground(QBrush(QColor(170, 255, 127)));
-//             m_pTableModel->item(0, 1)->setBackground(QBrush(QColor(170, 255, 127)));
-//             m_pTableModel->item(0, 2)->setBackground(QBrush(QColor(170, 255, 127)));
-//             m_pTableModel->item(0, 3)->setBackground(QBrush(QColor(170, 255, 127)));
-//             m_pTableModel->item(0, 4)->setBackground(QBrush(QColor(170, 255, 127)));
-//             m_pTableModel->item(0, 5)->setBackground(QBrush(QColor(170, 255, 127)));
+
+			m_pTableModel->insertRow(0);
+			m_pTableModel->setItem(0, 0, new QStandardItem(QString::number(m_pTableModel->rowCount() + 1)));
+			m_pTableModel->setItem(0, 1, new QStandardItem(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz")));
+
+			if (m_pTableModel->rowCount() > 1)
+			{
+				m_pTableModel->setItem(0, 2, new QStandardItem(m_pTableModel->item(1,2)->text()));
+				m_pTableModel->setItem(0, 3, new QStandardItem(m_pTableModel->item(1, 3)->text()));
+				m_pTableModel->setItem(0, 4, new QStandardItem(m_pTableModel->item(1, 4)->text()));
+
+			}
+
+            m_pTableModel->setItem(0, 5, new QStandardItem(tr("Exec Request")));
+            //改编样式
+            m_pTableModel->item(0, 0)->setBackground(QBrush(QColor(170, 255, 127)));
+            m_pTableModel->item(0, 1)->setBackground(QBrush(QColor(170, 255, 127)));
+            m_pTableModel->item(0, 2)->setBackground(QBrush(QColor(170, 255, 127)));
+            m_pTableModel->item(0, 3)->setBackground(QBrush(QColor(170, 255, 127)));
+            m_pTableModel->item(0, 4)->setBackground(QBrush(QColor(170, 255, 127)));
+            m_pTableModel->item(0, 5)->setBackground(QBrush(QColor(170, 255, 127)));
 
             //发送执行
             m_pCommThread->SendRemoteControl(ui.comboControlType->currentIndex(), ui.lineEditPonitNum->text().toInt() + m_pConfgWgt->GetControlStart(), ui.comboOpType->currentIndex(),2);
         }
+		else if (messReturn == QMessageBox::No)
+		{
+			m_pCommThread->SendRemoteControl(ui.comboControlType->currentIndex(), ui.lineEditPonitNum->text().toInt() + m_pConfgWgt->GetControlStart(), ui.comboOpType->currentIndex(), 3);
+
+		}
 	}
 	else if (strStatus == "Exec Request")
 	{

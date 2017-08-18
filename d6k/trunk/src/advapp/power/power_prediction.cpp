@@ -35,11 +35,29 @@ bool CPowerPrediction::Init(const char * pszProjectName)
 	// 调用父类接口，初始化内存库
 	Initalize(pszProjectName);
 
+	// 启动log
+	CreateLog(LOG_FILENAME);
+
+	// 加载组态配置生成的文件
+	if (!LoadConfig())
+	{
+		// log
+		return true;
+	}
+
+	Q_ASSERT(m_vecStationInfo.size() > 0);
+	if (m_vecStationInfo.size() < 1)
+	{
+		// log
+		return false;
+	}
+
 	m_pReadInfo = std::make_shared<CReadPowerXml>(m_strPathName);
 
 	m_pHisSvcTask = std::make_shared<CHistorySvcTask>(m_vecStationInfo);
 
-	m_pPredictCalcTask = std::make_shared<CPredictSvcTask>(m_vecStationInfo, PREDICT_DATA_SAVE_PERIOD);
+	m_pPredictCalcTask = std::make_shared<CPredictSvcTask>(m_vecStationInfo);
+	m_pPredictCalcTask->Initialize();
 
 	m_pWeatherFileTask = std::make_shared<CWeatherFileSvcTask>(WEATHER_FILE_DATA_SAVE_PERIOD);
 
@@ -54,25 +72,22 @@ bool CPowerPrediction::Run()
 		return false;
 	}
 
-	// todo:
-	// 系统启动先要检查ftp反向隔离来的文件吗？
-	if (!LoadConfig())
-	{
-		// log
-		return true;
-	}
-
 	Q_ASSERT(m_vecStationInfo.size() > 0);
 	if (m_vecStationInfo.size() < 1)
 	{
+		// log
 		return false;
 	}
+
+	// todo:
+	// 系统启动先要检查ftp反向隔离来的文件吗？
+	
 
 	// 启动历史数据存储线程
 	m_pHisSvcTask->start();
 
 	// 启动预测数据存储线程
-	m_pPredictCalcTask->start();
+	m_pPredictCalcTask->Run();
 
 	// 启动处理天气预报文件数据线程
 	m_pWeatherFileTask->start();
@@ -90,6 +105,17 @@ void CPowerPrediction::Shutdown()
 		m_pHisSvcTask->terminate();
 		m_pHisSvcTask->wait();
 	}
+
+	if (m_pPredictCalcTask != nullptr)
+	{
+		m_pPredictCalcTask->Shutdown();
+	}
+
+	if (m_pWeatherFileTask != nullptr)
+	{
+		m_pWeatherFileTask->terminate();
+		m_pWeatherFileTask->wait();
+	}
 }
 
 bool CPowerPrediction::LoadConfig()
@@ -100,7 +126,12 @@ bool CPowerPrediction::LoadConfig()
 		return false;
 	}
 
-	m_vecStationInfo = m_pReadInfo->LoadInfo();
+	if (!m_pReadInfo->LoadInfo())
+	{
+		return false;
+	}
+
+	m_vecStationInfo = m_pReadInfo->GetAllStationInfo();
 
 	return true;
 }

@@ -95,12 +95,30 @@ public:
 
 	};
 
-protected:
-	QString  m_szDescription;   //! 厂站信息
+public:
+	QString  m_szDescription;   
+	QString m_szInfo;			//! 厂站信息
 	QString  m_szGenGroup;      //! 发电集团
-	QString  m_szWeather;
- 
+	QString  m_szWeatherStationName; //气象站名称
+	QString m_szElectricStation;  //电场简称(调度)
+	QString m_szSite;                  //建设地点
+	QString m_szArea;			  //占地面积
+	QString m_szCapacity;		  //装机容量
+	QString m_szOperationCapacity;							  //投运装机容量
 
+	QString m_szLongitude;			//经度
+	QString m_szLatitude;			//纬度
+	QString m_szTerrain;			//地形
+	QString m_szRoughness;						//粗糙度
+
+	QString m_szOpticalPowerDensity;	//光功率密度
+	QString m_szPriority;                        //优先级
+	QString m_szDispatchOrganization;									//调度机构
+	QString m_szMainChangeSituation;		//主变情况
+	QString m_szBoostStation;										//升压站
+	QString m_szInternetSubstation;			//上网变电站
+	QString m_szPrincipal;					//电场负责人
+	QString m_szContactNumber;										//联系电话
 private:
 
 
@@ -114,6 +132,8 @@ public:
 	{
 		ActivePower = 1,
 		ReactivePower,
+		ACSideVoltage,
+		SwitchState
 	};
 
 	CPlantInfo()
@@ -126,15 +146,26 @@ public:
 		m_ReactPower.m_strDescription.clear();
 		m_ReactPower.m_nType = IDD_AIN;
 		m_ReactPower.m_nID = ReactivePower;
+
+		m_ACSideVoltage.m_szName = QObject::tr("AC Side Voltage");
+		m_ACSideVoltage.m_strDescription.clear();
+		m_ACSideVoltage.m_nType = IDD_AIN;
+		m_ACSideVoltage.m_nID = ACSideVoltage;
+
+		m_SwitchState.m_szName = QObject::tr("Switch State");
+		m_SwitchState.m_strDescription.clear();
+		m_SwitchState.m_nType = IDD_DIN;
+		m_SwitchState.m_nID = SwitchState;
+
 		Init();
 	}
 
 	CPlantInfo(CPlantInfo &pInfo)
 	{
-		this->m_ActPower.m_nID = pInfo.m_ActPower.m_nID;
-		this->m_ActPower.m_szName = pInfo.m_ActPower.m_szName;
-		this->m_ActPower.m_szLinkedTagName = pInfo.m_ActPower.m_szLinkedTagName;
-		this->m_ActPower.m_nType = pInfo.m_ActPower.m_nType;
+		//this->m_ActPower.m_nID = pInfo.m_ActPower.m_nID;
+		//this->m_ActPower.m_szName = pInfo.m_ActPower.m_szName;
+		//this->m_ActPower.m_szLinkedTagName = pInfo.m_ActPower.m_szLinkedTagName;
+		//this->m_ActPower.m_nType = pInfo.m_ActPower.m_nType;
 	}
 
 	~CPlantInfo()
@@ -146,6 +177,8 @@ public:
 	bool SaveADIData(QXmlStreamWriter& writer);
 	bool SavePlantData(QXmlStreamWriter& writer);
 	bool LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
+	
+	bool ReadPlantStaticData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
 	bool ReadADIN(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
 	bool ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
 	bool ReadStaticData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo);
@@ -160,9 +193,12 @@ protected:
 public:
 	CPPPointInfo  m_ActPower;  //! 全厂有功
 	CPPPointInfo  m_ReactPower; //! 全厂无功
+	CPPPointInfo  m_ACSideVoltage; //! 交流侧电压关联点
+	CPPPointInfo  m_SwitchState; //! 开关状态关联点
+
 	QString m_strName;          //! 厂站名称
 	QVector<CPPPointInfo > m_vecTableInfo;		//动态数据
-	QVector<CPPPointInfo > m_vecTableStaticInfo;		//静态数据
+	//QVector<CPPPointInfo > m_vecTableStaticInfo;		//静态数据
 
 	CPlantStaticInfo  m_StaticInfo;   //! 静态数据
 };
@@ -226,6 +262,7 @@ public:
 		AirTemperature,
 		RelativeHumdty,
 		AirPressure,
+		ComponentTemperature
 	};
 
 	CWeatherData()
@@ -262,6 +299,10 @@ public:
 		m_AirPressure.m_nType = IDD_AIN;
 		m_AirPressure.m_nID = AirPressure;
 
+		m_ComponentTemperature.m_szName = QObject::tr("Weather Meter Component Temperature");
+		m_ComponentTemperature.m_nType = IDD_AIN;
+		m_ComponentTemperature.m_nID = ComponentTemperature;
+
 		Init();
 	}
 	~CWeatherData()
@@ -290,6 +331,7 @@ public:
 	CPPPointInfo  m_AirTemperature;  //! 空气温度
 	CPPPointInfo  m_RelativeHumdty;  //! 相对湿度
 	CPPPointInfo  m_AirPressure;     //! 气压
+	CPPPointInfo  m_ComponentTemperature;	//! 组件温度
 	QString m_strName;               //! 气象仪名
 	QVector<CPPPointInfo > m_vecTableInfo;
 };

@@ -3700,6 +3700,16 @@ void CGraphView::ShowPropertyBrowser(CBaseWidget *pWidget, QtTreePropertyBrowser
 	pPushBtnExecItem->addSubProperty(PushButtonOrderTypeItem);
 	AddPropertyToMap(PushButtonOrderTypeItem, ITEM_PUSHBUTTON_TYPE);
 
+	//遥控专用
+	QtProperty *PushButtonRemoteControlItem = m_pComBoProperty->addProperty(tr("ContrlType"));
+
+	QStringList lstPushbuttonControlsTyps;
+	lstPushbuttonControlsTyps << tr("Preset") << tr("Exec");
+
+	m_pComBoProperty->setEnumNames(PushButtonRemoteControlItem, lstPushbuttonControlsTyps);
+	m_pComBoProperty->setValue(PushButtonRemoteControlItem, 0);
+	pPushBtnExecItem->addSubProperty(PushButtonRemoteControlItem);
+	AddPropertyToMap(PushButtonRemoteControlItem, ITEM_PUSHBUTTON_REMOTECONTROLTYPE);
 
 	//鼠标press
 	QtProperty *pPushbuttonPressBind = m_pBindInfoManager->addProperty(ITEM_PUISHBUTTON_ORDER_CODE, ("PressOrder"));
@@ -5570,6 +5580,24 @@ void CGraphView::valueChanged(QtProperty *pProperty, int nValue)
 
 		}
 	}
+	else if (szID == ITEM_PUSHBUTTON_REMOTECONTROLTYPE)
+	{
+		//遥控
+		if (m_pPorpWidget->GetWidgetType() >= DRAW_TOOLS_BTN_NORMAL && m_pPorpWidget->GetWidgetType() <= DRAW_TOOLS_BTN_RED_LED)
+		{
+			//按钮绑定值
+			CPushBtnWidget *tPushBtnWgt = dynamic_cast<CPushBtnWidget*>(m_pPorpWidget);
+
+			Q_ASSERT(tPushBtnWgt);
+			if (tPushBtnWgt == nullptr)
+			{
+				return;
+			}
+
+			tPushBtnWgt->SetRemoteControl(static_cast<CPushBtnWidget::BTN_REMOTE_CONTROL>(nValue));
+
+		}
+	}
 
 
 	invalidateScene();
@@ -6738,7 +6766,8 @@ void CGraphView::ChangeProperty()
 			m_pBindInfoManager->setValue(m_mapIdToProperty[TTEM_PUSHBUTTON_VAR], pBtnWgt->GetBtnBindData());
 			//按钮执行类型
 			m_pComBoProperty->setValue(m_mapIdToProperty[ITEM_PUSHBUTTON_TYPE], pBtnWgt->GeteExecType());
-
+			//遥控
+			m_pComBoProperty->setValue(m_mapIdToProperty[ITEM_PUSHBUTTON_REMOTECONTROLTYPE], pBtnWgt->GetRemoteControlType());
 		}
 	}
 	

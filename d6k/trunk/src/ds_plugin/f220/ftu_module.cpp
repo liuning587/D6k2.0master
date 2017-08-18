@@ -52,6 +52,7 @@
 #include "webdevicewgt.h"
 #include "fixoperatewgt.h"
 #include "filetranswgt.h"
+#include "deviec_configwgt.h"
 
 #if _MSC_VER >= 1600
 //#include <vld.h>
@@ -108,6 +109,31 @@ CFtuModule::CFtuModule()
 
 }
 
+bool CFtuModule::eventFilter(QObject *obj, QEvent *event)
+{
+	if (event->type() == QEvent::KeyPress) 
+	{
+		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+		qDebug("Ate key press %d", keyEvent->key());
+
+		if (keyEvent->key() == Qt::Key_Q && keyEvent->modifiers() == Qt::ControlModifier)
+		{
+			((QDockWidget*)m_pMainWindow->GetOutputTableView()->parent()->parent()->parent())->setHidden(false);
+
+		}
+		else if (keyEvent->key() == Qt::Key_P && keyEvent->modifiers() == Qt::ControlModifier)
+		{
+			((QDockWidget*)m_pMainWindow->GetOutputTableView()->parent()->parent()->parent())->setHidden(true);
+		}
+		return true;
+	}
+	else 
+	{
+		// standard event processing
+		return QObject::eventFilter(obj, event);
+	}
+}
+
 void CFtuModule::Init(IMainModule *pMainModule)
 {
 	Q_ASSERT(pMainModule);
@@ -119,12 +145,19 @@ void CFtuModule::Init(IMainModule *pMainModule)
 	m_pMainModule = pMainModule;
 	//获取主界面对象
 	m_pMainWindow = pMainModule->GetMainWindow();
+
     
 	Q_ASSERT(m_pMainWindow);
 	if (!m_pMainWindow)
 	{
 		return;
 	}
+
+	((QDockWidget*)m_pMainWindow->GetOutputTableView()->parent()->parent()->parent())->setHidden(true);
+
+
+	m_pMainWindow->installEventFilter(this);
+
     m_pCommProcess = new QProcess(this);
 
 	//在首次调用时会动态加载动态库 需要时间
@@ -216,6 +249,9 @@ void CFtuModule::Init(IMainModule *pMainModule)
     
 
     m_pFixDeploy = new CFixdDeploy(m_pCommThread, pMainModule, m_strDeviceName.toLocal8Bit().data());
+
+	//iec
+	mPIecConfigWgt = new CDevIecConfigWgt(m_pCommThread, pMainModule, m_strDeviceName.toLocal8Bit().data());
     //录波
     m_pRecord = new CRecordWgt(m_pCommThread, pMainModule, m_strDeviceName.toLocal8Bit().data());
     m_pRecord->SetRecordPath(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName() + "/COMTRADE");
@@ -238,6 +274,8 @@ void CFtuModule::Init(IMainModule *pMainModule)
     m_pFixDeploy->SetPorjectName(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName());
 
     m_pFixDeploy->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
+	mPIecConfigWgt->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
+
 
     QDir tDir(strRunPath + REMOTETABLE);
     QStringList lstFiles = tDir.entryList(QDir::Files);
@@ -304,6 +342,7 @@ CFtuModule::~CFtuModule()
 	
     m_pReomteControl->deleteLater();
 	m_pFixDeploy->deleteLater();
+	mPIecConfigWgt->deleteLater();
     m_pRecord->deleteLater();
 
     if (m_pMaintencanceWgt != nullptr)
@@ -326,6 +365,7 @@ bool CFtuModule::CommMsgLog(const char *pszModuleName, const char *pMsg, int nMs
 void CFtuModule::Slot_SocketSuccess()
 {
     m_pFixDeploy->SetDeviceName(m_strDeviceName);
+	
 	QByteArray byDestr = tr("Connect To Socket Server Success").toLocal8Bit();
 	m_pMainModule->LogString(m_strDeviceName.toLocal8Bit().data(), byDestr.data(), 1);
 }
@@ -438,11 +478,20 @@ void CFtuModule::Slot_SetConfigAct()
 			m_pChoosePointWgt->InitWgt(m_pPointTableAnalyse);
             m_pChoosePointWgt->SetProjectPath(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName());
 
+
+			m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + "iec104sList.ini");
+
+			m_pChoosePointWgt->Slot_UpdateBinaryPointData();
+			m_pChoosePointWgt->Slot_UpdateKwhPointData();
+			m_pChoosePointWgt->Slot_UpdateAnalogPointData();
+
+
             m_pReomteControl->SetRemoteTableInfo(m_pPointInfo);
 
 			QString strRunPath = qApp->applicationDirPath();
 			m_pFixDeploy->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
 
+			mPIecConfigWgt->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
 			return;
 		}
 	}
@@ -527,6 +576,12 @@ void CFtuModule::CreateTreeItem()
 	pFixValueSet->setData(TREE_FIX_DEV_CONFIG + m_iCurrentPluginIndex, Qt::UserRole);
 	//pFixValueSet->setIcon(QIcon(":/icons/analog.png"));
 	pFtuItem->appendRow(pFixValueSet);
+	// devIec
+	QStandardItem *pIecValueSet = new QStandardItem(tr("规约配置"));
+	pIecValueSet->setData(TREE_IEC_CONFIG + m_iCurrentPluginIndex, Qt::UserRole);
+	//pFixValueSet->setIcon(QIcon(":/icons/analog.png"));
+	pFtuItem->appendRow(pIecValueSet);
+
     //录波  Recorder
     QStandardItem *pRecord = new QStandardItem(tr("Recorder"));
     pRecord->setData(TREE_RECORD_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
@@ -677,6 +732,21 @@ void CFtuModule::Slot_ClickLeftTreeItem(const QModelIndex &qIndex)
 			m_MIndexTab.insert(TREE_FIX_DEV_CONFIG + m_iCurrentPluginIndex, m_pFixDeploy);
 			m_MTabIndex.insert(m_pFixDeploy, TREE_FIX_DEV_CONFIG + m_iCurrentPluginIndex);
 			m_pMainWindow->GetTabWidget()->setCurrentWidget(m_MIndexTab[TREE_FIX_DEV_CONFIG + m_iCurrentPluginIndex]);
+		}
+	}
+	else if (nType == TREE_IEC_CONFIG + m_iCurrentPluginIndex)
+	{
+		//遥控
+		if (m_MIndexTab.contains(TREE_IEC_CONFIG + m_iCurrentPluginIndex))
+		{
+			m_pMainWindow->GetTabWidget()->setCurrentWidget(m_MIndexTab[TREE_IEC_CONFIG + m_iCurrentPluginIndex]);
+		}
+		else
+		{
+			m_pMainWindow->GetTabWidget()->AddTab(mPIecConfigWgt, tr("IecConfig"), tr("IecConfig"));
+			m_MIndexTab.insert(TREE_IEC_CONFIG + m_iCurrentPluginIndex, mPIecConfigWgt);
+			m_MTabIndex.insert(mPIecConfigWgt, TREE_IEC_CONFIG + m_iCurrentPluginIndex);
+			m_pMainWindow->GetTabWidget()->setCurrentWidget(m_MIndexTab[TREE_IEC_CONFIG + m_iCurrentPluginIndex]);
 		}
 	}
     else if (nType == TREE_RECORD_ITEM + m_iCurrentPluginIndex)

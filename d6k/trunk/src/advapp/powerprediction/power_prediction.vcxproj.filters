@@ -47,7 +47,6 @@
     <ClCompile Include="predict_inverter_group_table_widget.cpp" />
     <ClCompile Include="predict_inverter_table_widget.cpp" />
     <ClCompile Include="predict_inverter_widget.cpp" />
-    <ClCompile Include="predict_module.cpp" />
     <ClCompile Include="predict_output_model.cpp" />
     <ClCompile Include="predict_output_table.cpp" />
     <ClCompile Include="predict_output_table_widget.cpp" />
@@ -77,13 +76,18 @@
     <ClCompile Include="predict_datainfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="predict_module.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="predict_define.h" />
     <ClInclude Include="define.h" />
-    <ClInclude Include="predict_datainfo.h" />
     <ClInclude Include="GeneratedFiles\ui_addstationdialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="predict_datainfo.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

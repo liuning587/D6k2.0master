@@ -25,6 +25,8 @@ CChartWgt::CChartWgt(QWidget *parent)
 	m_pChart->legend()->setVisible(true);
 	m_pChart->legend()->setAlignment(Qt::AlignBottom);
 	m_chartView->setRenderHint(QPainter::Antialiasing);
+	//默认情况下显示曲线  不显示区域
+	SetCureShow();
 }
 
 CChartWgt::~CChartWgt()
@@ -181,7 +183,7 @@ void CChartWgt::SetCurrentVisable(bool bFlag)
 void CChartWgt::SetCureShow()
 {
 	m_pLineDayPre->setVisible(true);
-	m_pAreaDayPre->setVisible(false);
+	 m_pAreaDayPre->setVisible(false);
 	//超短期预测
 	m_pLineShortPre->setVisible(true);
 	m_pAreaLineShortPre->setVisible(false);

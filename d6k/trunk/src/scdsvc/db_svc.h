@@ -92,6 +92,12 @@ public:
 	int GetNodeAppCount(int nOccNo);
 	SAPP * GetNodeAppAddr(int32u nOccNo,int nIndex);
 public:
+	// 更新测值
+	// 注意，不要整个进行memcpy，只进行有效的几个数据进行更新。
+	bool UpdateNode(NODE *pNode);
+	bool UpdateChannel(int32u nNodeOccNo, CHANNEL *pChannel);
+	bool UpdateDevice(int32u nNodeOccNo, DEVICE *pDevice);
+
 	bool UpdateAinValue(int32u nNodeOccNo, int32u nAinOccNo, fp64  nVal);
 	bool UpdateDinValue(int32u nNodeOccNo, int32u nOccNo, int8u  nVal);
 	bool UpdateUserVarValue(int32u nNodeOccNo, int32u nAinOccNo, fp64  nVal);

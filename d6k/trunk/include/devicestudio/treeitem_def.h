@@ -37,6 +37,8 @@ enum DS_TREEDEF
 	TREE_WEB_ITEM        = 601,
 	//file
 	TREE_FILE_ITEM       = 701,
+	//
+	TREE_IEC_CONFIG      = 801,
 };
 
 

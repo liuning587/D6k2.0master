@@ -8,6 +8,8 @@ CPlantData::CPlantData()
 	m_isInit = false;
 	m_pActPower = nullptr;
 	m_pReactPower = nullptr;
+
+	m_fCapacity = 20.0; // д╛хо20MW
 }
 
 CPlantData::~CPlantData()

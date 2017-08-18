@@ -51,9 +51,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cellwidgts.h">
+    <CustomBuild Include="cellwidgts.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
+    </CustomBuild>
     <CustomBuild Include="chartwgt.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -68,6 +68,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GeneratedFiles\debug\moc_cellwidgts.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\release\moc_cellwidgts.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\debug\moc_chartwgt.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>

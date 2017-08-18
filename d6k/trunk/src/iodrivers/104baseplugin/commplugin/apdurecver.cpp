@@ -247,37 +247,43 @@ void CApduRecver::AnalyseAsdu(char *pBuff, int nLength)
 	case M_ME_NA_1://归一化测量值 ASDU9 M_ME_NC_1
 	{
 		OnRecvAnalogNormalized(pBuff, nLength);
+		//OnRecvIecReadRequestAck(pBuff, nLength);
 		break;
 	}
 	case M_ME_TA_1://带短时标的归一化测量值 ASDU10
 	{
 	    OnRecvAnalogNormalizedShortTime(pBuff, nLength);
+		//OnRecvIecReadRequestAck(pBuff, nLength);
 	    break;
 	}
 	case M_ME_NB_1://标度化测量值 ASDU11   TODO  暂时改为定值
 	{
 		OnRecvAnalogScaled(pBuff, nLength);
-
+		//OnRecvIecReadRequestAck(pBuff, nLength);
 		break;
 	}
 	case M_ME_TB_1://带短时标的标度化测量值 ASDU12
 	{
 		OnRecvAnalogScaledShortTime(pBuff, nLength);
+		//OnRecvIecReadRequestAck(pBuff, nLength);
 		break;
 	}
 	case M_ME_NC_1://短浮点数测量值 ASDU13
 	{
 		OnRecvAnalogShortFloat(pBuff, nLength);
+		//OnRecvIecReadRequestAck(pBuff, nLength);
 		break;
 	}
 	case M_ME_TC_1://带短时标的短浮点数测量值 ASDU14
 	{
 		OnRecvAnalogShortFloatShortTime(pBuff, nLength);
+		//OnRecvIecReadRequestAck(pBuff, nLength);
 		break;
 	}
     case M_ME_ND_1://不带品质描述词的归一化测量值 ASDU21
     {
         OnRecvAnalogNormalizedNoQuality(pBuff, nLength);
+		//OnRecvIecReadRequestAck(pBuff, nLength);
         break;
     }
 	//累计量   遥脉
@@ -329,10 +335,16 @@ void CApduRecver::AnalyseAsdu(char *pBuff, int nLength)
 		//OnRecvDevReadRequestAck(pBuff, nLength);
 		break;
 	}
-	case  C_SE_NA_1:
-	case D_DV_WR_1:
+	case  D_DV_RD_2:
 	{
-		OnRecvDevWriteRequestAck(pBuff, nLength);
+		//读取信息
+		OnRecvReadIecData(pBuff, nLength);
+		break;
+	}
+	case D_DV_WR_3:
+	{
+		//写入确认
+		OnRecvIecWriteRequestAck(pBuff, nLength);
 		break;
 	}
     case F_DR_TA_1:
@@ -792,7 +804,25 @@ void CApduRecver::OnRecvSetBinarySPAck(char* pBuff, int nLength)
 		}
 		else
 		{
-            emit Signal_ControlFeedBack(0, telectrl.m_nDataID, 0, QString::number(nRecvAckCot));
+			int ionFloag = 0;
+
+			if (telectrl.m_fValue > 0.99999 && telectrl.m_fValue < 1.00001)
+			{
+				//on
+				ionFloag = 0;
+			}
+			else if (telectrl.m_fValue > -0.000001 && telectrl.m_fValue < 0.00001)
+			{
+				//off
+				ionFloag = 1;
+			}
+			else
+			{
+				//error
+				ionFloag = -1;
+			}
+
+            emit Signal_ControlFeedBack(0, telectrl.m_nDataID, ionFloag, QString::number(nRecvAckCot));
 			telectrl.m_nCtrlType = -1;
 		}
 	
@@ -876,7 +906,25 @@ void CApduRecver::OnRecvSetBinaryDPAck(char* pBuff, int nLength)
 		}
 		else
 		{
-            emit Signal_ControlFeedBack(1, telectrl.m_nDataID, 0, QString::number(nRecvAckCot));
+
+			int ionFloag = 0;
+
+			if (telectrl.m_fValue > 0.99999 && telectrl.m_fValue < 1.00001)
+			{
+				//on
+				ionFloag = 0;
+			}
+			else if (telectrl.m_fValue > -0.000001 && telectrl.m_fValue < 0.00001)
+			{
+				//off
+				ionFloag = 1;
+			}
+			else
+			{
+				//error
+				ionFloag = -1;
+			}
+            emit Signal_ControlFeedBack(1, telectrl.m_nDataID, ionFloag, QString::number(nRecvAckCot));
 			telectrl.m_nCtrlType = -1;
 		}
 	
@@ -949,6 +997,11 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 			//ushort
 			unsigned short *puShort = (unsigned short*)(pBuff + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2);
 			tDevData.strValue = QString::number(*puShort);
+
+			if (tDevData.nAddress == 32774)
+			{
+				tDevData.strValue = "0x" + QString::number(*puShort,16);
+			}
 		}
 		else if (tDevData.nTagType == 38)
 		{
@@ -1019,6 +1072,54 @@ void CApduRecver::OnRecvDevWriteRequestAck(char *pBuff, int nLength)
 		{
 			m_pComm104Pln->getSender()->OnSendDevWriteConform();
 		}
+	}
+}
+
+//iec 写入反馈
+void CApduRecver::OnRecvIecWriteRequestAck(char *pBuff, int nLength)
+{
+	if (nLength == 0)
+	{
+		return;
+	}
+
+	ASDU_BASE* pAsdudz = (ASDU_BASE*)pBuff;
+	if (pAsdudz->cot.GetCot() == 7)
+	{
+		QByteArray byDestr = tr("Write Scuess!").toLocal8Bit();
+		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
+
+	}
+}
+
+void CApduRecver::OnRecvIecReadRequestAck(char* pBuff, int nLength)
+{
+	if (nLength == 0)
+	{
+		return;
+	}
+
+	//ASDU_BASE* pAsduBase = (ASDU_BASE*)pBuff;
+	ASDU_IEC* pAsdudz = (ASDU_IEC*)pBuff;
+
+	//int nDeviceAddr = pAsdudz->asduAddr.GetAddr();
+
+	int nCount = pAsdudz->GetItemCount();
+
+	QMap<int, float> mapPointValue;
+
+	int nPointID = pAsdudz->infoaddr.GetAddr();
+
+	for (int i = 0; i < nCount; i++)
+	{
+
+		short fValue = pAsdudz->GetValue(i);
+		mapPointValue[nPointID++] = fValue;
+	}
+
+	if (!mapPointValue.isEmpty())
+	{
+		//emit Signal_DevReadBack(mapPointValue);
 	}
 }
 
@@ -1405,7 +1506,7 @@ void CApduRecver::OnRecvAnalogNormalized(char* pBuff, int nLength)
 		return;
 	}
 	ASDU_BASE* pAsduBase = (ASDU_BASE*)pBuff;
-    QMap<int, short> mapPointValue;
+    QMap<int, float> mapPointValue;
 
 	if (pAsduBase->IsSQ1())
 	{
@@ -1474,7 +1575,7 @@ void CApduRecver::OnRecvAnalogNormalized(char* pBuff, int nLength)
 
     if (!mapPointValue.isEmpty())
     {
-   	    emit Signal_DevReadBack(mapPointValue);
+   	   // emit Signal_DevReadBack(mapPointValue);
     }
 }
 
@@ -1495,7 +1596,7 @@ void CApduRecver::OnRecvAnalogNormalizedShortTime(char* pBuff, int nLen)
 		return;
 	}
 	ASDU10_SQ0* pAsdu10SQ0 = (ASDU10_SQ0*)pBuff;
-    QMap<int, short> mapPointValue;
+    QMap<int, float> mapPointValue;
 
 
 	int nCount = pAsdu10SQ0->GetItemCount();
@@ -1525,7 +1626,7 @@ void CApduRecver::OnRecvAnalogNormalizedShortTime(char* pBuff, int nLen)
 
     if (!mapPointValue.isEmpty())
     {
-        emit Signal_DevReadBack(mapPointValue);
+        //emit Signal_DevReadBack(mapPointValue);
     }
 }
 
@@ -1547,7 +1648,7 @@ void CApduRecver::OnRecvAnalogScaled(char* pBuff, int nLength)
 	}
 	ASDU_BASE* pAsduBase = (ASDU_BASE*)pBuff;
 
-    QMap<int, short> mapPointValue;
+    QMap<int, float> mapPointValue;
 
 	if (pAsduBase->IsSQ1())
 	{
@@ -1614,7 +1715,7 @@ void CApduRecver::OnRecvAnalogScaled(char* pBuff, int nLength)
 
     if (!mapPointValue.isEmpty())
     {
-        emit Signal_DevReadBack(mapPointValue);
+        //emit Signal_DevReadBack(mapPointValue);
     }
 }
 
@@ -1636,7 +1737,7 @@ void CApduRecver::OnRecvAnalogScaledShortTime(char* pBuff, int nLen)
 	}
 	ASDU12_SQ0* pAsdu12SQ0 = (ASDU12_SQ0*)pBuff;
 
-    QMap<int, short> mapPointValue;
+    QMap<int, float> mapPointValue;
 
 	int nCount = pAsdu12SQ0->GetItemCount();
 	int nDeviceAddr = pAsdu12SQ0->asduAddr.GetAddr();
@@ -1665,7 +1766,7 @@ void CApduRecver::OnRecvAnalogScaledShortTime(char* pBuff, int nLen)
 
     if (!mapPointValue.isEmpty())
     {
-        emit Signal_DevReadBack(mapPointValue);
+        //emit Signal_DevReadBack(mapPointValue);
     }
 }
 
@@ -1791,7 +1892,7 @@ void CApduRecver::OnRecvAnalogShortFloat(char* pBuff, int nLength)
 	}
 	ASDU_BASE* pAsduBase = (ASDU_BASE*)pBuff;
 
-    QMap<int, short> mapPointValue;
+    QMap<int, float> mapPointValue;
 
 	if (pAsduBase->IsSQ1())
 	{
@@ -1817,10 +1918,13 @@ void CApduRecver::OnRecvAnalogShortFloat(char* pBuff, int nLength)
 			if (qds.NT == 1) nQuality |= QUALITY_UNCURRENT;
 			if (qds.IV == 1) nQuality |= QUALITY_INVALID;
 
-			emit Signal_AnalogShortFloat(nDeviceAddr, nPointID, fValue, nQuality);
+			float tt = 0.0;
+			*(uint32_t *)(&tt) = (unsigned char)(pAsdu13SQ1->m_data[i].m_fValue) + (unsigned char)pAsdu13SQ1->m_data[i].m_fValue[1] * 0x100 + (unsigned char)pAsdu13SQ1->m_data[i].m_fValue[2] * 0x10000 + (unsigned char)pAsdu13SQ1->m_data[i].m_fValue[3] * 0x1000000;
+
+			emit Signal_AnalogShortFloat(nDeviceAddr, nPointID, tt, nQuality);
 
             //定值修改
-            mapPointValue[nPointID] = fValue;
+            mapPointValue[nPointID] = tt;
 
 			nPointID++;
 		}
@@ -1849,18 +1953,59 @@ void CApduRecver::OnRecvAnalogShortFloat(char* pBuff, int nLength)
 			if (qds.NT == 1) nQuality |= QUALITY_UNCURRENT;
 			if (qds.IV == 1) nQuality |= QUALITY_INVALID;
 
-            emit Signal_AnalogShortFloat(nDeviceAddr, nPointID, fValue, nQuality);
+			float tt = 0.0;
+			*(uint32_t *)(&tt) = (unsigned char)(pAsdu13SQ0->m_data[i].m_fValue) + (unsigned char)pAsdu13SQ0->m_data[i].m_fValue[1] * 0x100 + (unsigned char)pAsdu13SQ0->m_data[i].m_fValue[2] * 0x10000 + (unsigned char)pAsdu13SQ0->m_data[i].m_fValue[3] * 0x1000000;
+
+
+            emit Signal_AnalogShortFloat(nDeviceAddr, nPointID, tt, nQuality);
 
 
             //定值修改
-            mapPointValue[nPointID] = fValue;
+            mapPointValue[nPointID] = tt;
 		}
 	}
 
     if (!mapPointValue.isEmpty())
     {
-        emit Signal_DevReadBack(mapPointValue);
+        //emit Signal_DevReadBack(mapPointValue);
     }
+}
+
+//iec
+void CApduRecver::OnRecvReadIecData(char* pBuff, int nLength)
+{
+	if (nLength == 0)
+	{
+		return;
+	}
+	ASDU_BASE* pAsduBase = (ASDU_BASE*)pBuff;
+
+	QMap<int, float> mapPointValue;
+
+
+		ASDU_DEVICE_IEC* pAsdu13SQ1 = (ASDU_DEVICE_IEC*)pBuff;
+
+		int nDeviceAddr = pAsdu13SQ1->asduAddr.GetAddr();
+
+		int nCount = pAsdu13SQ1->GetItemCount();
+
+		int nPointID = pAsdu13SQ1->infoaddr.GetAddr();
+
+		for (int i = 0; i < nCount; i++)
+		{
+			int fValue = pAsdu13SQ1->GetValue(i);
+
+			//定值修改
+			mapPointValue[nPointID] = fValue;
+
+			nPointID++;
+		}
+	
+
+	if (!mapPointValue.isEmpty())
+	{
+		emit Signal_DevReadBack(mapPointValue);
+	}
 }
 
 //带短时标的短浮点数测量值
@@ -1882,7 +2027,7 @@ void CApduRecver::OnRecvAnalogShortFloatShortTime(char* pBuff, int nLen)
 	}
 	ASDU14_SQ0* pAsdu14SQ0 = (ASDU14_SQ0*)pBuff;
 
-    QMap<int, short> mapPointValue;
+    QMap<int, float> mapPointValue;
 
 	int nCount = pAsdu14SQ0->GetItemCount();
 	int nDeviceAddr = pAsdu14SQ0->asduAddr.GetAddr();
@@ -1903,15 +2048,20 @@ void CApduRecver::OnRecvAnalogShortFloatShortTime(char* pBuff, int nLen)
 		if (qds.NT == 1) nQuality |= QUALITY_UNCURRENT;
 		if (qds.IV == 1) nQuality |= QUALITY_INVALID;
 		//通过同一信号发出去  这边没必要进行区分
-        emit Signal_AnalogShortFloat(nDeviceAddr, nPointID, fValue, nQuality);
+        //emit Signal_AnalogShortFloat(nDeviceAddr, nPointID, fValue, nQuality);
+		///////////////////////
+		float tt = 0.0;
+		*(uint32_t *)(&tt) = (unsigned char)(pAsdu14SQ0->m_data[i].m_std) + (unsigned char)pAsdu14SQ0->m_data[i].m_std[1] * 0x100 + (unsigned char)pAsdu14SQ0->m_data[i].m_std[2] * 0x10000 + (unsigned char)pAsdu14SQ0->m_data[i].m_std[3] * 0x1000000;
+
+		emit Signal_AnalogShortFloat(nDeviceAddr, nPointID, tt, nQuality);
 
         //定值修改
-        mapPointValue[nPointID] = fValue;
+        mapPointValue[nPointID] = tt;
 	}
 
     if (!mapPointValue.isEmpty())
     {
-        emit Signal_DevReadBack(mapPointValue);
+        //emit Signal_DevReadBack(mapPointValue);
     }
 }
 

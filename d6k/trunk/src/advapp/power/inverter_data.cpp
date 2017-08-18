@@ -32,9 +32,14 @@ void CInverterData::SetInverterReactivePowerTagname(const std::string& strInvert
 	m_strInverterReactiveTagname = strInverterReactiveTagname;
 }
 
+void CInverterData::SetInverterVoltageTagname(const std::string& strInverterVoltageTagname)
+{
+	m_strInverterVoltageTagname = strInverterVoltageTagname;
+}
+
 bool CInverterData::Init()
 {
-	if (m_strInverterTagname.empty() || m_strInverterActiveTagname.empty() || m_strInverterReactiveTagname.empty())
+	if (m_strInverterTagname.empty() || m_strInverterActiveTagname.empty() || m_strInverterReactiveTagname.empty() || m_strInverterVoltageTagname.empty())
 	{
 		// log
 		return false;
@@ -45,6 +50,8 @@ bool CInverterData::Init()
 	m_pInverterActivePower = std::make_shared<CAinData>(m_strInverterActiveTagname);
 
 	m_pInverterReactivePower = std::make_shared<CAinData>(m_strInverterReactiveTagname);
+
+	m_pInverterVoltage = std::make_shared<CAinData>(m_strInverterVoltageTagname);
 
 	m_isInit = true;
 
@@ -131,6 +138,35 @@ bool CInverterData::GetRealDataOfActivePower(fp64* value)
 	}
 
 	*value = m_pInverterActivePower->GetValue();
+
+	return true;
+}
+
+bool CInverterData::GetRealDataOfVoltage(fp64* value)
+{
+	Q_ASSERT(m_pInverterVoltage && m_isInit);
+	if (m_pInverterVoltage == nullptr)
+	{
+		// log
+		return false;
+	}
+
+	if (!m_isInit)
+	{
+		if (!Init())
+		{
+			// log
+			return false;
+		}
+	}
+
+	if (!m_pInverterVoltage->GetRealTimeData())
+	{
+		// log
+		return false;
+	}
+
+	*value = m_pInverterVoltage->GetValue();
 
 	return true;
 }

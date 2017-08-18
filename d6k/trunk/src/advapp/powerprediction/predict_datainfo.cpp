@@ -347,16 +347,68 @@ bool CPlantInfo::SavePlantData(QXmlStreamWriter& writer)
 	writer.writeStartElement("plant");
 	//writer.writeAttribute("deviceid", "1");
 	
-	writer.writeStartElement("staticdata");
-	for each (auto var in m_vecTableStaticInfo)
-	{
-		writer.writeStartElement("sdata");
-		writer.writeAttribute("key", QString("%1").arg(var.m_strKey));
-		writer.writeAttribute("name", QString("%1").arg(var.m_szName));
-		//Description
+	//m_szDescription
+	//QString  m_szDescription;   //! 厂站信息
+	//QString  m_szGenGroup;      //! 发电集团
+	//QString  m_szWeatherStationName; //气象站名称
+	//QString m_szElectricStation;  //电场简称(调度)
+	//QString m_szSite;                  //建设地点
+	//QString m_szArea;			  //占地面积
+	//QString m_szCapacity;		  //装机容量
+	//QString m_szOperationCapacity;							  //投运装机容量
 
-		writer.writeEndElement();
-	}
+	//QString m_szLongitude;			//经度
+	//QString m_szLatitude;			//纬度
+	//QString m_szTerrain;			//地形
+	//QString m_szRoughness;						//粗糙度
+
+	//QString m_szOpticalPowerDensity;	//光功率密度
+	//QString m_szPriority;                        //优先级
+	//QString m_szDispatchOrganization;									//调度机构
+	//QString m_szMainChangeSituation;		//主变情况
+	//QString m_szBoostStation;										//升压站
+	//QString m_szInternetSubstation;			//上网变电站
+	//QString m_szPrincipal;					//电场负责人
+	//QString m_szContactNumber;										//联系电话
+
+
+	writer.writeStartElement("staticdata");
+
+	writer.writeStartElement("sdata");
+
+	writer.writeStartElement("data");
+	writer.writeAttribute("Count", QString("%1").arg(21));
+
+	writer.writeStartElement("e");
+
+	writer.writeAttribute("Describe", QString("%1").arg(m_StaticInfo.m_szDescription));
+	writer.writeAttribute("Info", QString("%1").arg(m_StaticInfo.m_szInfo));
+	writer.writeAttribute("GenGroup", QString("%1").arg(m_StaticInfo.m_szGenGroup));
+	writer.writeAttribute("WeatherStationName", QString("%1").arg(m_StaticInfo.m_szWeatherStationName));
+	writer.writeAttribute("ElectricStation", QString("%1").arg(m_StaticInfo.m_szElectricStation));
+	writer.writeAttribute("Site", QString("%1").arg(m_StaticInfo.m_szSite));
+	writer.writeAttribute("Area", QString("%1").arg(m_StaticInfo.m_szArea));
+	writer.writeAttribute("Capacity", QString("%1").arg(m_StaticInfo.m_szCapacity));
+	writer.writeAttribute("OperationCapacity", QString("%1").arg(m_StaticInfo.m_szOperationCapacity));
+	writer.writeAttribute("Longitude", QString("%1").arg(m_StaticInfo.m_szLongitude));
+	writer.writeAttribute("Latitude", QString("%1").arg(m_StaticInfo.m_szLatitude));
+	writer.writeAttribute("Terrain", QString("%1").arg(m_StaticInfo.m_szTerrain));
+	writer.writeAttribute("Roughness", QString("%1").arg(m_StaticInfo.m_szRoughness));
+	writer.writeAttribute("OpticalPowerDensity", QString("%1").arg(m_StaticInfo.m_szOpticalPowerDensity));
+	writer.writeAttribute("Priority", QString("%1").arg(m_StaticInfo.m_szPriority));
+	writer.writeAttribute("DispatchOrganization", QString("%1").arg(m_StaticInfo.m_szDispatchOrganization));
+	writer.writeAttribute("MainChangeSituation", QString("%1").arg(m_StaticInfo.m_szMainChangeSituation));
+	writer.writeAttribute("BoostStation", QString("%1").arg(m_StaticInfo.m_szBoostStation));
+	writer.writeAttribute("InternetSubstation", QString("%1").arg(m_StaticInfo.m_szInternetSubstation));
+	writer.writeAttribute("Principal", QString("%1").arg(m_StaticInfo.m_szPrincipal));
+	writer.writeAttribute("ContactNumber", QString("%1").arg(m_StaticInfo.m_szContactNumber));
+	writer.writeEndElement();
+
+
+	writer.writeEndElement();
+
+	writer.writeEndElement();
+
 	writer.writeEndElement();
 
 
@@ -393,7 +445,7 @@ bool CPlantInfo::LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 		{
 			if (strTmp1 == "staticdata")
 			{
-
+				ReadStaticData(reader, pPlntInfo);
 			}
 			else if (strTmp1 == "dynamicdata")
 			{
@@ -413,6 +465,11 @@ bool CPlantInfo::LoadData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 		reader.readNext();
 	}
 	return true;
+}
+
+bool CPlantInfo::ReadPlantStaticData(QXmlStreamReader & reader, CPlantInfo * pPlntInfo)
+{
+	return false;
 }
 /*! \fn bool CPlantInfo::ReadADIN(QXmlStreamReader& reader)
 **************************************************************
@@ -500,6 +557,22 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 					pPlntInfo->m_ReactPower.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
 					pPlntInfo->m_ReactPower.m_nType = pAnalog.m_nType;
 				}
+				else if (pAnalog.m_szName == pPlntInfo->m_ACSideVoltage.m_szName)
+				{
+					pPlntInfo->m_ACSideVoltage.m_nID = pAnalog.m_nID;
+					pPlntInfo->m_ACSideVoltage.m_szName = pAnalog.m_szName;
+					pPlntInfo->m_ACSideVoltage.m_strDescription = pAnalog.m_strDescription;
+					pPlntInfo->m_ACSideVoltage.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
+					pPlntInfo->m_ACSideVoltage.m_nType = pAnalog.m_nType;
+				}
+				else if (pAnalog.m_szName == pPlntInfo->m_SwitchState.m_szName)
+				{
+					pPlntInfo->m_SwitchState.m_nID = pAnalog.m_nID;
+					pPlntInfo->m_SwitchState.m_szName = pAnalog.m_szName;
+					pPlntInfo->m_SwitchState.m_strDescription = pAnalog.m_strDescription;
+					pPlntInfo->m_SwitchState.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
+					pPlntInfo->m_SwitchState.m_nType = pAnalog.m_nType;
+				}
 				m_vecTableInfo.push_back(pAnalog);
 			}
 		}
@@ -516,6 +589,74 @@ bool CPlantInfo::ReadAi(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 
 bool CPlantInfo::ReadStaticData(QXmlStreamReader& reader, CPlantInfo* pPlntInfo)
 {
+	QString strTmp1, strTmp2;
+	while (!reader.atEnd())
+	{
+		strTmp1 = reader.name().toString();
+		if (reader.isStartElement())
+		{
+			strTmp2 = reader.name().toString();
+
+			if (strTmp2 == "e")
+			{
+				//m_szDescription
+				//QString  m_szDescription;   //! 厂站信息
+				//INFO
+				//QString  m_szGenGroup;      //! 发电集团
+				//QString  m_szWeatherStationName; //气象站名称
+				//QString m_szElectricStation;  //电场简称(调度)
+				//QString m_szSite;                  //建设地点
+				//QString m_szArea;			  //占地面积
+				//QString m_szCapacity;		  //装机容量
+				//QString m_szOperationCapacity;							  //投运装机容量
+
+				//QString m_szLongitude;			//经度
+				//QString m_szLatitude;			//纬度
+				//QString m_szTerrain;			//地形
+				//QString m_szRoughness;						//粗糙度
+
+				//QString m_szOpticalPowerDensity;	//光功率密度
+				//QString m_szPriority;                        //优先级
+				//QString m_szDispatchOrganization;									//调度机构
+				//QString m_szMainChangeSituation;		//主变情况
+				//QString m_szBoostStation;										//升压站
+				//QString m_szInternetSubstation;			//上网变电站
+				//QString m_szPrincipal;					//电场负责人
+				//QString m_szContactNumber;										//联系电话
+
+				pPlntInfo->m_StaticInfo.m_szDescription = reader.attributes().value("Describe").toString();
+				pPlntInfo->m_StaticInfo.m_szInfo = reader.attributes().value("Info").toString();
+				pPlntInfo->m_StaticInfo.m_szGenGroup = reader.attributes().value("GenGroup").toString();
+				pPlntInfo->m_StaticInfo.m_szWeatherStationName = reader.attributes().value("WeatherStationName").toString();
+				pPlntInfo->m_StaticInfo.m_szElectricStation = reader.attributes().value("ElectricStation").toString();
+				pPlntInfo->m_StaticInfo.m_szSite = reader.attributes().value("Site").toString();
+				pPlntInfo->m_StaticInfo.m_szArea = reader.attributes().value("Area").toString();
+
+				pPlntInfo->m_StaticInfo.m_szCapacity = reader.attributes().value("Capacity").toString();
+				pPlntInfo->m_StaticInfo.m_szOperationCapacity = reader.attributes().value("OperationCapacity").toString();
+				pPlntInfo->m_StaticInfo.m_szLongitude = reader.attributes().value("Longitude").toString();
+				pPlntInfo->m_StaticInfo.m_szLatitude = reader.attributes().value("Latitude").toString();
+				pPlntInfo->m_StaticInfo.m_szTerrain = reader.attributes().value("Terrain").toString();
+				pPlntInfo->m_StaticInfo.m_szRoughness = reader.attributes().value("Roughness").toString();
+
+				pPlntInfo->m_StaticInfo.m_szOpticalPowerDensity = reader.attributes().value("OpticalPowerDensity").toString();
+				pPlntInfo->m_StaticInfo.m_szPriority = reader.attributes().value("Priority").toString();
+				pPlntInfo->m_StaticInfo.m_szDispatchOrganization = reader.attributes().value("DispatchOrganization").toString();
+				pPlntInfo->m_StaticInfo.m_szMainChangeSituation = reader.attributes().value("MainChangeSituation").toString();
+				pPlntInfo->m_StaticInfo.m_szBoostStation = reader.attributes().value("BoostStation").toString();
+				pPlntInfo->m_StaticInfo.m_szInternetSubstation = reader.attributes().value("InternetSubstation").toString();
+				pPlntInfo->m_StaticInfo.m_szPrincipal = reader.attributes().value("Principal").toString();
+				pPlntInfo->m_StaticInfo.m_szContactNumber = reader.attributes().value("ContactNumber").toString();
+			}
+		}
+		else if (reader.isEndElement() && strTmp1 == "e")
+		{
+			break;
+		}
+
+		reader.readNext();
+	}
+
 	return true;
 }
 
@@ -537,9 +678,11 @@ void CPlantInfo::Init()
 	
 	m_vecTableInfo.append(m_ActPower);
 	m_vecTableInfo.append(m_ReactPower);
+	m_vecTableInfo.append(m_ACSideVoltage);
+	m_vecTableInfo.append(m_SwitchState);
 
 	//静态信息
-	m_vecTableStaticInfo.clear();
+	//m_vecTableStaticInfo.clear();
 }
 /*! \fn bool CInverterGroup::SaveInverterGrp(QXmlStreamWriter& writer)
 **********************************************************************
@@ -587,8 +730,8 @@ bool CInverterGroup::LoadInvertersGrp(QXmlStreamReader& reader)
 				CInverterInfo *pInverter = new CInverterInfo;
 				QString nName = reader.attributes().value("Name").toString();
 				pInverter->m_szName = nName;
-				int nID = reader.attributes().value("ID").toInt();
-				pInverter->m_nID = nID;
+				//int nID = reader.attributes().value("DeviceID").toInt();
+				//pInverter->m_nID = nID;
 				pInverter->m_nDeviceID = reader.attributes().value("DeviceID").toInt();
 
 				pInverter->LoadData(reader, pInverter);
@@ -851,6 +994,16 @@ bool CWeatherData::ReadAi(QXmlStreamReader& reader, CWeatherData* pWeaInfo)
 
 					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_TotalRadiation);
 				}
+				else if (pAnalog.m_szName == pWeaInfo->m_ComponentTemperature.m_szName)
+				{
+					pWeaInfo->m_ComponentTemperature.m_nID = pAnalog.m_nID;
+					pWeaInfo->m_ComponentTemperature.m_szName = pAnalog.m_szName;
+					pWeaInfo->m_ComponentTemperature.m_strDescription = pAnalog.m_strDescription;
+					pWeaInfo->m_ComponentTemperature.m_szLinkedTagName = pAnalog.m_szLinkedTagName;
+					pWeaInfo->m_ComponentTemperature.m_nType = pAnalog.m_nType;
+
+					pWeaInfo->m_vecTableInfo.push_back(pWeaInfo->m_ComponentTemperature);
+				}
 
 				//m_vecTableInfo.push_back(pAnalog);
 			}
@@ -886,6 +1039,7 @@ void CWeatherData::Init()
 	m_vecTableInfo.append(m_AirTemperature);
 	m_vecTableInfo.append(m_RelativeHumdty);
 	m_vecTableInfo.append(m_AirPressure);
+	m_vecTableInfo.append(m_ComponentTemperature);
 }
 
 /*! \fn bool CPredictData::SaveADIData(QXmlStreamWriter& writer)
@@ -2047,6 +2201,7 @@ CStationData* CPredictMgr::CreateNewPredictItem(CPredictGroup* pPredictGroup)
 ** \date     2017年5月2日
 ** \note
 *****************************************************************************************************************/
+#include <qdir.h>
 bool CPredictMgr::SaveProjectPredictNode(QDomDocument* pXml, QDomElement& pElement, const QString& szRoot)
 {
 	Q_ASSERT(pXml);
@@ -2054,6 +2209,15 @@ bool CPredictMgr::SaveProjectPredictNode(QDomDocument* pXml, QDomElement& pEleme
 	{
 		return false;
 	}
+
+	QString strPath = szRoot + "/powerpredict/";
+	QDir d(strPath);
+	d.setFilter(QDir::Files);
+	int i, j = d.count() - 1;
+	for (i = 0; i <= j; i++)
+		d.remove(d[i]);
+
+
 	/*QDomElement rElm = pXml->createElement("powerpredict");
 	rElm.setAttribute("name", "powerpredict");
 	pElement.appendChild(rElm);*/

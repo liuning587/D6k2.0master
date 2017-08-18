@@ -32,7 +32,7 @@ CApduSender::CApduSender(QObject *parent):
 	m_pFileTransfor = new QTimer(this);
 	//
 	connect(m_pFileTransfor, SIGNAL(timeout()), this, SLOT(Slot_FileTransPort()));
-	m_pFileTransfor->setInterval(50);
+	m_pFileTransfor->setInterval(10);
 	m_nDevIndex = 0;
 	m_pDevTimer = new QTimer(this);
 	m_pDevTimer->setInterval(1000);
@@ -837,132 +837,134 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 	}
 
 
-//     if (pRequestDz->m_nCommandType == 48 || pRequestDz->m_nCommandType == 136)
-//     {
-//         char buf[255] = { 0 };
-// 
-//         //组织ASDU46
-//         ASDUDZ* pAsdudz = (ASDUDZ*)(buf + sizeof(APCI));
-// 
-//         pAsdudz->type = pRequestDz->m_nCommandType;
-// 
-//         pAsdudz->vsq = 0x01;
-// 
-// 
-//         pAsdudz->asduAddr.SetAddr(pRequestDz->m_nAsduID);
-//         //传送原因
-//         pAsdudz->cot.SetCot(pRequestDz->m_nCto);
-// 
-//         int nSetIndex = 0;
-// 
-//         for (int i = 0; i < pRequestDz->m_lstData.count(); i++)
-//         {
-//             //赋值
-//             if (0 == nSetIndex)
-//             {
-//                 pAsdudz->infoaddr.SetAddr(pRequestDz->m_lstData.at(i).nAddress);
-//             }
-//             //赋值
-//             //pAsdudz->m_data[nSetIndex].infoaddr.SetAddr(pRequestDz->m_lstData.at(i).nAddress);
-//             pAsdudz->m_data[nSetIndex].m_nValue = pRequestDz->m_lstData.at(i).nValue;
-//             //pAsdudz->m_dzQos.DQ = (pRequestDz->m_nQos == TELECTRL_REQUEST_SELECT) ? 0 : 1;
-//             pAsdudz->m_dzQos.DQ = 0;
-//             pAsdudz->m_dzQos.QOS = 0;
-//             pAsdudz->m_dzQos.RES = 0;
-//             pAsdudz->m_dzQos.QU = 0;
-// 
-//             if ((i + 1) % (pAsdudz->MAX_DATA_PER_ASDUDZ_RD) == 0)
-//             {
-//                 //当达到最大数时  发送数据包
-//                 pAsdudz->SetItemCount(nSetIndex + 1);
-//                 int nResult = Send_I(buf, sizeof(ASDUDZ));
-//                 if (nResult != SEND_OK)
-//                 {
-//                     return false;
-//                 }
-//                 //清空数据
-//                 memset(pAsdudz->m_data, 0, pAsdudz->MAX_DATA_PER_ASDUDZ_RD);
-//                 nSetIndex = 0;
-//             }
-//             else
-//             {
-//                 nSetIndex++;
-//             }
-// 
-//             
-//         }
-// 
-//         if (nSetIndex != pAsdudz->MAX_DATA_PER_ASDUDZ_RD && nSetIndex != 0)
-//         {
-//             pAsdudz->SetItemCount(nSetIndex);
-//             int nResult = Send_I(buf, pAsdudz->GetAsduDzLength());
-// 
-//             if (nResult != SEND_OK)
-//             {
-//                 return false;
-//             }
-//         }
-//     }
-//     else if (pRequestDz->m_nCommandType == 102 || pRequestDz->m_nCommandType == 132)
-//     {
-//         char buf[255] = { 0 };
-// 
-//         //组织ASDU46
-//         ASDUDZ2* pAsdudz = (ASDUDZ2*)(buf + sizeof(APCI));
-// 
-//         pAsdudz->type = pRequestDz->m_nCommandType;
-// 
-//         pAsdudz->vsq = 0x01;
-// 
-// 
-//         pAsdudz->asduAddr.SetAddr(pRequestDz->m_nAsduID);
-//         //传送原因
-//         pAsdudz->cot.SetCot(pRequestDz->m_nCto);
-// 
-//         
-// 
-//         int nSetIndex = 0;
-// 
-//         for (int i = 0; i < pRequestDz->m_lstData.count(); i++)
-//         {
-//             //赋值
-//             if (i == 0)
-//             {
-//                 pAsdudz->m_data[nSetIndex].infoaddr.SetAddr(pRequestDz->m_lstData.at(i).nAddress);
-//             }
-//             
-// 
-//             if ((i + 1) % (pAsdudz->MAX_DATA_PER_ASDUDZ2_RD) == 0)
-//             {
-//                 //当达到最大数时  发送数据包
-//                 pAsdudz->SetItemCount(nSetIndex + 1);
-//                 int nResult = Send_I(buf, sizeof(ASDUDZ2));
-//                 if (nResult != SEND_OK)
-//                 {
-//                     return false;
-//                 }
-//                 //清空数据
-//                 memset(pAsdudz->m_data, 0, pAsdudz->MAX_DATA_PER_ASDUDZ2_RD);
-//                 nSetIndex = 0;
-//             }
-// 
-//             nSetIndex++;
-//         }
-// 
-//         if (nSetIndex != pAsdudz->MAX_DATA_PER_ASDUDZ2_RD)
-//         {
-//             pAsdudz->SetItemCount(nSetIndex);
-//             
-//             int nResult = Send_I(buf, pAsdudz->GetAsduDzLength());
-// 
-//             if (nResult != SEND_OK)
-//             {
-//                 return false;
-//             }
-//         }
-//     }
+	return true;
+}
+
+bool CApduSender::OnSendIecDataRequest(IEC_BASE *pRequestDz)
+{
+	if ( pRequestDz->m_nCommandType == 138)
+	{
+		//发送数据
+		char buf[255] = { 0 };
+
+		//组织ASDU46
+		ASDU_IEC* pAsdudz = (ASDU_IEC*)(buf + sizeof(APCI));
+
+		pAsdudz->type = pRequestDz->m_nCommandType;
+
+		pAsdudz->vsq = 0x01;
 
 
+		pAsdudz->asduAddr.SetAddr(pRequestDz->m_nAsduID);
+		//传送原因
+		pAsdudz->cot.SetCot(pRequestDz->m_nCto);
+
+		int nSetIndex = 0;
+
+		for (int i = 0; i < pRequestDz->m_lstData.count(); i++)
+		{
+			//赋值
+			if (0 == nSetIndex)
+			{
+				pAsdudz->infoaddr.SetAddr(pRequestDz->m_lstData.at(i).nAddress);
+			}
+			//赋值
+			//pAsdudz->m_data[nSetIndex].infoaddr.SetAddr(pRequestDz->m_lstData.at(i).nAddress);
+			pAsdudz->m_data[nSetIndex].m_nValue = pRequestDz->m_lstData.at(i).nValue;
+			//pAsdudz->m_dzQos.DQ = (pRequestDz->m_nQos == TELECTRL_REQUEST_SELECT) ? 0 : 1;
+
+
+			if ((i + 1) % (pAsdudz->MAX_DATA_PER_ASDUDZ_RD) == 0)
+			{
+				//当达到最大数时  发送数据包
+				pAsdudz->SetItemCount(nSetIndex + 1);
+				int nResult = Send_I(buf, sizeof(ASDU_IEC));
+				if (nResult != SEND_OK)
+				{
+					return false;
+				}
+				//清空数据
+				memset(pAsdudz->m_data, 0, pAsdudz->MAX_DATA_PER_ASDUDZ_RD);
+				nSetIndex = 0;
+			}
+			else
+			{
+				nSetIndex++;
+			}
+
+
+		}
+
+		if (nSetIndex != pAsdudz->MAX_DATA_PER_ASDUDZ_RD && nSetIndex != 0)
+		{
+			pAsdudz->SetItemCount(nSetIndex);
+			int nResult = Send_I(buf, pAsdudz->GetAsduDzLength());
+
+			if (nResult != SEND_OK)
+			{
+				return false;
+			}
+		}
+	}
+	else if (pRequestDz->m_nCommandType == 132)
+	{
+		//获取数据
+		char buf[255] = { 0 };
+
+		//组织ASDU46
+		ASDUDZ2* pAsdudz = (ASDUDZ2*)(buf + sizeof(APCI));
+
+		pAsdudz->type = pRequestDz->m_nCommandType;
+
+		pAsdudz->vsq = 0x01;
+
+
+		pAsdudz->asduAddr.SetAddr(pRequestDz->m_nAsduID);
+		//传送原因
+		pAsdudz->cot.SetCot(pRequestDz->m_nCto);
+
+
+
+		int nSetIndex = 0;
+
+		for (int i = 0; i < pRequestDz->m_lstData.count(); i++)
+		{
+			//赋值
+			if (i == 0)
+			{
+				pAsdudz->m_data[nSetIndex].infoaddr.SetAddr(pRequestDz->m_lstData.at(i).nAddress);
+			}
+
+
+			if ((i + 1) % (pAsdudz->MAX_DATA_PER_ASDUDZ2_RD) == 0)
+			{
+				//当达到最大数时  发送数据包
+				pAsdudz->SetItemCount(nSetIndex + 1);
+				int nResult = Send_I(buf, sizeof(ASDUDZ2));
+				if (nResult != SEND_OK)
+				{
+					return false;
+				}
+				//清空数据
+				memset(pAsdudz->m_data, 0, pAsdudz->MAX_DATA_PER_ASDUDZ2_RD);
+				nSetIndex = 0;
+			}
+
+			nSetIndex++;
+		}
+
+		if (nSetIndex != pAsdudz->MAX_DATA_PER_ASDUDZ2_RD)
+		{
+			pAsdudz->SetItemCount(nSetIndex);
+
+			int nResult = Send_I(buf, pAsdudz->GetAsduDzLength());
+
+			if (nResult != SEND_OK)
+			{
+				return false;
+			}
+		}
+	}
 	return true;
 }
 

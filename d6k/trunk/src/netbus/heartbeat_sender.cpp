@@ -60,7 +60,7 @@ void CUdpSender::Send()
 			g_msgQueueHB.GetFromSwitchMQ((void*)cMsg, MAX_EMSG_L, &timeout);
 
 			EMSG_BUF* msg = (EMSG_BUF*)cMsg;
-			if (msg->MsgType == RECV_SWITCH_CMD_RES || msg->MsgType == RECV_SWITCH_CMD_RES)
+			if (msg->MsgType == SEND_SWITCH_CMD_REQ || msg->MsgType == RECV_SWITCH_CMD_RES)
 			{
 				// 缓冲1s后进行主备切换
 				ACE_OS::sleep(1);

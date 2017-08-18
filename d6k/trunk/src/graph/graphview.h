@@ -305,7 +305,7 @@ enum PROPERTYITEM
    ITEM_PUSHBUTTON_TYPE,     //√¸¡Ó¿‡–Õ
    ITEM_PUSHBUTTON_PRESSORDER,    //press√¸¡Ó
    ITEM_PUSHBUTTON_RELEASEORDER,    //release√¸¡Ó
-
+   ITEM_PUSHBUTTON_REMOTECONTROLTYPE,     //“£øÿ
     
 };
 

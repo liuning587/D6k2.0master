@@ -13,6 +13,10 @@ public:
 	CPlantData();
 	~CPlantData();
 
+	// 静态属性
+	// 装机容量
+	float m_fCapacity;
+
 public:	
 
 	void SetActPowerTagname(const std::string& strActPowerTagame);
@@ -35,6 +39,10 @@ protected:
 	void LogMsg(const char *szLogTxt, int nLevel);
 
 private:
+
+	// todo:
+	// 后续区分动态属性和静态属性
+	
 
 	// 是否初始化
 	std::atomic<bool> m_isInit;

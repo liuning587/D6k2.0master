@@ -122,6 +122,8 @@ public slots:
     void Slot_SetControlCommand(int iControlType, int ipointNum, int OperateType, int nMessType);
 	//定值指令
 	void Slot_setDevOrder(DEV_BASE &devData);
+	//iec指令
+	void Slot_SetIecOrder(IEC_BASE &iecData);
     //录波文件获取指令
     void Slot_SetRecordOrder(QList<LB_DATA> &lbData);
     //死区

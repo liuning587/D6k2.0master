@@ -120,6 +120,11 @@ private:
 	void OnRecvDevReadRequestAck(char* pBuff, int nLength);
 	//参数写入
 	void OnRecvDevWriteRequestAck(char *pBuff, int nLength);
+	//iec  写入
+	void OnRecvIecWriteRequestAck(char *pBuff, int nLength);
+
+	//iec read
+	void OnRecvIecReadRequestAck(char* pBuff, int nLength);
     //召唤目录响应
 //     void OnRecvResponseCatalog(char *pBuff, int nLength);
 //     //选择文件响应
@@ -151,7 +156,8 @@ private:
 	void OnRecvWriteConform(char *pBuff, int nLength);
 	//升级激活确认
 	void OnRecvUpdateActionAck(char *pBuff, int nLength);
-
+	//读取内容
+	void OnRecvReadIecData(char *pBuff, int nLength);
 signals:
     //单点连续遥信数据
     void Signal_OnePointRemote(int iDeviceID, int nPointID, int nValue);
@@ -201,7 +207,8 @@ signals:
 	//遥控反馈信息 0单点  1 双点      0:on 1:off         
 	void Signal_ControlFeedBack(int iControlType,int iPointNum, int iOperateType,QString strStatus);
 	//定值数据
-	void Signal_DevReadBack(QMap<int,short> mapInfo);
+	void Signal_DevReadBack(QMap<int,float> mapInfo);
+
 	//设定数据响应   48/136    6/7   1/0  
 	void Signal_devWriteBack(int iControlType,int iCot,int iQos);
     //故障

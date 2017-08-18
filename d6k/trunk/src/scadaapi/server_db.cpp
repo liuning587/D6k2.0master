@@ -235,6 +235,19 @@ bool CServerDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VA
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
 		return false;
 
+	//! fixed by LiJin 2017.8.9
+	int32u nMyState = GetMyHostState();
+
+	if (nMyState != STATE_MAIN)
+	{// 如果本机不是主机，则不写入数据
+		QString szLog;
+		szLog = QString(QObject::tr("Node [%1] is't working on master! PutRtData [ %2 ].[ %3 ].[ %4 ] failed "))
+			.arg(m_nMyNodeOccNo).arg(nIddType).arg(nOccNo).arg(nFiledID);
+		LogMsg(szLog.toStdString().c_str(), 0);
+
+		return false;
+	}
+
 	bool bRet = false;
 	switch (nIddType)
 	{

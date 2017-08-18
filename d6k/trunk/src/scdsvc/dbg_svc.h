@@ -30,11 +30,34 @@ class CDbgSvc : public CBaseModule
 public:
 	CDbgSvc(CScadaSvc* pServer, const std::string & szMailBoxName, int &MailID);
 	virtual ~CDbgSvc(void);
-
 public:
 	virtual bool Initialize(const char *pszDataPath, unsigned int nMode);
 	virtual void Run();
 	virtual void Shutdown();
+public:
+
+protected:
+	// 遥控
+	bool DoDout();
+	// 遥调
+	bool DoAout();
+	// 节点投退
+	bool DoNodeScanEnable();
+
+	bool DoChannelScanEnable();
+
+	bool DoDeviceScanEnable();
+
+	bool DoSetVar();
+
+private:
+	void * m_pCtx;
+	void * m_pSender;
+	
+	bool InitMQ(unsigned int nPortNo);
+
+	void CloseMQ();
+
 };
 
 #endif // _DBGSVR_MODULE_H

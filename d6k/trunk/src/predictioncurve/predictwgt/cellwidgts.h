@@ -12,6 +12,7 @@ class QCheckBox;
 
 class CCellTimeWgt : public QWidget
 {
+	Q_OBJECT
 public:
 	CCellTimeWgt(QWidget *parent = nullptr);
 	~CCellTimeWgt();
@@ -33,12 +34,18 @@ private:
 
 class CCellRadioWgt : public QWidget
 {
+	Q_OBJECT
 public:
 	CCellRadioWgt(QWidget *parent = nullptr);
 	~CCellRadioWgt();
 signals:
 	// 1 ÕÛÏß  2Öù×´Í¼
 	void Signal_ClickItem(int nFlag);
+public slots:
+    //ÇúÏß²Û
+    void Slot_ClickCurveItem();
+	//Öù×´²Û
+	void Slot_ClickAreaItem();
 private:
 	QRadioButton *m_pRaidoCurve;
 	QRadioButton *m_pRadioRechantle;
@@ -47,6 +54,7 @@ private:
 
 class CCellCheckWgt : public QWidget
 {
+	Q_OBJECT
 public:
 	CCellCheckWgt(QWidget *parent = nullptr);
 	~CCellCheckWgt();

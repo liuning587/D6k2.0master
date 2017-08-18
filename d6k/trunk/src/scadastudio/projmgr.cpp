@@ -25,7 +25,7 @@
 #include "scadastudio/base.h"
 #include "scadastudio/tabwidget.h"
 
-typedef QMainWindow* (*GetDeviceTemplate)();
+typedef QMainWindow* (*GetModelToolDll)();
 
 CProjMgr::CProjMgr(CCore *pCore)
 	:m_pCore(NULL), m_pDomDocument(NULL), m_pFile(nullptr), m_strFile("")
@@ -78,7 +78,7 @@ CProjMgr::CProjMgr(CCore *pCore)
 	pMenu->addAction(pCloseProjectAct);
 
 	auto pObjectMenu = pCore->GetUIMgr()->menuBar()->addMenu(QObject::tr("Tool"));
-	QAction *pEquipmentModelAct = new QAction(tr("equipment model"), pObjectMenu);
+	QAction *pEquipmentModelAct = new QAction(tr("Equipment model"), pObjectMenu);
 	pObjectMenu->addAction(pEquipmentModelAct);
 
 	auto pTool = pCore->GetUIMgr()->addToolBar("basic");
@@ -650,7 +650,7 @@ void CProjMgr::EquipmentModel()
     }
 
 #ifdef _DEBUG
-    m_pModelLib = new QLibrary("devicetemplate");
+    m_pModelLib = new QLibrary("object_model");
 #else
     m_pModelLib = new QLibrary("devicetemplate");
 #endif
@@ -668,7 +668,7 @@ void CProjMgr::EquipmentModel()
 	m_pCore->LogMsg(FES_DESC, strTmp.toStdString().c_str(), LEVEL_1);
 
     // 获取模型工具
-	GetDeviceTemplate getDeviceTemplate = (GetDeviceTemplate)m_pModelLib->resolve("GetDeviceTemplate");
+	GetModelToolDll getDeviceTemplate = (GetModelToolDll)m_pModelLib->resolve("GetModelToolDll");
     if (getDeviceTemplate)
     {
         m_pModelDll = getDeviceTemplate();

@@ -55,6 +55,16 @@ public:
 		//脉冲
 		BTN_PLUS,
 	};
+
+	//遥控预制  和  执行
+	enum BTN_REMOTE_CONTROL
+	{
+		//预制
+		BTN_PRESET = 0,
+		//执行
+		BTN_EXEC = 1,
+	};
+
 public:
 
 	CPushBtnWidget(QRectF rcPos, CPushBtnWidget::BTN_TYPE shape);
@@ -151,12 +161,24 @@ public:
 		m_eExecType = nType;
 	}
 
+	int GetRemoteControlType()
+	{
+		return m_eRemoteControyType;
+	}
+
+	void SetRemoteControl(BTN_REMOTE_CONTROL nType)
+	{
+		m_eRemoteControyType = nType;
+	}
+
 private:
 	BTN_TYPE m_Shape;
 	//命令状态变量
 	QString m_strBtnBindValue;
 	//命令类型
 	BTN_EXEC_TYPE m_eExecType;
+	//预置或执行
+	BTN_REMOTE_CONTROL m_eRemoteControyType;
 	//命令
 	std::vector<CDyncEventData*> m_arrEventIntent;
 };

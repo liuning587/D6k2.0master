@@ -61,14 +61,24 @@ CCellRadioWgt::CCellRadioWgt(QWidget *parent /*= nullptr*/):
 	pTotalLayout->addWidget(m_pRadioRechantle);
 	pTotalLayout->addStretch();
 	pTotalLayout->setContentsMargins(0, 5, 0, 5);
-	connect(m_pRaidoCurve,SIGNAL(clicked()),this,SIGNAL(Signal_ClickItem(1)));
-	connect(m_pRadioRechantle, SIGNAL(clicked()), this, SIGNAL(Signal_ClickItem(2)));
+
+	connect(m_pRaidoCurve,SIGNAL(clicked()),this,SLOT(Slot_ClickCurveItem()));
+	connect(m_pRadioRechantle, SIGNAL(clicked()), this, SLOT(Slot_ClickAreaItem()));
 }
 CCellRadioWgt::~CCellRadioWgt()
 {
 
 }
 
+void CCellRadioWgt::Slot_ClickCurveItem()
+{
+	emit Signal_ClickItem(1);
+}
+
+void CCellRadioWgt::Slot_ClickAreaItem()
+{
+	emit Signal_ClickItem(2);
+}
 
 
 CCellCheckWgt::CCellCheckWgt(QWidget *parent /*= nullptr*/) :

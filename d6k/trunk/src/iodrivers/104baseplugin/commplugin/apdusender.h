@@ -65,6 +65,9 @@ public:
 
 	//定值获取
 	bool OnSendDevDataRequest(DEV_BASE *pRequestDz);
+
+	//iec 获取和写入
+	bool OnSendIecDataRequest(IEC_BASE *pRequestIec);
 	//定值写入确认
 	bool OnSendDevWriteConform();
     //死区设置

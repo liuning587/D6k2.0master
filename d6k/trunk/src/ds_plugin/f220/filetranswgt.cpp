@@ -172,7 +172,11 @@ void CFileTransWgt::Slot_DownLoadItems()
 		return;
 	}
 
-	QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save File"), ui.treeWidget->currentItem()->text(0).split("/").last());
+	QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save File"), m_strFilePath + ui.treeWidget->currentItem()->text(0).split("/").last());
+
+	QString strTempName = fileName;
+
+	m_strFilePath = strTempName.remove(strTempName.split("/").last());
 
 	if (!fileName.isEmpty())
 	{

@@ -121,7 +121,28 @@
         <number>2</number>
        </property>
        <item>
-        <widget class="QTableWidget" name="tableWidget_3"/>
+        <widget class="QTableWidget" name="tableWidget_3">
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>值</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>默认值</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>编号</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -146,7 +167,28 @@
         <number>2</number>
        </property>
        <item>
-        <widget class="QTableWidget" name="tableWidget_2"/>
+        <widget class="QTableWidget" name="tableWidget_2">
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>值</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>默认值</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>编号</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>

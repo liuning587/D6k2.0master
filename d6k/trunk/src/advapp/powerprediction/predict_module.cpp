@@ -1373,7 +1373,7 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 		itemWeatherData->setData(pStation->GetName(), STATION_NAME_ROLE);
 		itemWeatherData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemWeatherData->setEditable(false);
-		pItem->appendRow(itemWeatherData);
+		newItem->appendRow(itemWeatherData);
 
 		//预测数据
 		auto strPredictData = pStation->GetPredictInfo()->GetName();
@@ -1385,11 +1385,11 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 		CQuoteItem* itemPredictData = new CQuoteItem(strPredictData);
 		itemPredictData->setData(strPredictData, LASTVALUE);
 		itemPredictData->setData(POWER_PREDICT_PREDICT_TYPE, PREDICT_ROOT_ROLE);
-		itemPredictData->setData(reinterpret_cast<long long>(pStation->GetPlantInfo()), POINTERDATA);
+		itemPredictData->setData(reinterpret_cast<long long>(pStation->GetPredictInfo()), POINTERDATA);
 		itemPredictData->setData(pStation->GetName(), STATION_NAME_ROLE);
 		itemPredictData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemPredictData->setEditable(false);
-		pItem->appendRow(itemPredictData);
+		newItem->appendRow(itemPredictData);
 
 		//逆变器组数据
 		auto strInverterData = pStation->GetInverterGrpInfo()->GetName();
@@ -1405,7 +1405,7 @@ void CPowerPredictApi::CreatePredictGroupUi(CPredictGroup* pPtdtGroup, CQuoteIte
 		itemInverterData->setData(pStation->GetName(), STATION_NAME_ROLE);
 		itemInverterData->setIcon(QIcon(PREDICT_DEVICE_PNG));
 		itemInverterData->setEditable(false);
-		pItem->appendRow(itemInverterData);
+		newItem->appendRow(itemInverterData);
 
 		auto pGroup = reinterpret_cast<CInverterGroup*>(itemInverterData->data(POINTERDATA).toLongLong());
 		Q_ASSERT(pGroup);

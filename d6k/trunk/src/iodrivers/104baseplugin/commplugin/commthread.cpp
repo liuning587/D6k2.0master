@@ -3,6 +3,7 @@
 #include "apdusender.h"
 #include <QDateTime>
 #include <QTimer>
+#include <windows.h>
 
 CCommThread::CCommThread(QObject *parent)
 	: QThread(parent)
@@ -14,9 +15,11 @@ CCommThread::CCommThread(QObject *parent)
     {
         return;
     }
+	::SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED);
 
 	qRegisterMetaType<DEV_BASE>("DEV_BASE&");
-	qRegisterMetaType<QMap<int, short>>("QMap<int,short>");
+	qRegisterMetaType<IEC_BASE>("IEC_BASE&");
+	qRegisterMetaType<QMap<int, float>>("QMap<int,float>");
     qRegisterMetaType<QList<LB_DATA>>("QList<LB_DATA>&");
     qRegisterMetaType<ZOOM_BASE>("ZOOM_BASE&");
 	qRegisterMetaType<FILE_CATALOG_REQUEST_1>("FILE_CATALOG_REQUEST_1&");
@@ -96,13 +99,15 @@ void CCommThread::run()
 	connect(this, SIGNAL(Signal_Control(int, int, int,int)), &commPlugin, SLOT(Slot_SetControlCommand(int, int, int,int)));
 	//定值指令
 	connect(this, SIGNAL(Signal_DevSendInfo(DEV_BASE &)), &commPlugin, SLOT(Slot_setDevOrder(DEV_BASE &)));
+	//
+	connect(this, SIGNAL(Signal_IecSendInfo(IEC_BASE &)), &commPlugin, SLOT(Slot_SetIecOrder(IEC_BASE &)));
     //死区设置
     connect(this, SIGNAL(Signal_ZoomArea(ZOOM_BASE &)), &commPlugin, SLOT(Slot_SetZoomArea(ZOOM_BASE &)));
 
 	//遥控反馈
 	connect(&commPlugin, SIGNAL(Signal_ControlFeedBack(int, int, int, QString)), this, SIGNAL(Signal_ControlFeedBack(int, int, int, QString)));
 	//定值
-	connect(&commPlugin, SIGNAL(Signal_DevReadBack(QMap<int, short>)), this, SIGNAL(Signal_DevReadBack(QMap<int, short>)));
+	connect(&commPlugin, SIGNAL(Signal_DevReadBack(QMap<int, float>)), this, SIGNAL(Signal_DevReadBack(QMap<int, float>)));
     //死区
     connect(&commPlugin, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)), this, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)));
 	//定值
@@ -135,6 +140,8 @@ void CCommThread::run()
 	connect(this, SIGNAL(Signal_ReadActionRequest(FILE_ATTR_INFO &)), &commPlugin, SLOT(Slot_ReadAction(FILE_ATTR_INFO &)));
 	//定值读取
 	connect(&commPlugin,SIGNAL(Signal_ReadFixData(DEV_BASE &)),this,SIGNAL(Signal_ReadFixData(DEV_BASE &)));
+	//iec config
+
 	//文件目录
 	connect(commPlugin.GetRecver(),SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)),this,SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)));
 
@@ -178,6 +185,12 @@ void CCommThread::SendRemoteControl(int iControlType, int iPointNum, int iOpType
 void CCommThread::SendDevOrder(DEV_BASE &dveBaseInfo)
 {
 	emit Signal_DevSendInfo(dveBaseInfo);
+}
+
+//iec
+void CCommThread::SendIecOrder(IEC_BASE &iecBaseInfo)
+{
+	emit Signal_IecSendInfo(iecBaseInfo);
 }
 
 //死区设置
@@ -235,7 +248,7 @@ void CCommThread::SendDisConnectRequest()
 		this->quit();
 		this->wait();
 	}
-	emit Signal_DisConnectSocket();
+	//emit Signal_DisConnectSocket();
 }
 
 void CCommThread::SendUpdateRequest(ASDU211_UPDATE & updateData)

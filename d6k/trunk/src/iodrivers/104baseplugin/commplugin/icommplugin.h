@@ -90,7 +90,7 @@ signals:
 	//遥控反馈
 	void Signal_ControlFeedBack(int iControlType, int iPointNum, int iOperateType, QString strStatus);
 	//定值数据
-	void Signal_DevReadBack(QMap<int, short> mapInfo);
+	void Signal_DevReadBack(QMap<int, float> mapInfo);
 	//设定数据响应   48/136    6/7   1/0  
 	void Signal_devWriteBack(int iControlType, int iCot, int iQos);
     //故障

@@ -71,6 +71,8 @@ void CPredicitionWgt::InitWidget()
 void CPredicitionWgt::MakeData()
 {
 	m_CurveWgt->SetChartTitle(QStringLiteral("²âÊÔ³¡Õ¾"));
+
+	//m_CurveWgt->SetAreaCureShow();
 // 	QList<QPointF>  xxlst;
 // 	xxlst.append(QPointF(QDateTime::currentDateTime().addDays(-1).toMSecsSinceEpoch(), 3));
 // 	xxlst.append(QPointF(QDateTime::currentDateTime().toMSecsSinceEpoch(), 5));
@@ -98,6 +100,11 @@ void CPredicitionWgt::Slot_ChooseCureType(int nFlag)
 	if (nFlag == 1)
 	{
 		//ÕÛÏßÍ¼
-		int nn = 0;
+		m_CurveWgt->SetCureShow();
+	}
+	else if (nFlag == 2)
+	{
+		//Öù×´Í¼
+		m_CurveWgt->SetAreaCureShow();
 	}
 }

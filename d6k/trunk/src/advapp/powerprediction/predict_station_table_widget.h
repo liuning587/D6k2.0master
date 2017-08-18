@@ -30,6 +30,7 @@ public slots:
 	//…Ë÷√∞Û∂®÷µ 
 	void Slot_SetBindValue();
 	void on_customContextMenuRequested(const QPoint &pos);
+	void itemChanged(QTableWidgetItem *item);
 private:
 	CPlantInfo*    m_pPlantItem;
 };

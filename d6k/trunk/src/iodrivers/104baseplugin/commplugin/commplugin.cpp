@@ -102,7 +102,7 @@ CCommPlugin::CCommPlugin(CFtuModule *pModule)
 	//接收的数据
     connect(m_pApduRecver, SIGNAL(Signal_recv16Data(QByteArray, int)), this, SIGNAL(Signal_recv16Data(QByteArray, int)));
 	//定值
-	connect(m_pApduRecver, SIGNAL(Signal_DevReadBack(QMap<int, short>)), this, SIGNAL(Signal_DevReadBack(QMap<int, short>)));
+	connect(m_pApduRecver, SIGNAL(Signal_DevReadBack(QMap<int, float>)), this, SIGNAL(Signal_DevReadBack(QMap<int, float>)));
 	//定值设定
 	connect(m_pApduRecver, SIGNAL(Signal_devWriteBack(int, int, int)), this, SIGNAL(Signal_devWriteBack(int, int, int)));
     //故障
@@ -375,10 +375,10 @@ bool CCommPlugin::OnTimerSend(int nFrameType, int nUtype)
 		m_pTimerOut2->stop();
 		//链路中只要有包就重新触发t3超时
 		m_pTimerOut3->start();
-		if (!m_pTimerOut1->isActive())
-		{
-			m_pTimerOut1->start();
-		}
+		//if (!m_pTimerOut1->isActive())
+		//{
+		//	m_pTimerOut1->start();
+		//}
 	}
 	break;
 	case TYPE_U:
@@ -741,11 +741,17 @@ void CCommPlugin::Slot_SetControlCommand(int iControlType, int ipointNum, int Op
         //预置
         telectrl.m_nCtrlType = TELECTRL_REQUEST_SELECT;
     }
-    else
+    else if (nMessType == 2)
     {
         //执行
         telectrl.m_nCtrlType = TELECTRL_REQUEST_EXECUTE;
     }
+	else if (nMessType == 3)
+	{
+		//撤销
+		telectrl.m_nCtrlType = TELECTRL_REQUEST_UNSELECT;
+
+	}
 	
 
 	telectrl.m_nDataID = ipointNum;
@@ -784,6 +790,11 @@ void CCommPlugin::Slot_SetControlCommand(int iControlType, int ipointNum, int Op
 void CCommPlugin::Slot_setDevOrder(DEV_BASE &devData)
 {
 	m_pApduSender->OnSendDevDataRequest(&devData);
+}
+
+void CCommPlugin::Slot_SetIecOrder(IEC_BASE &iecData)
+{
+	m_pApduSender->OnSendIecDataRequest(&iecData);
 }
 
 void CCommPlugin::Slot_SetZoomArea(ZOOM_BASE &zoomBaseInfo)
@@ -878,6 +889,10 @@ void CCommPlugin::Slot_timeOutT3()
 		m_pTimerOut1->stop();
 		m_pTimerOut2->stop();
 		m_pTimerOut3->stop();
+	}
+	else
+	{
+		m_pTimerOut1->start();
 	}
 }
 

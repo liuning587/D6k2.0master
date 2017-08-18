@@ -17,7 +17,7 @@ public:
 	void InitWidget();
 	//²âÊÔ  ¿ÉÉ¾
 	void MakeData();
-public:
+public slots:
 	//Ñ¡ÔñÕÛÏßÍ¼»òÖù×´Í¼ 1ÕÛÏß  2Öù×´Í¼
 	void Slot_ChooseCureType(int nFlag);
 private:

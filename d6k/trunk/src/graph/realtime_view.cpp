@@ -23,15 +23,13 @@
 #include "realtime_view.h" 
 #include "graphscene.h"
 #include "widget_factory.h"
-
 #include "line_widget.h"
 #include "shape_widget.h"
 #include "group_widget.h"
-
 #include "background.h"
 #include "graph_file.h"
 #include "graphics_layer.h" 
-
+#include "pushbtn_widget.h"
 #include "axisframe.h" 
 
 #include <QMouseEvent>
@@ -46,9 +44,10 @@
 CRealTimeView::CRealTimeView(QWidget *parent) :
 QGraphicsView(parent)
 {
- 	setStyleSheet("background: transparent;border:0px");
+ 	//setStyleSheet("background: transparent;border:0px");
  	setWindowFlags(Qt::FramelessWindowHint);	
-	this->setViewportMargins(13, 13, 0, 0);
+	m_nLayerIndex = 1;
+	//this->setViewportMargins(13, 13, 0, 0);
 }
 
 CRealTimeView::CRealTimeView(QGraphicsScene *pScene, QWidget * parent)
@@ -114,13 +113,121 @@ CGraphScene *CRealTimeView::GetGraphicsScene() const
 	return dynamic_cast<CGraphScene *>(scene());
 } 
    
+void CRealTimeView::mouseMoveEvent(QMouseEvent * e)
+{
+	return QGraphicsView::mouseMoveEvent(e);
+}
+
+void CRealTimeView::mousePressEvent(QMouseEvent * e)
+{
+	QPointF m_CurrentClickPoint = mapToScene(e->pos());
+
+	bool m_bMovingFlag = false;
+
+	CGraphScene *pScene = GetGraphicsScene();
+	Q_ASSERT(pScene);
+	if (pScene == nullptr)
+		return;
+
+	CGraphFile * pGraphFile = pScene->GetGraphFile();
+	Q_ASSERT(pGraphFile);
+	if (pGraphFile == nullptr)
+		return;
+
+	QPointF ptTemp(mapToScene(e->pos()).x(), mapToScene(e->pos()).y());
+
+	if (e->button() == Qt::LeftButton)
+	{// Èç¹û×ó¼ü
+		OnLButtonDown(e);
+	}
+	else if (e->button() == Qt::RightButton)
+	{
+		
+	}
+	this->scene()->update();
+
+	return QGraphicsView::mousePressEvent(e);
+}
+
+void CRealTimeView::mouseReleaseEvent(QMouseEvent * e)
+{
+	return QGraphicsView::mouseReleaseEvent(e);
+}
+
+void CRealTimeView::mouseDoubleClickEvent(QMouseEvent * e)
+{
+	return QGraphicsView::mouseDoubleClickEvent(e);
+}
+
+void CRealTimeView::OnLButtonDown(QMouseEvent * e)
+{	
+	CGraphScene *pScene = GetGraphicsScene();
+	Q_ASSERT(pScene);
+	if (pScene == nullptr)
+		return;
+
+	CGraphFile * pGraphFile = pScene->GetGraphFile();
+	Q_ASSERT(pGraphFile);
+	if (pGraphFile == nullptr)
+		return;
+
+	int nPosX = static_cast <int> (mapToScene(e->pos()).x());
+	int nPosY = static_cast <int> (mapToScene(e->pos()).y());
+
+	QPoint ptTemp(mapToScene(e->pos()).x(), mapToScene(e->pos()).y());
+	
+	CBaseWidget *pObj = HitTest(ptTemp, GetLayerIndex());
+	
+	Q_ASSERT(pObj);
+	if (pObj)
+	{
+		pObj->SetPressFlag(true);
+		pObj->update(); ;
+	}
+
+	CPushBtnWidget * pBtn = dynamic_cast<CPushBtnWidget*>(pObj);
+	if (pBtn)
+	{
+		if (pBtn->GeteExecType()== CPushBtnWidget::BTN_ON_OFF)
+		{
+			emit sig_BtnOrderType(pBtn->GetBtnBindData(), pBtn->GetRemoteControlType());
+		}		
+	}
+}
+
+CBaseWidget* CRealTimeView::HitTest(QPoint & pos, unsigned int nLayerIdx)
+{
+	Q_ASSERT(nLayerIdx > 0 && nLayerIdx <= CGraphFile::MAX_LAYER_CNT);
+	if (nLayerIdx == 0 || nLayerIdx > CGraphFile::MAX_LAYER_CNT)
+		return nullptr;
+	
+	CGraphScene *pScene = GetGraphicsScene();//  dynamic_cast<CGraphScene*>(pView->scene());
+
+	Q_ASSERT(pScene);
+	if (pScene == nullptr)
+		return nullptr;
+
+	auto pGraphFile = pScene->GetGraphFile();
+	Q_ASSERT(pGraphFile);
+	if (pGraphFile == nullptr)
+		return nullptr;
+
+	auto pLayer = pGraphFile->GetLayer(GetLayerIndex());
+	Q_ASSERT(pLayer);
+	if (pLayer == nullptr)
+		return nullptr;
+
+	return pLayer->HitTest(pos);
+}
+
+
 void CRealTimeView::drawBackground(QPainter *painter, const QRectF &rect)
 {
 	CGraphScene * pScene = GetGraphicsScene();
 	if (pScene)
 	{
 		CGraphFile  *pFile = (pScene->GetGraphFile());
-		if (pFile)
+		if (pFile)\
 		{
 			pFile->DrawBackground(painter, rect);
 		}

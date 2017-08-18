@@ -58,6 +58,9 @@ public:
 	virtual bool UpdateUserVal(int32u nOccNo,const CVariant& val,int8u nQuality);
 	virtual bool UpdateSysVal(int32u nOccNo,const CVariant& val, int8u nQuality);
 
+	virtual bool UpdateChannel(CHANNEL *pChannel);
+	virtual bool UpdateDevice(DEVICE *pDevice);
+
 	bool GetAinAlarmByOccNo(int32u nOccNo,AIN_ALARM** pAinAlarm);
 	bool GetAinAlarmLimitByOcNo(int32u nOccNo,AIN_ALARM_LIMIT** pAinAlarmLimit);
 	bool GetDinAlarmByOccNo(int32u nOccNo,DIN_ALARM** pDinAlarm);

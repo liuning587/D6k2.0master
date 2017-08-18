@@ -27,6 +27,8 @@ public:
     void SendRemoteControl(int iControlType, int iPointNum, int iOpType, int iMessType);
 	//发送定值指令
 	void SendDevOrder(DEV_BASE &dveBaseInfo);
+	//发送iec配置指令
+	void SendIecOrder(IEC_BASE &iecBaseInfo);
     //发送文件获取指令
     void SendRecordOrder(QList<LB_DATA> &lbInfo);
     //设置总召时间
@@ -117,9 +119,11 @@ signals:
 	//遥控反馈
 	void Signal_ControlFeedBack(int iControlType, int iPointNum, int iOperateType, QString strStatus);
 	//定值数据
-	void Signal_DevReadBack(QMap<int, short> mapInfo);
+	void Signal_DevReadBack(QMap<int, float> mapInfo);
 	//发送定值数据接口
 	void Signal_DevSendInfo(DEV_BASE &dveBaseInfo);
+	//iec
+	void Signal_IecSendInfo(IEC_BASE &iecBaseInfo);
     //发送录波获取信号
     void Signal_RecordSendInfo(QList<LB_DATA> &lbInfo);
 	//设定数据响应   48/136    6/7   1/0  

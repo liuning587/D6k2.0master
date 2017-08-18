@@ -133,7 +133,10 @@ void CRealTimeAnalog::InitWidget()
     
 
 	m_pTableView->verticalHeader()->setHidden(true);
-	m_pTableView->setSortingEnabled(true);
+	m_pTableView->horizontalHeader()->setSortIndicator(0,Qt::AscendingOrder);
+	//m_pTableView->setSortingEnabled(true);
+
+	m_pTableView->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
 	m_pTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_pTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);

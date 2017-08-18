@@ -38,12 +38,6 @@ CMemDB::~CMemDB(void)
 { 
 
 }
-
-void CMemDB::LogMsg(const char *szLogTxt, int nLevel)
-{
-	::LogMsg("SCADA", szLogTxt, nLevel, nullptr);
-}
-
 /*! \fn bool CMemDB::Initialize(RUN_MODE mode)
 ********************************************************************************************************* 
 ** \brief CMemDB::Initialize 

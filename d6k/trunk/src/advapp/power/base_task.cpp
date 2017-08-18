@@ -21,7 +21,7 @@ void CBaseTask::CreateTimer()
 {
 	m_pTimer = new QTimer(this);
 
-	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(Slot_Handle_Timeout()));
+	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(Slot_Handle_Timeout()), Qt::DirectConnection);
 }
 
 bool CBaseTask::StartTimer()

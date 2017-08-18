@@ -30,6 +30,7 @@ class CLcdoperatorWgt;
 class CFaultEventWgt;
 class CWebDeviceWgt;
 class CFileTransWgt;
+class CDevIecConfigWgt;
 
 class F220SHARED_EXPORT CFtuModule : public IPluginModule
 {
@@ -62,6 +63,8 @@ public:
 	{
 		return m_nFixAreaCode;
 	}
+protected:
+	bool eventFilter(QObject *obj, QEvent *event);
 public:
 	virtual void Init(IMainModule *pCore) ;
 	virtual void UnInit() ;
@@ -172,6 +175,8 @@ private:
 	int m_nFixAreaCode;
 	//文件传输
 	CFileTransWgt *m_pFileTransWgt;
+	//iec
+	CDevIecConfigWgt *mPIecConfigWgt;
 };
 
 #endif // FTU_MODULE_H

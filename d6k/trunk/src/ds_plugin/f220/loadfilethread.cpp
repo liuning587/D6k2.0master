@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QApplication>
 #include <QDir>
+#include <QMessageBox>
 #include "loadfilethread.h"
 #include "filetranswgt.h"
 
@@ -66,7 +67,7 @@ void CLoadFileThread::Slot_CreateNewFile(QString strFileName, QByteArray byData)
 		QDir tDir;
 
 		tDir.setPath(strpath);
-
+		
 		if (!tDir.exists())
 		{
 			if (!tDir.mkpath(strpath))
@@ -74,18 +75,19 @@ void CLoadFileThread::Slot_CreateNewFile(QString strFileName, QByteArray byData)
 				qDebug() << tr("create % path error").arg(strFileName);
 			}
 		}
-
+		
 		QFile file(strFileName + listPaths.last());
-
+		
 		if (!file.open(QFile::WriteOnly))
 		{
+			
 			qDebug() << file.errorString();
 			return;
 		}
 
 		file.write(byData);
 		file.close();
-
+		
 		return;
 	}
 	

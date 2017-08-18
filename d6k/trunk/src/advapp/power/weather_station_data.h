@@ -31,6 +31,8 @@ public:
 
 	void SetAirPressureTagname(const std::string& strAirPressureTagname);
 
+	void SetComponentDescriptionTagname(const std::string& strComponentDescription);
+
 	// 初始化
 	bool Init();
 
@@ -61,6 +63,9 @@ public:
 	// 获取大气压实时数据
 	bool GetRealDataOfAirPressure(fp64* value);
 
+	// 获取组件温度数据
+	bool GetRealDataOfComponentDescription(fp64* value);
+
 protected:
 	void LogMsg(const char *szLogTxt, int nLevel);
 
@@ -77,6 +82,7 @@ private:
 	std::string m_strAirTemperatureTagname;
 	std::string m_strRelativeHumdtyTagname;
 	std::string m_strAirPressureTagname;
+	std::string m_strComponentDescription;
 
 	//!  总辐射
 	std::shared_ptr<CAinData> m_pTotalRadiation;
@@ -94,6 +100,8 @@ private:
 	std::shared_ptr<CAinData> m_pRelativeHumdty;
 	//!  大气压
 	std::shared_ptr<CAinData> m_pAirPressure;
+	//! 组件温度
+	std::shared_ptr<CAinData> m_pComponentDescription;
 };
 
 #endif

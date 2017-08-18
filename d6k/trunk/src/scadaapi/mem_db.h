@@ -76,7 +76,8 @@ public:
 	// 本接口暂时采用这种通用设计，为今后SCADA上支持定位变量的可能做准备。
 	virtual bool GetAinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
 	virtual bool GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
-
+	// 获取数据库节点的主从状态
+	virtual int32u GetMyHostState();
 
 #if 0
 	// 预估所需共享内存的尺寸
@@ -89,7 +90,6 @@ public:
 
 
 protected:
-	void LogMsg(const char *szLogTxt, int nLevel);
 	void MainTask(void *pImpl);
 
 	void StartModule();

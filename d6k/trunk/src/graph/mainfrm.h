@@ -12,6 +12,7 @@ class CGraphScene;
 class CRealTimeView;
 class QTreeWidgetItem;
 class QDockWidget;
+class QComboBox;
 #define USER_ROLE_ROOT Qt::UserRole + 1
 #define USER_GRP_ROLE  Qt::UserRole + 2
 #define USER_FILE_ROLE Qt::UserRole + 3
@@ -84,6 +85,7 @@ private:
 protected:
     void resizeEvent(QResizeEvent *event);
 	void SetCurrentFile(const QString& szName);
+	//CBaseWidget* HitTest(QPoint & pos, unsigned int nLayerIdx);
 public slots: 
 	void OnDelete();
 	void slot_OnTreeDbClicked(QTreeWidgetItem *item, int column);
@@ -92,12 +94,15 @@ public slots:
 	void slot_OnHideView();
 	void slot_FullScreenView();
 	void slot_NormalScreenView();
+	void slot_ComBoBoxChanged(int nIndex);
+	void slot_BtnOrder(const QString& tagName,int nType);
 private:
 	QTabWidget  *m_pTabWidget;
 	QTabWidget  *m_pLeftTabWidget;
 	QTreeWidget* m_pTreeWidget;
 	QTreeWidget* m_pPredictTreeWidget;
 	QDockWidget * m_pDockWidget;
+	QComboBox* m_pComBox;
 private:
 	QString m_szProjPath; 	
 	//当前页面
@@ -107,6 +112,10 @@ private:
 	std::vector < SIM_GRAPH_DEF > m_arrFiles;
 
 	std::vector<CRealTimeTask*> m_arrTasks;
+	//图层
+	int m_nIndexLayer;
+	//是否正在执行命令
+	bool m_bIsOrder;
 
 private:
 	//预测曲线

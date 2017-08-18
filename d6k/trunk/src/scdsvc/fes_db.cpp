@@ -213,6 +213,38 @@ bool CFesDB::UpdateSysVal(int32u nOccNo, const CVariant& val, int8u nQuality)
 	return true;
 }
 
+bool  CFesDB::UpdateChannel( CHANNEL *pChannel)
+{
+	Q_ASSERT(pChannel);
+	if (pChannel == nullptr)
+		return false;
+
+	Q_ASSERT(pChannel->OccNo != INVALID_OCCNO && pChannel->OccNo <= m_nChannelCount);
+	if (pChannel->OccNo == INVALID_OCCNO || pChannel->OccNo > m_nChannelCount)
+	{
+		return false;
+	}
+
+	m_pChannels[pChannel->OccNo - 1].ScanEnable = pChannel->ScanEnable;
+	m_pChannels[pChannel->OccNo - 1].IsDefined = pChannel->IsDefined;
+	m_pChannels[pChannel->OccNo - 1].Init = pChannel->Init;
+	m_pChannels[pChannel->OccNo - 1].Quality = pChannel->Quality;
+	m_pChannels[pChannel->OccNo - 1].PeerQuality = pChannel->PeerQuality;
+	//.....
+
+
+	return true;
+}
+
+bool  CFesDB::UpdateDevice(DEVICE *pDevice)
+{
+	Q_ASSERT(pDevice);
+	if (pDevice == nullptr)
+		return false;
+
+	return true;
+}
+
 bool CFesDB::GetAinAlarmByOccNo(int32u nOccNo, AIN_ALARM** pAinAlarm)
 {
 	Q_ASSERT(nOccNo!=INVALID_OCCNO && nOccNo <=m_nAinAlarmCount);
