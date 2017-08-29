@@ -315,7 +315,7 @@ void CBreakRecver::OnRecvTimeInfo(char * pBuff, int nLen)
 	else
 	{
 		//Ê§°Ü
-		QString strValue = tr("Ê±¼äÉèÖÃÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
+		QString strValue = QStringLiteral("Ê±¼äÉèÖÃÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_Result);
 		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(),1 );
 	}
 	
@@ -334,7 +334,7 @@ void CBreakRecver::OnRecvProtectAck(char * pBuff, int nLen)
 	else
 	{
 		//Ê§°Ü
-		QString strValue = tr("¶¨ÖµÉèÖÃÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
+		QString strValue = QStringLiteral("¶¨ÖµÉèÖÃÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_Result);
 		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
 	}
 }
@@ -352,7 +352,7 @@ void CBreakRecver::OnRcvSysAck(char *pBuff, int nLen)
 	else
 	{
 		//Ê§°Ü
-		QString strValue = tr("¶¨ÖµÉèÖÃÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
+		QString strValue = QStringLiteral("¶¨ÖµÉèÖÃÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_Result);
 		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
 	}
 }
@@ -371,7 +371,7 @@ void CBreakRecver::OnRecvRemoteContrlAck(char * pBuff, int nLen)
 	else
 	{
 		//Ê§°Ü
-		QString strValue = tr("²Ù×÷Ê§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
+		QString strValue = QStringLiteral("²Ù×÷Ê§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_Result);
 		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
 	}
 }
@@ -389,7 +389,7 @@ void CBreakRecver::OnRecvReset(char *pBuff, int nLen)
 	else
 	{
 		//Ê§°Ü
-		QString strValue = tr("ÐÅºÅ¸´¹éÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
+		QString strValue = QStringLiteral("ÐÅºÅ¸´¹éÊ§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
 		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
 	}
 }
@@ -409,7 +409,7 @@ void CBreakRecver::OnRecvClearSoeAck(char *pBuff, int nLen)
 	else
 	{
 		//Ê§°Ü
-		QString strValue = tr("²Ù×÷Ê§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
+		QString strValue = QStringLiteral("²Ù×÷Ê§°Ü,´íÎóÂë:%1").arg(pTimeAck->m_AddResult);
 		GetBreakerModuleApi()->WriteRunLog("Breaker", strValue.toLocal8Bit().data(), 1);
 	}
 }

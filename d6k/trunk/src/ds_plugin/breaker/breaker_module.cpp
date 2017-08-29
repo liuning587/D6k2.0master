@@ -79,6 +79,7 @@ void CBreakerModule::Init(IMainModule *pMainModule)
 
 	
 	m_nRemoterControl = 0;
+	m_nRemoterControlObj = 0;
 	m_nRemoteStauts = 0;
 	m_pPluginTopItem = nullptr;
 
@@ -481,6 +482,17 @@ void CBreakerModule::Slot_SocketConnectSuccess()
 	WriteRunLog("Breaker", strInfo.toLocal8Bit().data(), 1);
 	m_pTimer->start();
 	m_pDebugTimer->start();
+
+	//软压板定值更新
+	m_pSoft->Slot_UpdateData();
+	//保护定值
+	m_pProtectDev->Slot_UpdateData();
+	//系统参数
+	m_pSysDev->Slot_UpdateData();
+	//开入参数
+	m_pDo->Slot_UpdateData();
+	//开出参数
+	m_pDi->Slot_UpdateData();
 }
 
 void CBreakerModule::Slot_SocketError(QString errString)
@@ -788,7 +800,15 @@ void CBreakerModule::Slot_SetDeviceTime()
 void CBreakerModule::SLot_RemoteControl()
 {
 	m_nRemoterControl = 0;
+	
 	QDialog *pContrlDlg = new QDialog;
+
+	QComboBox *pComboxObj = new QComboBox;
+	pComboxObj->addItem(tr("#1断路器"));
+	pComboxObj->addItem(tr("#2断路器"));
+	pComboxObj->addItem(tr("隔离开关"));
+
+
 	QComboBox *pCombox = new QComboBox;
 	pCombox->addItem(tr("分"));
 	pCombox->addItem(tr("合"));
@@ -801,8 +821,11 @@ void CBreakerModule::SLot_RemoteControl()
 	btnLayout->addWidget(pComform);
 
 	QVBoxLayout *totalLayout = new QVBoxLayout(pContrlDlg);
+	totalLayout->addWidget(pComboxObj);
 	totalLayout->addWidget(pCombox);
+	
 	totalLayout->addLayout(btnLayout);
+	pContrlDlg->setWindowTitle(tr("遥控"));
 
 	if (pContrlDlg->exec())
 	{
@@ -814,9 +837,11 @@ void CBreakerModule::SLot_RemoteControl()
 		dbgControl.type = DBG_CODE_RM_CTRL;
 
 		dbgControl.m_ControlType = 0;
-		dbgControl.m_ControlObj = 0;
+		dbgControl.m_ControlObj = pComboxObj->currentIndex();
 		dbgControl.m_Order = pCombox->currentIndex();
 		m_nRemoteStauts = pCombox->currentIndex();
+
+		m_nRemoterControlObj = dbgControl.m_ControlObj;
 
 		m_pNetManager->GetSender()->OnSendRemoteControl(dbgControl);
 		QString strValue = tr("发送遥控选择包");
@@ -845,7 +870,7 @@ void CBreakerModule::Slot_RemoteContrExec()
 			dbgControl.type = DBG_CODE_RM_CTRL;
 
 			dbgControl.m_ControlType = 1;
-			dbgControl.m_ControlObj = 0;
+			dbgControl.m_ControlObj = m_nRemoterControlObj;
 			dbgControl.m_Order = m_nRemoteStauts;
 
 			m_pNetManager->GetSender()->OnSendRemoteControl(dbgControl);

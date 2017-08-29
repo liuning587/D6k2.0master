@@ -212,4 +212,6 @@ private:
 	CSoeClearWgt *m_pSoeClearWgt;
 	//
 	QList<int> m_ClearSoeLst;
+	//
+	int m_nRemoterControlObj;
 };

@@ -8,7 +8,7 @@
 #include <memory>
 #include <QDateTime>
 #include <QMenu>
-
+#include <QComboBox>
 
 
 CDiWdiget::CDiWdiget(CNetManager *pNetManager, QWidget *parent)
@@ -61,9 +61,20 @@ void CDiWdiget::InitData()
 		QTableWidgetItem *pItem3 = new QTableWidgetItem;
 		pItem3->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
 
-		QTableWidgetItem *pItem4 = new QTableWidgetItem;
-		pItem4->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
-		pItem4->setText(QString::number(item.second->m_nValue));
+		//改成combobx
+		QComboBox *pComboInType = new QComboBox;
+		pComboInType->addItem(QStringLiteral("正常"));
+		pComboInType->addItem(QStringLiteral("取反"));
+		pComboInType->addItem(QStringLiteral("闭锁"));
+
+		if (item.second->m_nValue<4 && item.second->m_nValue >-1)
+		{
+			pComboInType->setCurrentIndex(item.second->m_nValue);
+		}
+
+// 		QTableWidgetItem *pItem4 = new QTableWidgetItem;
+// 		pItem4->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
+// 		pItem4->setText(QString::number(item.second->m_nValue));
 
 		QTableWidgetItem *pItem5 = new QTableWidgetItem;
 		pItem5->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -73,7 +84,9 @@ void CDiWdiget::InitData()
 		ui.tableWidget->setItem(nRow, 1, pItem1);
 		ui.tableWidget->setItem(nRow, 2, pItem2);
 		ui.tableWidget->setItem(nRow, 3, pItem3);
-		ui.tableWidget->setItem(nRow, 4, pItem4);
+		//ui.tableWidget->setItem(nRow, 4, pItem4);
+		ui.tableWidget->setCellWidget(nRow, 4, pComboInType);
+
 		ui.tableWidget->setItem(nRow, 5, pItem5);
 
 
@@ -104,7 +117,16 @@ void CDiWdiget::Slot_RecvNewRealTimeData(DBG_GET_MEAS &tMeas)
 				//更新数据
 				m_IdItem[tMeas.m_data[i].infoaddr]->setText(QString::number(strValue->GetAddr()));
 				//更新数据类型
-				ui.tableWidget->item(m_IdItem[tMeas.m_data[i].infoaddr]->row(), 4)->setText(QString::number(strValueType->GetAddr()));
+				QComboBox *pCombobox = qobject_cast<QComboBox*>(ui.tableWidget->cellWidget(m_IdItem[tMeas.m_data[i].infoaddr]->row(), 4));
+
+			    if (pCombobox != nullptr)
+			    {
+					if (strValueType->GetAddr() > -1 && strValueType->GetAddr() <4)
+					{
+						pCombobox->setCurrentIndex(strValueType->GetAddr());
+					}
+			    }
+/*				ui.tableWidget->item(m_IdItem[tMeas.m_data[i].infoaddr]->row(), 4)->setText(QString::number(strValueType->GetAddr()));*/
 
 				ui.tableWidget->item(m_IdItem[tMeas.m_data[i].infoaddr]->row(), 5)->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz"));
 			}
@@ -168,7 +190,14 @@ void CDiWdiget::Slot_SetDevData()
 		DBG_MSG2 *strValueType = (DBG_MSG2*)(devData.m_data[i].measData + 2);
 
 		strValue->SetAddr(ui.tableWidget->item(i, 3)->text().toInt());
-		strValueType->SetAddr(ui.tableWidget->item(i, 4)->text().toInt());
+
+		QComboBox *pCombobox = qobject_cast<QComboBox*>(ui.tableWidget->cellWidget(i, 4));
+
+		if (pCombobox != nullptr)
+		{
+			strValueType->SetAddr(pCombobox->currentIndex());
+		}
+
 	}
 
 	m_pNetManager->GetSender()->OnSend4Data(devData);
