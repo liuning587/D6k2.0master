@@ -17,7 +17,7 @@ void CWebDeviceWgt::InitWgt()
 	plabelIp->setText(tr("IP:"));
 	
 	m_pLineIpAddr = new QLineEdit(this);
-	m_pLineIpAddr->setText("172.16.42.111");
+	m_pLineIpAddr->setText("127.0.0.1");
 
 	QLabel *pLablePort = new QLabel(this);
 	pLablePort->setText(tr("Port"));

@@ -73,7 +73,7 @@ void CAoutOperDialog::slot_OnBtnAutoExec()
 //	AppSetAoutValue(m_nAoutOccNo, fVal, 0);
 	if (m_pMemDB)
 	{
-		m_pMemDB->FesSetAoutValue(m_nAoutOccNo, 2, 2);
+		m_pMemDB->FesSetAoutValue(m_nAoutOccNo, 2, nullptr);
 	}
 }
 

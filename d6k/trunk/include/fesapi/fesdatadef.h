@@ -50,6 +50,15 @@ struct FesInfo
 	char FesGrpName[MAX_NAME_LENGTH + STRING_PAD];         //!前置组名
 };
 
+//用于同步channel以及device的实时数据信息
+struct SyncDataInfo 
+{
+	int8u IsDefined;                         
+	int8u ScanEnable;                       
+	int8u Init;                              
+	int8u Quality;
+};
+
 /*! \struct  StringUnit
 *   \brief 字符串基本单元 */
 struct StringUnit
@@ -626,6 +635,7 @@ struct VARDATA
 	int8u Init;                              /* UNINITED / INITED ,DEFAULT_INIT  */
 	int8u Quality;                           /* QUALITY_OK /QUALITY_BAD, DEFAULT_QUA */
 	int8u ManSet;                            /* 0: Normal, 1: has been Manual set **/
+	int8u IsReadOnly;                        //! 对应用层来说，是否是只读
 
 	IO_VARIANT Value;            			    /* DI's Output: 0/1                  */
 	IO_VARIANT RawValue;                     	//原始值   /* Data collects from inst. , produces */  /* Output/NotOutput based on SiglaType */
@@ -698,11 +708,11 @@ struct ATTDEF
 {
 	int32u      Index;       //! 序号
 	int32u      ByteOffset;  //! 结构体内的偏移
-	int16u      DataType;   //! 数据类型 
-	int16u      Att;        //! 属性号
+	int16u      DataType;    //! 数据类型 
+	int16u      Att;         //! 属性号
 
-	int16u      ArraySize;  //! 数组长度
-	int16u      RW;         //! 读写属性 
+	int16u      ArraySize;   //! 数组长度
+	int16u      RW;          //! 读写属性 
 	char        AttName[MAX_ATTNAME_LENGTH];
 	char        Description[MAX_NAME_LENGTH];
 };
@@ -713,8 +723,8 @@ enum MSG_CODE
 	MSG_ALARM = 1,      //! 通用告警
 	MSG_AIN_ALARM = 2,
 	MSG_DIN_ALARM = 3,
-	MSG_DIAG,   //! 自诊断告警
-	MSG_OPER,   //! 操作告警
+	MSG_DIAG,          //! 自诊断告警
+	MSG_OPER,          //! 操作告警
 	MSG_SETVAL,        //! 设值
 	MSG_RT_SETVAL,     //! 设值反校（可用于遥控反校，选择回复）
 };
@@ -828,10 +838,10 @@ struct DINALARM_MSG_H
 	TIMEPAK Tm;
 
 	int32u  NodeOccNo;
-	int32u	EvtCode;      //! 报警信息代码
-	int32u	OccNo;        //! 模拟量点号
+	int32u	EvtCode;        //! 报警信息代码
+	int32u	OccNo;          //! 点号
 
-	int32u  AlarmOccNo;     //! 模拟量告警的排行号
+	int32u  AlarmOccNo;     //! 告警的排行号
 	int32u  AlarmLimitOccNo;
 
 	int16u	AlarmFlag;     //! 最高位为1不允许报警,为0允许报警
@@ -848,15 +858,15 @@ struct DINALARM_MSG
 	TIMEPAK Tm;
 
 	int32u  NodeOccNo;
-	int32u	EvtCode;      //! 报警信息代码
-	int32u	OccNo;        //! 模拟量点号
+	int32u	EvtCode;         //! 报警信息代码
+	int32u	OccNo;           //! 点号
 
-	int32u  AlarmOccNo;     //! 模拟量告警的排行号
+	int32u  AlarmOccNo;      //! 告警的排行号
 	int32u  AlarmLimitOccNo;
 
-	int16u	AlarmFlag;     //! 最高位为1不允许报警,为0允许报警
-	int16u  AlarmState;    //! 对开关量无意义;对模拟量,
-	int8u	Value;         //! 当前测值
+	int16u	AlarmFlag;       //! 最高位为1不允许报警,为0允许报警
+	int16u  AlarmState;      //! 对开关量无意义;对模拟量,
+	int8u	Value;           //! 当前测值
 
 	int8u  ExtraData[MSG_LEN - sizeof(DINALARM_MSG_H)];
 };
@@ -924,17 +934,20 @@ struct SETVAL_MSG
 {
 	int16u	MsgCode;
 	int16u	Len;
+
 	int8u	IddType;
-	int8u	Att;  //! 哪个属性
-	int16u  Pad1;
+	int8u	Att;       //! 哪个属性
+	int8u	Datatype;
+	int8u   Pad1;
 
 	int32u	NodeOccNo;
 	int32u	Occno;
 
-	int8u	Datatype;
-	int8u   Pad2;     /*MSG_SETVLUDONE 0:选择或撤销成功 1:选择或撤销失败 */
-	int8u   Source1; /*** see lcucnst.h ***/
-	int8u   Source2;
+	int32u  SourcAppOccNo;    //! 属于哪个应用
+	int32u  SourceAppIddType; //! 应用的类型 
+	int32u  Ext;              //! 扩展预留
+
+
 	IO_VARIANT	Value[2];/*CTRL: 1执行；2选择；3选择后执行；4撤销*/
 };
 

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CForwarding_select_ai_tagname_dialog</string>
+   <string>Forwarding</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">

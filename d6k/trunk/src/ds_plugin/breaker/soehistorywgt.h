@@ -85,7 +85,10 @@ public slots:
 	void Slot_FtpDone(bool);
 	//保存历史事件
 	void SaveHistoryEvent();
-
+	//
+	void Slot_OpenWaveFile();
+	//
+	void Slot_FtpStateChange(int);
 private:
 	Ui::CSoeHistoryWgt ui;
 	//网络

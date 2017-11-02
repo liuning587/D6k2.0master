@@ -39,7 +39,7 @@ extern "C"
 	
 	// 测点类型、节点索引、测点索引、测点属性
 	SCADA_API bool GetRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pRetData);
-	SCADA_API bool PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt,void *pSrc);
+	SCADA_API bool PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName, void *pExt);
 
 	// APP定时1秒更新心跳信号
 	SCADA_API void SetAppHeatBeat(int32u nOccNo );

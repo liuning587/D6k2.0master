@@ -422,7 +422,7 @@ void CBreakerModule::InitConnectData()
 	}
 
 	//±£´æÍøÂçÊý¾Ý
-	m_pSoeHistory->SetFtpIp(strIp);
+	m_pSoeHistory->SetFtpIp(pDataConfigWgt->GetIpAddress());
 	m_pSoeHistory->SetFtpUserName(strFtpUserName);
 	m_pSoeHistory->SetFtpPasswd(strFtpPassWd);
 	m_pSoeHistory->SetFtpDir(strFtpDir);

@@ -69,14 +69,14 @@ public:
 	void Run();
 	void Shutdown();
 public: 
-	bool GetOccNoByTagName(const char*pszTagName, int32u &nIddType, int32u &nOccNo, int32u &nFiledID);
+	bool GetOccNoByTagName(const char*pszTagName, int32u &nIddType, int32u &nOccNo, int32u &nFiledID)const;
 
 	// ªÒ»°occno
 	int32u GetOccNoByTagName(const char * szTagName, int32u &nDataType)const;
 	bool   GetTagNameByOccNo(int32u nDataType,int32u nOccNo, std::string& szTagName)const;
 	//mem size
 	size_t GetEstimateSize();
-	int32u GetCurrentNodeOccNo()
+	int32u GetCurrentNodeOccNo()const
 	{
 		return m_nCurrentNodeOccNo;
 	}

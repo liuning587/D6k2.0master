@@ -32,6 +32,8 @@ class CScadaDB : public CMemDB
 {
 public:
 	CScadaDB( );
+	explicit CScadaDB(CScadaApi *pScada);
+
 	virtual ~CScadaDB(void);
 public:
 	virtual bool Initialize(const char *pszDataPath, unsigned int nMode);

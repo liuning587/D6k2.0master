@@ -7,6 +7,8 @@
 CFixOperateWgt::CFixOperateWgt(QWidget *parent)
 	: QDialog(parent)
 {
+	setWindowFlags(Qt::WindowCloseButtonHint);
+
 	InitSetWgt();
 }
 

@@ -23,9 +23,8 @@
 CAnalogZoneWgt::CAnalogZoneWgt(QWidget *parent /*= 0*/)
 {
     Q_UNUSED(parent);
+	setWindowFlags(Qt::WindowCloseButtonHint);
     InitWgt();
-
-	
 }
 
 void CAnalogZoneWgt::InitWgt()

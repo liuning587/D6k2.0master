@@ -47,6 +47,8 @@ CChoosePointsWgt::CChoosePointsWgt(CPointInfo *pPointInfo, QWidget *parent)
 	: QWidget(parent),
 	m_pDescTableWgt(new CDragTableWgt(this)),
 	m_pSourceTableWgt(new CDragTableWgt(this)),
+	m_pDoubleDescTableWgt(new CDragTableWgt(this)),
+	m_pDoubleSourceTableWgt(new CDragTableWgt(this)),
 	m_pAnalogDescTableWgt(new CAnalogDragTableWgt(this)),
 	m_pAnalogSourceTableWgt(new CAnalogDragTableWgt(this)),
 	m_pKwhDescTableWgt(new CDragTableWgt(this)),
@@ -64,6 +66,10 @@ CChoosePointsWgt::CChoosePointsWgt(CPointInfo *pPointInfo, QWidget *parent)
 	m_pDescTableWgt->SetDescTableWgt();
 	m_pSourceTableWgt->SetSourceTableWgt();
 
+	//双点
+	m_pDoubleDescTableWgt->SetDescTableWgt();
+	m_pDoubleSourceTableWgt->SetSourceTableWgt();
+
 	m_pAnalogDescTableWgt->SetDescTableWgt();
 	m_pAnalogSourceTableWgt->SetSourceTableWgt();
 
@@ -79,12 +85,17 @@ CChoosePointsWgt::CChoosePointsWgt(CPointInfo *pPointInfo, QWidget *parent)
 
 	//更新数据  信号  槽
 	connect(m_pDescTableWgt, SIGNAL(Signal_UpdateTableInfo()), this, SLOT(Slot_UpdateBinaryPointData()));
+	connect(m_pDoubleDescTableWgt, SIGNAL(Signal_UpdateTableInfo()), this, SLOT(Slot_UpdateDoubleBinaryPointData()));
+
 	connect(m_pAnalogDescTableWgt, SIGNAL(Signal_UpdateTableInfo()), this, SLOT(Slot_UpdateAnalogPointData()));
 	connect(m_pKwhDescTableWgt, SIGNAL(Signal_UpdateTableInfo()), this, SLOT(Slot_UpdateKwhPointData()));
 	connect(m_pControlDescTableWgt, SIGNAL(Signal_UpdateTableInfo()), this, SLOT(Slot_UpdateControlPointData()));
 
 	//更新选中状态
 	connect(m_pDescTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pSourceTableWgt, SLOT(Slot_SetSelectedState(QList<unsigned int>)));
+
+	connect(m_pDoubleDescTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pDoubleSourceTableWgt, SLOT(Slot_SetSelectedState(QList<unsigned int>)));
+
 	connect(m_pAnalogDescTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pAnalogSourceTableWgt, SLOT(Slot_SetSelectedState(QList<unsigned int>)));
 	connect(m_pKwhDescTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pKwhSourceTableWgt, SLOT(Slot_SetSelectedState(QList<unsigned int>)));
 	connect(m_pControlDescTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pControlSourceTableWgt, SLOT(Slot_SetSelectedState(QList<unsigned int>)));
@@ -93,6 +104,9 @@ CChoosePointsWgt::CChoosePointsWgt(CPointInfo *pPointInfo, QWidget *parent)
 
 	//复原状态
 	connect(m_pSourceTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pDescTableWgt, SLOT(Slot_setRecoverState(QList<unsigned int>)));
+
+	connect(m_pDoubleSourceTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pDoubleDescTableWgt, SLOT(Slot_setRecoverState(QList<unsigned int>)));
+
 	connect(m_pAnalogSourceTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pAnalogDescTableWgt, SLOT(Slot_setRecoverState(QList<unsigned int>)));
 	connect(m_pKwhSourceTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pKwhDescTableWgt, SLOT(Slot_setRecoverState(QList<unsigned int>)));
 	connect(m_pControlSourceTableWgt, SIGNAL(Signal_ExistListID(QList<unsigned int>)), m_pControlDescTableWgt, SLOT(Slot_setRecoverState(QList<unsigned int>)));
@@ -123,6 +137,12 @@ void CChoosePointsWgt::SetWgtLayout()
 
 	pBinayLayout->addWidget(m_pDescTableWgt);
 	pBinayLayout->addWidget(m_pSourceTableWgt);
+	//创建双点遥信
+	QWidget *pDoubleBinaryWgt = new QWidget(this);
+	QHBoxLayout *pDoubleBinayLayout = new QHBoxLayout(pDoubleBinaryWgt);
+
+	pDoubleBinayLayout->addWidget(m_pDoubleDescTableWgt);
+	pDoubleBinayLayout->addWidget(m_pDoubleSourceTableWgt);
 
 	//创建遥测widget
 	QWidget *pAnalogWgt = new QWidget(this);
@@ -154,6 +174,7 @@ void CChoosePointsWgt::SetWgtLayout()
 
 
 	m_pTabWgt->addTab(pBinaryWgt, tr("Binary Point"));
+	m_pTabWgt->addTab(pDoubleBinaryWgt, QStringLiteral("双点遥信"));
 	m_pTabWgt->addTab(pAnalogWgt, tr("Analog Point"));
 	m_pTabWgt->addTab(pKwhWgt, tr("Kwh Point"));
 	m_pTabWgt->addTab(pControlWgt, tr("Control Point"));
@@ -175,6 +196,10 @@ void CChoosePointsWgt::InitWgt(CRemotePonitTableAnalyse *pPointAnalyse)
 	//清空数据
 	m_pDescTableWgt->ClearAllData();
 	m_pSourceTableWgt->ClearAllData();
+
+	m_pDoubleDescTableWgt->ClearAllData();
+	m_pDoubleSourceTableWgt->ClearAllData();
+
 	m_pAnalogDescTableWgt->ClearAllData();
 	m_pAnalogSourceTableWgt->ClearAllData();
 	m_pKwhDescTableWgt->ClearAllData();
@@ -223,6 +248,18 @@ void CChoosePointsWgt::Slot_UpdateBinaryPointData()
 	}
 
 	m_pPointInfo->SetBinaryMap(m_pDescTableWgt->GetCurrentTableData());
+}
+
+void CChoosePointsWgt::Slot_UpdateDoubleBinaryPointData()
+{
+	Q_ASSERT(m_pPointInfo);
+	if (m_pPointInfo == NULL)
+	{
+		return;
+	}
+
+	m_pPointInfo->SetDoubleBinaryMap(m_pDoubleDescTableWgt->GetCurrentTableData());
+
 }
 
 /*! \fn Slot_UpdateAnalogPointData()
@@ -309,6 +346,12 @@ bool CChoosePointsWgt::InsertDataToTable()
 	m_pDescTableWgt->clearContents();
 	m_pDescTableWgt->setRowCount(0);
 
+	m_pDoubleDescTableWgt->clearContents();
+	m_pDoubleDescTableWgt->setRowCount(0);
+
+	m_pDoubleSourceTableWgt->clearContents();
+	m_pDoubleSourceTableWgt->setRowCount(0);
+
 	m_pSourceTableWgt->clearContents();
 	m_pSourceTableWgt->setRowCount(0);
 
@@ -337,6 +380,11 @@ bool CChoosePointsWgt::InsertDataToTable()
 	m_pControlSourceTableWgt->setRowCount(0);
 
 	if (!GetBinaryPoints())
+	{
+		return false;
+	}
+
+	if (!GetDoubleBinaryPoints())
 	{
 		return false;
 	}
@@ -411,6 +459,36 @@ bool CChoosePointsWgt::GetBinaryPoints()
         m_pVirtualSourceTableWgt->setItem(i, 1, item5);
         m_pVirtualSourceTableWgt->setItem(i, 2, item6);
         m_pVirtualSourceTableWgt->setItem(i, 3, item7);
+	}
+
+	return true;
+}
+
+//双点遥信
+bool CChoosePointsWgt::GetDoubleBinaryPoints()
+{
+	QList<RPT> lstBinaryRpt = m_pPointTableAnalyse->GetBinaryData();
+
+	//填充数据  遥信
+	for (int i = 0; i < lstBinaryRpt.count(); i++)
+	{
+		QTableWidgetItem *item0 = new QTableWidgetItem;
+		item0->setText(QString::number(lstBinaryRpt.at(i).NUM2));
+
+		QTableWidgetItem *item1 = new QTableWidgetItem;
+		item1->setText(tr("Binary"));
+
+		QTableWidgetItem *item2 = new QTableWidgetItem;
+		item2->setText(lstBinaryRpt.at(i).Destriber);
+
+		QTableWidgetItem *item3 = new QTableWidgetItem;
+
+		m_pDoubleSourceTableWgt->insertRow(i);
+		m_pDoubleSourceTableWgt->setItem(i, 0, item0);
+		m_pDoubleSourceTableWgt->setItem(i, 1, item1);
+		m_pDoubleSourceTableWgt->setItem(i, 2, item2);
+		m_pDoubleSourceTableWgt->setItem(i, 3, item3);
+
 	}
 
 	return true;
@@ -578,6 +656,9 @@ void CChoosePointsWgt::Slot_UpdateAllChoosePoints(const QString &strFilename)
     m_pDescTableWgt->clearContents();
     m_pDescTableWgt->setRowCount(0);
 
+	m_pDoubleDescTableWgt->clearContents();
+	m_pDoubleDescTableWgt->setRowCount(0);
+
     m_pAnalogDescTableWgt->clearContents();
     m_pAnalogDescTableWgt->setRowCount(0);
 
@@ -614,6 +695,16 @@ void CChoosePointsWgt::Slot_UpdateAllChoosePoints(const QString &strFilename)
 		if (m_pPointTableAnalyse->GetBinaryIdGroup().contains(m_pCurrentPoints->GetBinarylst()[i]))
 		{
 			UpdateToDesTables(m_pPointTableAnalyse->GetBinaryIdGroup()[m_pCurrentPoints->GetBinarylst()[i]], m_pDescTableWgt);
+		}
+	}
+
+	//双点遥信
+	for (int i = 0; i < m_pCurrentPoints->GetDoubleBinarylst().count(); i++)
+	{
+		//
+		if (m_pPointTableAnalyse->GetBinaryIdGroup().contains(m_pCurrentPoints->GetDoubleBinarylst()[i]))
+		{
+			UpdateToDesTables(m_pPointTableAnalyse->GetBinaryIdGroup()[m_pCurrentPoints->GetDoubleBinarylst()[i]], m_pDoubleDescTableWgt);
 		}
 	}
 
@@ -753,6 +844,8 @@ void CChoosePointsWgt::Slot_UpdateAllChoosePoints(const QString &strFilename)
 //     }
 
     Slot_UpdateBinaryPointData();
+	//双点遥信
+	Slot_UpdateDoubleBinaryPointData();
     Slot_UpdateAnalogPointData();
     Slot_UpdateKwhPointData();
     Slot_UpdateControlPointData();
@@ -943,6 +1036,25 @@ void CChoosePointsWgt::SaveChooseBinFile(const QString &strFilename)
 		file.write(QByteArray(QString::number(i+1).toStdString().c_str()) + "," + 
 			QByteArray(QString::number(nDeviceNum).toStdString().c_str()) + QByteArray("\n"));
     }
+
+	//双点遥信
+	for (int i = 0; i < m_pDoubleDescTableWgt->rowCount(); i++)
+	{
+		if (i == 0)
+		{
+			file.write("引用表类型=DYX\n");
+			file.write("引用表数目=" + QByteArray(QString::number(m_pDoubleDescTableWgt->rowCount()).toStdString().c_str()) + "\n");
+		}
+
+
+		int nDeviceNum = m_pDoubleDescTableWgt->item(i, 1)->text().toInt();
+		// int nDeviceGroup = m_pPointTableAnalyse->GetBinaryIdGroup()[nDeviceNum].GroupNum;
+		//nDeviceNum = m_pPointTableAnalyse->GetBinaryIdGroup()[nDeviceNum].NUM;
+
+
+		file.write(QByteArray(QString::number(i + 1).toStdString().c_str()) + "," +
+			QByteArray(QString::number(nDeviceNum).toStdString().c_str()) + QByteArray("\n"));
+	}
 
     //遥测
     for (int i = 0; i < m_pAnalogDescTableWgt->rowCount(); i++)

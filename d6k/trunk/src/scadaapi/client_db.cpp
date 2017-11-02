@@ -37,16 +37,22 @@ bool SortLFunction(DataItem& data1, DataItem& data2);
 }*/
 
 
-CClientDB::CClientDB( )
+CClientDB::CClientDB()
 {
 	m_bStopFlag = false;
 	m_nEstimateSize = 0;
 	InitFuncArrary();
 }
 
+CClientDB::CClientDB(CScadaApi *pScada) :CScadaDB(pScada)
+{
+
+}
+
+
 CClientDB::~CClientDB(void)
 {
-	
+
 }
 
 bool CClientDB::Initialize(const char *pszDataPath, unsigned int nMode, int32u nOccNo)
@@ -158,33 +164,33 @@ bool CClientDB::GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VA
 	bool bRet = false;
 	switch (nIddType)
 	{
-	case IDD_SYSVAR:
-	{
-		Q_ASSERT(m_arrGetSysVarRTDataFuncs[nFiledID]);
-		if (m_arrGetSysVarRTDataFuncs[nFiledID])
+		case IDD_SYSVAR:
 		{
-			m_arrGetSysVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetSysVarRTDataFuncs[nFiledID]);
+			if (m_arrGetSysVarRTDataFuncs[nFiledID])
+			{
+				m_arrGetSysVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_USERVAR:
-	{
-		Q_ASSERT(m_arrGetUserVarRTDataFuncs[nFiledID]);
-		if (m_arrGetUserVarRTDataFuncs[nFiledID])
+		case IDD_USERVAR:
 		{
-			m_arrGetUserVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetUserVarRTDataFuncs[nFiledID]);
+			if (m_arrGetUserVarRTDataFuncs[nFiledID])
+			{
+				m_arrGetUserVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	default:
-		Q_ASSERT(false);
-		bRet = false;
-		break;
+		default:
+			Q_ASSERT(false);
+			bRet = false;
+			break;
 	}
 	return true;
 }
 
-bool CClientDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CClientDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char *pszAppTagName, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -204,30 +210,41 @@ bool CClientDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VA
 	}
 
 	bool bRet = false;
+
+	int32u nSrcAppOccNo = 0;
+	int32u nTempIddType = 0, nTempFiledID = 0;
+	bRet = GetOccNoByTagName(pszAppTagName, nTempIddType, nSrcAppOccNo, nTempFiledID);
+	Q_ASSERT(bRet);
+	if (bRet == false)
+	{// log
+
+	}
+	Q_ASSERT(nTempIddType == IDD_SAPP && nTempFiledID == 0);
+
 	switch (nIddType)
 	{
-	case IDD_SYSVAR:
-	{
-		Q_ASSERT(m_arrSysVarSetFunctions[nFiledID]);
-		if (m_arrSysVarSetFunctions[nFiledID])
+		case IDD_SYSVAR:
 		{
-			m_arrSysVarSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+			Q_ASSERT(m_arrSysVarSetFunctions[nFiledID]);
+			if (m_arrSysVarSetFunctions[nFiledID])
+			{
+				m_arrSysVarSetFunctions[nFiledID](nOccNo, pData, nSrcAppOccNo, pExt);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_USERVAR:
-	{
-		Q_ASSERT(m_arrUserVarSetFunctions[nFiledID]);
-		if (m_arrUserVarSetFunctions[nFiledID])
+		case IDD_USERVAR:
 		{
-			m_arrUserVarSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+			Q_ASSERT(m_arrUserVarSetFunctions[nFiledID]);
+			if (m_arrUserVarSetFunctions[nFiledID])
+			{
+				m_arrUserVarSetFunctions[nFiledID](nOccNo, pData, nSrcAppOccNo, pExt);
+			}
+			break;
 		}
-		break;
-	}
-	default:
-		Q_ASSERT(false);
-		bRet = false;
-		break;
+		default:
+			Q_ASSERT(false);
+			bRet = false;
+			break;
 	}
 	return true;
 }
@@ -337,7 +354,7 @@ size_t CClientDB::CreateDinLimitAlarm(unsigned char* pAddr)
 		}
 		m_arrDinAlarmLimits.push_back(&m_pDinAlarmLimit[i]);
 	}
-	return m_nDinAlarmLimitCount* sizeof DIN_ALARM_LIMIT;
+	return m_nDinAlarmLimitCount * sizeof DIN_ALARM_LIMIT;
 }
 
 size_t CClientDB::CreateTransFormLinear(unsigned char* pAddr)
@@ -364,7 +381,7 @@ size_t CClientDB::CreateTransFormLinear(unsigned char* pAddr)
 		}
 		m_arrLinears.push_back(&m_pLinear[i]);
 	}
-	return m_nLinearCount* sizeof TRANSFORM_LINEAR;
+	return m_nLinearCount * sizeof TRANSFORM_LINEAR;
 }
 
 size_t CClientDB::CreateTransFormNonLinear(unsigned char* pAddr)
@@ -391,7 +408,7 @@ size_t CClientDB::CreateTransFormNonLinear(unsigned char* pAddr)
 		}
 		m_arrNonLinears.push_back(&m_pNonLinear[i]);
 	}
-	return m_nNonLinearCount* sizeof TRANSFORM_NONLINEAR;
+	return m_nNonLinearCount * sizeof TRANSFORM_NONLINEAR;
 }
 
 size_t CClientDB::CreateSystemVariable(unsigned char* pAddr)
@@ -418,7 +435,7 @@ size_t CClientDB::CreateSystemVariable(unsigned char* pAddr)
 		}
 		m_arrSystemVariables.push_back(&m_pSystemVariable[i]);
 	}
-	return m_nSystemVariableCount* sizeof VARDATA;
+	return m_nSystemVariableCount * sizeof VARDATA;
 }
 
 size_t CClientDB::CreateUserVariable(unsigned char* pAddr)
@@ -445,7 +462,7 @@ size_t CClientDB::CreateUserVariable(unsigned char* pAddr)
 		}
 		m_arrUserVariables.push_back(&m_pUserVariable[i]);
 	}
-	return m_nUserVariableCount* sizeof VARDATA;
+	return m_nUserVariableCount * sizeof VARDATA;
 }
 
 void CClientDB::InitFuncArrary()
@@ -1023,7 +1040,7 @@ bool CClientDB::GetSysVarMinRange(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CClientDB::SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CClientDB::SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, int32u nAppOccNo, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -1042,7 +1059,7 @@ bool CClientDB::SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, vo
 	return true;
 }
 
-bool CClientDB::SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CClientDB::SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, int32u nAppOccNo, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)

@@ -43,6 +43,8 @@ public:
 	bool InsertDataToTable();
 	//获取遥信点表信息
 	bool GetBinaryPoints();
+	//获取双点遥信点表信息
+	bool GetDoubleBinaryPoints();
 	//获取遥测点表信息
 	bool GetAnalogPoints();
 	//获取遥脉点表信息
@@ -62,6 +64,8 @@ public:
 public slots:
     //更新遥信测点
     void Slot_UpdateBinaryPointData();
+	//更新双点遥信
+	void Slot_UpdateDoubleBinaryPointData();
 	//更新遥测测点
 	void Slot_UpdateAnalogPointData();
 	//更新遥脉测点信息
@@ -76,6 +80,11 @@ private:
 	CDragTableWgt *m_pDescTableWgt;
 	//source 遥信
 	CDragTableWgt *m_pSourceTableWgt;
+	//desc 双点遥信
+	CDragTableWgt *m_pDoubleDescTableWgt;
+	//source 遥信
+	CDragTableWgt *m_pDoubleSourceTableWgt;
+
 	// desc 遥测
 	CAnalogDragTableWgt *m_pAnalogDescTableWgt;
 	//source  遥测

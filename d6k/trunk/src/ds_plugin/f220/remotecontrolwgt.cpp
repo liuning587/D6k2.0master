@@ -195,7 +195,8 @@ void CRemoteControlWgt::InsertDataFromFeedBack(int iControlType, int iPointNum, 
         }
 		else if (messReturn == QMessageBox::No)
 		{
-			m_pCommThread->SendRemoteControl(ui.comboControlType->currentIndex(), ui.lineEditPonitNum->text().toInt() + m_pConfgWgt->GetControlStart(), ui.comboOpType->currentIndex(), 3);
+			//点击NO时不做处理
+			//m_pCommThread->SendRemoteControl(ui.comboControlType->currentIndex(), ui.lineEditPonitNum->text().toInt() + m_pConfgWgt->GetControlStart(), ui.comboOpType->currentIndex(), 3);
 
 		}
 	}
@@ -230,7 +231,7 @@ void CRemoteControlWgt::InsertDataFromFeedBack(int iControlType, int iPointNum, 
 	{
         m_pTimeOut->stop();
 
-        QString strErrorInfo = tr("operator error,errorCode:%1").arg(strStatus);
+        QString strErrorInfo = tr("操作失败,错误码:%1").arg(strStatus);
 
         if (strStatus == "10")
         {

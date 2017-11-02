@@ -31,6 +31,9 @@ class CFaultEventWgt;
 class CWebDeviceWgt;
 class CFileTransWgt;
 class CDevIecConfigWgt;
+class CFtuModule;
+
+CFtuModule *GetFtuModel();
 
 class F220SHARED_EXPORT CFtuModule : public IPluginModule
 {
@@ -111,6 +114,10 @@ public slots:
 	void Slot_DisConnect();
 	//升级
 	void Slot_UpdateProcess();
+	//隐藏
+	void Slot_HiddenLog();
+	//显示
+	void SLot_ShowLog();
 private:
 	//模块加载工具
 	IMainModule *m_pMainModule;

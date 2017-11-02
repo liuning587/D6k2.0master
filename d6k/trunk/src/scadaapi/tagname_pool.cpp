@@ -353,7 +353,7 @@ void CTagNamePool::Shutdown()
 }
 
 
-bool CTagNamePool::GetOccNoByTagName(const char*pszTagName, int32u &nIddType, int32u &nOccNo, int32u &nFiledID)
+bool CTagNamePool::GetOccNoByTagName(const char*pszTagName, int32u &nIddType, int32u &nOccNo, int32u &nFiledID)const
 {
 	Q_ASSERT(pszTagName && strlen(pszTagName)>0);
 	if (!pszTagName || strlen(pszTagName)==0)

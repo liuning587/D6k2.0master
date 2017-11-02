@@ -338,7 +338,7 @@ enum TAG_ATTR
 	ATTR_RESETRELAY,      // 保护复归                                             (MODULE)
 	ATTR_TEST,            // 数据测试                                             (AI/DI)后台使用
 	ATTR_TESTCANCEL,      // 取消数据测试                                         (AI/DI)后台使用
-	ATTR_MAX
+	ATTR_MAX = ATT_MAX
 };
  
 /*! \enum TAG_ATTW  fescnst.h  "fescnst.h"
@@ -367,7 +367,7 @@ enum TAG_ATTW
 	ATTW_RESETRELAY,      // 保护复归                                             (MODULE)
 	ATTW_TEST,            // 数据测试                                             (AI/DI)后台使用
 	ATTW_TESTCANCEL,      // 取消数据测试                                         (AI/DI)后台使用
-	ATTW_MAX
+	ATTW_MAX = ATT_MAX
 };
 
 #endif // FES_DATA_CONST_H

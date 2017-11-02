@@ -45,7 +45,7 @@ using AIN_ALARM_DEF = std::shared_ptr<AIN_ALARM>;
 using DIN_ALARM_DEF = std::shared_ptr<DIN_ALARM>;
 using AIN_ALARM_LIMIT_DEF = std::shared_ptr<AIN_ALARM_LIMIT>;
 using DIN_ALARM_LIMIT_DEF = std::shared_ptr<DIN_ALARM_LIMIT>;
-
+struct SyncDataInfo;
 
 class CDbSvc : public CBaseModule
 {
@@ -102,6 +102,8 @@ public:
 	bool UpdateDinValue(int32u nNodeOccNo, int32u nOccNo, int8u  nVal);
 	bool UpdateUserVarValue(int32u nNodeOccNo, int32u nAinOccNo, fp64  nVal);
 	bool UpdateSysVarValue(int32u nNodeOccNo, int32u nAinOccNo, fp64  nVal);
+	bool UpdateChannelInfo(int32u nNodeOccNo, int32u nChannelOccNo, SyncDataInfo  nVal);
+	bool UpdateDeviceInfo(int32u nNodeOccNo, int32u nDeviceOccNo, SyncDataInfo  nVal);
 protected:
 	//加载整个工程文件
 	bool LoadProject(const char *pszFilePath);
@@ -129,6 +131,9 @@ protected:
 	size_t BuildAppNodeDB(char* pAddr,int32u nOccNo,std::vector<std::shared_ptr<SAPP>>& arrAppNodes);
 
 	size_t BuildTagNameDB(char* pAddress, std::vector<TAG_OCCNO_DEF>& vec);
+
+	virtual void MainLoop();
+
 private:
 	//节点内存开辟模块
 	std::shared_ptr<CShareMem> m_pMem;

@@ -27,6 +27,7 @@ bool CFesApi::Initialize(const char *pszDataPath, int32u nChannelOccNO, unsigned
 	// 如果初始化过，则不再初始化
 	if (m_nRefCount > 0)
 	{
+		Q_ASSERT(false);// 会在这里断吗？？？
 		m_nRefCount++;
 		return true;
 	}
@@ -50,6 +51,8 @@ bool CFesApi::Initialize(const char *pszDataPath, int32u nChannelOccNO, unsigned
 		m_pStringPool->Initialize(pszDataPath, nMode);
 	}
 
+	m_pMemDB->InitKernelMailBox();
+
 	if (nChannelOccNO!=INVALID_OCCNO)
 	{
 		//打开内存之后 打开驱动邮箱
@@ -58,6 +61,7 @@ bool CFesApi::Initialize(const char *pszDataPath, int32u nChannelOccNO, unsigned
 			return false;
 		}
 	}	
+
 	return true;
 }
 

@@ -99,7 +99,7 @@ void CAnalysePointBin::InitData(const QString &strFileName)
 						m_lstAnalog.append(strData.split(",")[1].toInt());
 					}
 				}
-				else if (strLineInfo.contains("YX"))
+				else if (strLineInfo.contains("YX") && !strLineInfo.contains("DYX"))
 				{
 					QByteArray tNumbers = filePointBin.readLine();
 					QString strNums = QString::fromLocal8Bit(tNumbers);
@@ -114,6 +114,24 @@ void CAnalysePointBin::InitData(const QString &strFileName)
 						strData.remove(" ");
 
 						m_lstBinary.append(strData.split(",")[1].toInt());
+					}
+				}
+				else if (strLineInfo.contains("DYX"))
+				{
+					//双点遥信
+					QByteArray tNumbers = filePointBin.readLine();
+					QString strNums = QString::fromLocal8Bit(tNumbers);
+					strNums.remove(" ");
+					strNums.remove(QStringLiteral("引用表数目="));
+					int nNumber = strNums.toInt();
+
+					for (int i = 0; i < nNumber; i++)
+					{
+						QByteArray btData = filePointBin.readLine();
+						QString strData = QString::fromLocal8Bit(btData);
+						strData.remove(" ");
+
+						m_lstDoubleBinary.append(strData.split(",")[1].toInt());
 					}
 				}
 				else if (strLineInfo.contains("YM"))

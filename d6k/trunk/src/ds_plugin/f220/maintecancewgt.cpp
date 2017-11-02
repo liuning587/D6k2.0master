@@ -921,7 +921,7 @@ void CMaintecanceWgt::Slot_UpLoadPontFile()
 
 										   //tWriteAction.m_nFileID = 0;       //文件ID  暂时置为0
 
-	tReadAction.m_strFileName = "/tffs0//iec104sList.ini";    //文件名称
+	tReadAction.m_strFileName = "/tffs0//prot_list.ini";    //文件名称
 
 	tReadAction.m_nOperatorType = 9;    //只召唤目录
 
@@ -1019,7 +1019,7 @@ void CMaintecanceWgt::Slot_CheckDeviceTable()
 
 	//tWriteAction.m_nFileID = 0;       //文件ID  暂时置为0
 
-	tReadAction.m_strFileName = "/tffs0//iec104sList.ini";    //文件名称
+	tReadAction.m_strFileName = "/tffs0//prot_list.ini";    //文件名称
 
 	tReadAction.m_nOperatorType = 1;
 
@@ -1550,6 +1550,7 @@ void CMaintecanceWgt::Slot_UploadVirutalBinary()
 CTimeChooseWgt::CTimeChooseWgt(QWidget *parent /*= 0*/)
 {
     Q_UNUSED(parent);
+	setWindowFlags(Qt::WindowCloseButtonHint);
     m_pCalenderItem = new QCalendarWidget(this);
     m_pCTimeEdit = new QTimeEdit(this);
 

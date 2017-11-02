@@ -18,6 +18,8 @@ CInfoConfigWgt::CInfoConfigWgt(QWidget *parent)
 	: QDialog(parent)
 {
 	setWindowTitle(tr("Program Config"));
+	setWindowFlags(Qt::WindowCloseButtonHint);
+
     m_pLineProjectName = new QLineEdit(this);
 	m_pLinEdIP = new QLineEdit(this);
 	m_pLinePort = new QLineEdit(this);
@@ -64,6 +66,8 @@ CInfoConfigWgt::CInfoConfigWgt(QWidget *parent)
     //Slot_UpdateFtpConfig(m_pComBoxDebiceType->currentText());
     //
     connect(m_pLstProject, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(Slot_ClickListItem(QListWidgetItem *)));
+	//
+	connect(m_pLstProject, SIGNAL(itemDoubleClicked(QListWidgetItem *)),this,SLOT(Slot_lstDoubleClick(QListWidgetItem *)));
 }
 
 void  CInfoConfigWgt::InitWgt()
@@ -429,6 +433,12 @@ void CInfoConfigWgt::Slot_ClickListItem(QListWidgetItem *pItem)
     strRunPath = strRunPath + PROJECTPATH + pItem->text();
     m_pLineProjectName->setText(pItem->text().split(".").at(0));
     OpenXmlFile(strRunPath);
+}
+
+void CInfoConfigWgt::Slot_lstDoubleClick(QListWidgetItem *pItem)
+{
+	Slot_ClickListItem(pItem);
+	Slot_Comform();
 }
 
 bool CInfoConfigWgt::OpenXmlFile(const QString &fileName)

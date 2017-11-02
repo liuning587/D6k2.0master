@@ -162,6 +162,15 @@ void CSimuChannel::PollingData()
 ********************************************************************************************************/
 int  CSimuChannel::RecvMsgDoNull()
 {
+	SETVAL_MSG  sv_msg;
+	std::memset(&sv_msg, 0, sizeof(SETVAL_MSG));
+
+	while (true)
+	{
+		bool bRet = ReadHostCmd(GetOccNo(), &sv_msg, 0);
+		if (bRet == false)
+			break;
+	}
 	return 0;
 }
 
@@ -183,6 +192,15 @@ void CSimuChannel::MainTask(void *pChannel)
 	std::chrono::milliseconds dura(10);
 
 	bool bRet = IsFesAlive();
+
+	int32u nHostState = STATE_UNKOWN;
+	
+	nHostState = GetMyHostState();
+	if (nHostState != STATE_MAIN)
+	{
+		// 把下行的遥控设值报文全部清掉
+		RecvMsgDoNull();
+	}
 	
 	while (true)
 	{
@@ -191,14 +209,24 @@ void CSimuChannel::MainTask(void *pChannel)
 			LogMsg(QObject::tr("Fes is dead,so i have to exit!").toStdString().c_str(),1);
 			break;
 		}
-		PollingData();
+
+		if (m_bStopFlag == true)
+		{
+			break;
+		}
+
+		nHostState = GetMyHostState();
+		if (nHostState == STATE_MAIN)
+		{
+			PollingData();
+		}		
 	}
 }
 
 
 void CSimuChannel::SetTaskStopFlag()
 {
-	std::unique_lock<std::mutex> lk(m_mutThread);
+	std::unique_lock<std::mutex> lk(m_mtxThread);
 	m_bStopFlag = true;
 	m_cvThread.notify_one();
 }

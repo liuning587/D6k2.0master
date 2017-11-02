@@ -26,6 +26,11 @@ public:
 		return m_lstBinary;
 	}
 
+	const QList<int> GetDoubleBinarylst()
+	{
+		return m_lstDoubleBinary;
+	}
+
 	const QList<int> GetKwhlst()
 	{
 		return m_lstKwh;
@@ -43,6 +48,8 @@ private:
 	QList<int> m_lstAnalog;
 	//遥信
 	QList<int> m_lstBinary;
+	//双点遥信
+	QList<int> m_lstDoubleBinary;
 	//遥控
 	QList<int> m_lstControl;
 	//遥脉

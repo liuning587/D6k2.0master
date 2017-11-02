@@ -2,20 +2,34 @@
 #include "commthread.h"
 #include "pointinfo.h"
 #include "infoconfigwgt.h"
+#include <QMessageBox>
 
 CFaultEventWgt::CFaultEventWgt(CCommThread *pCommunicate, CPointInfo *pPointInfo, CInfoConfigWgt *pConfgWgt, QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
 
-    Q_UNUSED(pPointInfo);
-    Q_UNUSED(pConfgWgt);
-
     Q_ASSERT(pCommunicate);
     if (pCommunicate == nullptr)
     {
         return;
     }
+
+	Q_ASSERT(pPointInfo);
+	if (pPointInfo == nullptr)
+	{
+		return;
+	}
+	m_pPointInfo = pPointInfo;
+
+
+	m_pConfgWgt = pConfgWgt;
+
+	Q_ASSERT(m_pConfgWgt);
+	if (m_pConfgWgt == nullptr)
+	{
+		return;
+	}
 
     m_pCommunicate = pCommunicate;
 
@@ -29,10 +43,13 @@ CFaultEventWgt::CFaultEventWgt(CCommThread *pCommunicate, CPointInfo *pPointInfo
     ui.tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui.tableWidget->horizontalHeader()->setSelectionBehavior(QAbstractItemView::SelectRows);
 //     ui.tableWidget->setColumnHidden(6, true);
-    ui.treeWidget->setHidden(true);
+   // ui.treeWidget->setHidden(true);
     
 
     connect(m_pCommunicate, SIGNAL(Signal_MalFuction(ASDUGZ)), this, SLOT(Slot_MalFuction(ASDUGZ)));
+
+	ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableWidget, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(Slot_ContextMenuRequest(const QPoint &)));
 
 //     QMap<int, int> ttt;
 //     ttt.insert(3344,311);
@@ -50,6 +67,7 @@ CFaultEventWgt::~CFaultEventWgt()
 
 void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
 {
+
     //往表格里插入数据
     int nRow = ui.tableWidget->rowCount();
 
@@ -68,7 +86,11 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
     ui.tableWidget->setItem(nRow, 2, item2);
 
     QTableWidgetItem *item3 = new QTableWidgetItem;
-    item3->setText(QString::number(gzData.m_BinaryAddr.GetAddr()));
+
+	QMap<unsigned int, RPT> mapPoint = m_pPointInfo->GetBinaryMap();
+
+	int nPointID = gzData.m_BinaryAddr.GetAddr();
+	
     ui.tableWidget->setItem(nRow, 3, item3);
 
     QTableWidgetItem *item4 = new QTableWidgetItem;
@@ -85,6 +107,10 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
 		}
 
 		item2->setText(tr("Single"));
+
+		nPointID = nPointID - m_pConfgWgt->GetBinaryStartAddr();
+		item3->setText(mapPoint[nPointID].Destriber);
+
 	}
 	else
 	{
@@ -98,7 +124,11 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
 			item4->setText(tr("ON"));
 		}
 
+		nPointID = nPointID - m_pConfgWgt->GetDoubleBinaryStartAddr();
+		item3->setText(mapPoint[nPointID].Destriber);
+
 	}
+
     //item4->setText(QString::number(gzData.m_BinaryValue));
     ui.tableWidget->setItem(nRow, 4, item4);
 
@@ -116,7 +146,7 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
 
 	QString strData;
 	QStringList lstTitle;
-	lstTitle << "UAB" << "UBC" << "UCA" << "U0" << "IA" << "IB" << "IC" << "I0";
+	lstTitle << "IA" << "IB" <<  "IC" << "IO" << "UAB" << "UBC" << "UO" << "RSV" ;
 
 	int nDNum = lstTitle.count() > 8 ? 8 : lstTitle.count();
 
@@ -160,4 +190,23 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
     ui.tableWidget->setItem(nRow, 8, item8);
 
     ui.tableWidget->scrollToBottom();
+}
+
+#include <QMenu>
+void CFaultEventWgt::Slot_ContextMenuRequest(const QPoint &point)
+{
+	Q_UNUSED(point);
+	QMenu *pMenu = new QMenu(ui.tableWidget);
+	QAction *pClearAct = new QAction(tr("Clear All"), ui.tableWidget);
+	pMenu->addAction(pClearAct);
+	connect(pClearAct, SIGNAL(triggered()), this, SLOT(Slot_clearAction()));
+	pMenu->exec(QCursor::pos());
+	pMenu->deleteLater();
+	pClearAct->deleteLater();
+}
+
+void CFaultEventWgt::Slot_clearAction()
+{
+	ui.tableWidget->clearContents();
+	ui.tableWidget->setRowCount(0);
 }

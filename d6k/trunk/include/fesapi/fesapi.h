@@ -19,8 +19,8 @@ class IO_CLOCK;
 extern "C"
 {
 	//IO库
-	FESAPI bool CreateIO();
-	FESAPI bool DestroyIO();
+//	FESAPI bool CreateIO();
+//	FESAPI bool DestroyIO();
 
 	// 供驱动程序调用
 	FESAPI bool OpenIO(const char *pszDataPath, int32u nChannelOccNo,unsigned int nMode);
@@ -110,6 +110,8 @@ extern "C"
 	// 心跳
 	FESAPI void IoSetDeviceHeartBeat(int32u nOccNo);
 	FESAPI void IoSetChannelHeartBeat(int32u nOccNo);
+	FESAPI void FtSetChannelHeartBeat(int32u nOccNo);
+
 
 	// 设置装置的品质，如果为坏，则该装置下所有测点品质为坏，如果为好，则...
 	FESAPI bool IoSetDeviceQua(int32u nDeviceOccNo, int8u nQuality);
@@ -141,9 +143,11 @@ extern "C"
 	FESAPI void IoAlarmMsg(int32u nChannleNo, int32u nAlarmType, const char* pszAlarmTxt, TIMEPAK * pTm);
 
 	//用户消息接口 用于遥控、调节、保护定值类以及内部调试等的消息传递，在驱动程序中定时调用，检查是否有控制命令等下发
-	FESAPI bool ReadHostCmd(INT32U nChannleNo, SETVAL_MSG *pCmd, INT32U nTimeout);
+	FESAPI bool ReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout);
 	//用于遥控反校等信息上送，由驱动调用
-	FESAPI bool SendIOCmd(INT32U nOccNo, IO_VARIANT *pVal, INT32U nTimeout);
+	FESAPI bool SendIOCmd(int32u nOccNo, IO_VARIANT *pVal, int32u nTimeout);
+	// 读取前置消息的通用接口，支持IO_DRIVER  FT_DRIVER
+	FESAPI bool ReadFesMsg(int32u nOccNo, int32u nIddType, BASE_MSG *pMsg, int32u nTimeOut);
 
 	// 获取用户变量的测值
 	FESAPI bool AppGetUserVarValue(int32u nOccNo, IO_VARIANT *pVariant, int8u * pQua);
@@ -169,7 +173,7 @@ extern "C"
 	FESAPI bool AppSetAinValue(int32u nOccNo, fp64 fValue, int8u nQuality);
 
 	// 设开出
-	FESAPI bool AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource);
+	FESAPI bool AppSetDoutValue(int32u nOccNo, int8u Value, const char * pszSrcAppTagName);
 	// 设值-给远程节点的开出设值
 	FESAPI bool AppSetDoutValueEx(int32u nDestNode, int32u nOccNo, int8u Value, void *pExtra);
 	// 写值
@@ -179,7 +183,16 @@ extern "C"
 	// 通用接口
 	// 获取基础对象的属性值
 	FESAPI bool GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pRetData);
-	FESAPI bool PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData,const char * szOperatorName,const char * szMonitorName, void *pExt, bool bOpLog);
+
+	struct OpLogData
+	{
+		bool  OpLog;  //! 是否记录 
+		const char * OperatorName;  //! 操作员
+		const char * MonitorName;   //! 监视员		
+	};
+	
+	FESAPI bool PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData, void *pExt,
+		const char * pszSrcAppTagName, struct OpLogData *pOpLog);
 
 
 }

@@ -33,6 +33,9 @@ class CFesDB : public CMemDB
 {
 public:
 	CFesDB( );
+
+	explicit CFesDB(CScadaApi * pScada);
+
 	virtual ~CFesDB(void);
 
 public:
@@ -54,7 +57,7 @@ public:
 
 	bool  GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT &RetData);
 	
-	bool  PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc);
+	bool  PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData,const char * pszAppTagName, void *pExt);
 protected:
 	size_t CreateChannel(unsigned char* pAddr);
 	size_t CreateDevice(unsigned char* pAddr);
@@ -224,8 +227,8 @@ private:
 	bool SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
 
 
-	bool SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
-	bool SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
+	bool SetDoutValue(int32u nOccNo, IO_VARIANT *pData, int32u nAppOccNo,  void *pExt);
+	bool SetAoutValue(int32u nOccNo, IO_VARIANT *pData, int32u nAppOccNo, void *pExt);
 
 private:
 
@@ -240,8 +243,8 @@ private:
 	std::array< std::function<bool(int32u, IO_VARIANT&)  >, ATT_MAX> m_arrGetUserVariablesFuncs;
 
 	//…Ë÷√ Ù–‘
-	std::array< std::function<bool(int32u,  IO_VARIANT*, void*, void* )   >, ATT_MAX> m_arrAoutSetFunctions;
-	std::array< std::function<bool(int32u,  IO_VARIANT*, void*, void* )   >, ATT_MAX> m_arrDoutSetFunctions;
+	std::array< std::function<bool(int32u, IO_VARIANT*, int32u, void*)   >, ATT_MAX> m_arrAoutSetFunctions;
+	std::array< std::function<bool(int32u,  IO_VARIANT*, int32u, void* )   >, ATT_MAX> m_arrDoutSetFunctions;
 }; 
 
 #endif // FESDB_MODULE_H

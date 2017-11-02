@@ -22,10 +22,22 @@ extern "C"
 
 	// 配置驱动参数
 	IODRV char * ConfigDriverParam(const char * szOldConfData);
-	// 默认的配置
-	IODRV const char * GetDefaultParam();
-	IODRV const char * GetDefaultExtParam();
+	// 默认的通道配置
+	IODRV const char * GetChannelDefaultParam();
+	IODRV const char * GetChannelDefaultExtParam();
  
+	// 指定通道的配置参数
+	IODRV const char * GetChannelParam(const char * pszTagName);
+	IODRV const char * GetChannelExtParam(const char * pszTagName);
+
+
+	IODRV const char * GetDeviceDefaultlParam(const char * pszAddr);
+	IODRV const char * GetDeviceDefaultExtParam(const char * pszAddr);
+
+	// 测试装置的通断，0 成功，非0，错误代码
+	IODRV int TestDevice(const char * pszAddr);
+
+
 }
 
 

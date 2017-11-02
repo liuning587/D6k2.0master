@@ -29,6 +29,10 @@
 #include "stl_util-inl.h"
 #include "rtnet_msg_packer.h"
 
+#include "message_executer.h"
+
+#include "red_task.h"
+
 #include <QObject> 
 #include <QString> 
 #include <QHostAddress>
@@ -89,11 +93,18 @@ bool CNetbusSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 			return false;
 		}
 		m_pNetConfig->MyNodeOccNo = nMyNodeOccNo;
+		// 判断本节点是否为双机冗余节点
+		NODE *pMyNode = pDBSvc->GetNodeByOccNo(nMyNodeOccNo);
+		Q_ASSERT(pMyNode);
+		if (pMyNode)
+		{
+			m_bIsRedNode = (pMyNode->SlaveOccNo != INVALID_OCCNO && pMyNode->SlaveOccNo <= MAX_NODE_OCCNO) ? true : false;
+		}		
 
 		std::tie(m_nNodeCount, m_pNodes) = pDBSvc->GetNodeData();
 		Q_ASSERT(m_nNodeCount > 0 && m_nNodeCount <= MAX_NODE_OCCNO);
 		Q_ASSERT(m_pNodes);
-		m_pNetConfig->NodeCount = m_nNodeCount;
+		m_pNetConfig->NodeCount = static_cast<int32u> (m_nNodeCount);
 	//	m_pNetConfig->IsDoubleNet = true;
 		if (m_nNodeCount > 0 && m_nNodeCount <= MAX_NODE_OCCNO && m_pNodes)
 		{
@@ -102,7 +113,7 @@ bool CNetbusSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 			std::memset(m_pNodeConfigs, 0, sizeof(NODE_CONFIG)*m_nNodeCount);
 
 			// 从共享内存中拷贝数据出来
-			unsigned int i = 0;
+			size_t i = 0;
 			for (i = 0; i < m_nNodeCount; i++)
 			{// TODO
 				m_pNodeConfigs[i].OccNo = m_pNodes[i].OccNo;
@@ -117,7 +128,6 @@ bool CNetbusSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 				memset(m_pNodeConfigs[i].chIP[1], 0, sizeof m_pNodeConfigs[i].chIP[1]);
 				strncpy(m_pNodeConfigs[i].chIP[1], QHostAddress(m_pNodes[i].NetBIPAddr).toString().toStdString().c_str(),
 					qMin(NAME_SIZE + 1, QHostAddress(m_pNodes[i].NetBIPAddr).toString().length()));
-
 			
 				m_pNodeConfigs[i].HostSlave = m_pNodes[i].State;
 
@@ -131,6 +141,19 @@ bool CNetbusSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 			}
 
 			m_pNetConfig->pNodeConfig = m_pNodeConfigs;
+
+			if (m_bIsRedNode)
+			{// 如果是主从冗余节点，则启动冗余任务
+				if (m_pRedTask != nullptr)
+				{
+					m_pRedTask.reset(new (CRedTask)(pDBSvc));
+				}
+				else
+				{
+					m_pRedTask = std::make_shared<CRedTask>(pDBSvc);
+				}
+			}
+
 			// 启动网络总线模块
 			return StartNetBus(m_pNetConfig.get(), pszDataPath, "FES", NODE_FES, nMode);
 		}
@@ -142,10 +165,26 @@ bool CNetbusSvc::Initialize(const char *pszDataPath, unsigned int nMode)
 void CNetbusSvc::Run()
 {
 	StartModule();
+
+	if (m_bIsRedNode)
+	{// 如果是主从冗余节点，则启动冗余任务
+		if (m_pRedTask != nullptr)
+		{
+			m_pRedTask->Start();
+		}
+	}
 }
 
 void CNetbusSvc::Shutdown()
 {
+	if (m_bIsRedNode)
+	{// 如果是主从冗余节点，则启动冗余任务
+		if (m_pRedTask != nullptr)
+		{
+			m_pRedTask->Stop();
+		}		 
+	}
+
 	StopNetBus("FES");
 	StopModule();
 }
@@ -160,13 +199,15 @@ void CNetbusSvc::Shutdown()
 ********************************************************************************************************/
 void  CNetbusSvc::MainLoop()
 {
-	RecvSvcInfo();
+	RecvNetData();
 //!<1>先检测邮件
 	TransEmails();
 //!<2>数据同步，策略待定，当前是全库同步
 	TransDataInfo();
 //!<3>定时更新节点状态
 	UpdateNetState();	
+//!<4> 处理主从同步
+	RedBackupSvc();
 }
 
 /*! \fn void CNetbusSvc::TransEmails()
@@ -185,9 +226,16 @@ void CNetbusSvc::TransEmails()
 
 	static unsigned int nCount = 0;
 
+	//! 建议先接收本地所有的邮件，然后统一打包一次发送，避免小数据包
+	//! 报文需要进一步压缩，目前报文中无效部分过多。
+
 	while (true)
 	{
 		bool bRet = false;
+
+		std::memset(&msg, 0, sizeof(DMSG));
+		msg.RecverID = m_nMailBoxID;
+
 		bRet = RecvMail("FES", &msg, 0);
 		//成功收到一封邮件,收到邮件立即转发到scada中
 		if (bRet)
@@ -209,12 +257,12 @@ void CNetbusSvc::TransEmails()
 			
 			m_pBuf->SrcOccNo=m_pNetConfig->MyNodeOccNo;
 
-			size_t nSize = EMSG_BUF_HEAD_SIZE + sizeof DMSG;
+			int32u nSize = EMSG_BUF_HEAD_SIZE + sizeof DMSG;
 			m_pBuf->MsgDataSize = nSize;
 
 			memcpy(m_pBuf->BuffData,&msg,sizeof DMSG);
 
-			size_t nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
+			int nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
 
 			if (!nRet)
 			{
@@ -237,53 +285,81 @@ void CNetbusSvc::TransEmails()
 		}
 	}
 }
-
-
-void CNetbusSvc::RecvSvcInfo()
+/*! \fn void CNetbusSvc::RecvNetData()
+********************************************************************************************************* 
+** \brief CNetbusSvc::RecvNetData 
+** \details 接收下行的报文
+** \return void 
+** \author xingzhibing 
+** \date 2017年3月22日 
+** \note 
+********************************************************************************************************/
+void CNetbusSvc::RecvNetData()
 {
-	int8u cMsg[MAX_EMSG_L + 1] = { 0 };
+	int8u EMsgBuff[MAX_EMSG_L *2] = { 0 };
 
 	int32u nCopySize = 0;
 
-	bool bRet = NBRecvData("FES", cMsg, MAX_EMSG_L, &nCopySize, 0);
+	bool bRet = NBRecvData("FES", EMsgBuff, MAX_EMSG_L, &nCopySize, 0);
 
 	if (bRet)
 	{
-		EMSG_BUF* msg = (EMSG_BUF*)cMsg;
-
-		if (msg)
+		EMSG_BUF* pEMsg = (EMSG_BUF*)EMsgBuff;
+		
+		if (pEMsg)
 		{
-			switch (msg->FuncCode)
+			switch (pEMsg->FuncCode)
 			{
-			case  COT_SETVAL:
-			{
-				DMSG * pMailMsg = (DMSG*)(msg->BuffData);
+				case  COT_SETVAL:
+				{// 设值信文-直接转发到DB_SVC
+					DMSG * pMailMsg = reinterpret_cast<DMSG*>(pEMsg->BuffData);
 
-				SETVAL_MSG * pMsg = (SETVAL_MSG*)(pMailMsg->Buff);
+					auto fn = [this] (DMSG*pLocal)->bool
+					{
+						Q_ASSERT(pLocal);
+						if (pLocal)
+						{
+							Q_ASSERT(GetFesSvc()->GetDBSvc()->GetMailBoxID() != 0);
 
-				switch (pMsg->IddType)
-				{
-				case IDD_AIN:
-					break;
-				case IDD_DIN:
-					break;
-				case IDD_AOUT:
-				{
-					GetFesSvc()->GetDBSvc()->FesSetAoutValue(pMsg->Occno,V_FLOAT(pMsg->Value[0]),0);
-					break;
-				}
-				case IDD_DOUT:		
-				{
-					GetFesSvc()->GetDBSvc()->FesSetAoutValue(pMsg->Occno, V_CHAR(pMsg->Value[0]), 0);
+							pLocal->RecverID = GetFesSvc()->GetDBSvc()->GetMailBoxID();
+							bool bRet = SendMail("FES", pLocal, 0);
+							return bRet;
+						}
+						return false;
+					};
+
+					CMessageExecutor MsgExer(pMailMsg);
+					bRet = MsgExer.Run(fn);
+
+
+#if 0
+					SETVAL_MSG * pMsg = (SETVAL_MSG*)(pMailMsg->Buff);
+
+					switch (pMsg->IddType)
+					{
+						case IDD_AIN:
+							break;
+						case IDD_DIN:
+							break;
+						case IDD_AOUT:
+						{
+							GetFesSvc()->GetDBSvc()->FesSetAoutValue(pMsg->Occno, V_FLOAT(pMsg->Value[0]), 0);
+							break;
+						}
+						case IDD_DOUT:
+						{
+							GetFesSvc()->GetDBSvc()->FesSetAoutValue(pMsg->Occno, V_CHAR(pMsg->Value[0]), 0);
+							break;
+						}
+						default:
+							break;
+					}
+
+#endif
 					break;
 				}
 				default:
 					break;
-				}
-				break;
-			}
-			default: 
-				break;
 			}
 		}
 	}
@@ -304,6 +380,8 @@ void CNetbusSvc::TransDataInfo()
 	SendAinToSvr();
 	SendUserVarToSvr();
 	SendSysVarToSvr();
+	SyncChannelInfo();
+	SyncDeviceInfo();
 }
 
 /*! \fn void CNetbusSvc::UpdateNetState()
@@ -384,8 +462,7 @@ size_t CNetbusSvc::PackageAllRTData(std::shared_ptr<CDbSvc> pDB, unsigned char *
 }
 
 #endif
-
-
+ 
 
 void  CNetbusSvc::SendDinToSvr()
 {
@@ -541,6 +618,94 @@ void CNetbusSvc::SendSysVarToSvr()
 			//TODO LOG
 		}
 	}
+}
+
+void CNetbusSvc::SyncDeviceInfo()
+{
+	Q_ASSERT(m_pNetMsgPacker);
+	if (m_pNetMsgPacker == nullptr)
+		return;
+
+	memset(m_pBuf, 0, sizeof EMSG_BUF);
+
+	m_pBuf->MsgPath = EMSG_PATH::TO_SERVER;
+	m_pBuf->MsgType = MSG_TYPE::COT_PERCYC;
+	m_pBuf->FuncCode = MSG_TYPE::COT_PERCYC;
+	//第一个pair 为起始OccNo 第二个为元素数目
+	std::vector<std::pair<int32u, int32u > > arrDeviceNums;
+	m_pNetMsgPacker->GetDevicePackageNum(arrDeviceNums);
+
+	int32u nSize;
+
+	for (auto iter : arrDeviceNums)
+	{
+		m_pNetMsgPacker->PackageSyncDeviceInfo(m_pBuf, iter, nSize);
+		int nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
+		if (!nRet)
+		{
+			//TODO LOG
+		}
+	}
+}
+
+void CNetbusSvc::SyncChannelInfo()
+{
+	Q_ASSERT(m_pNetMsgPacker);
+	if (m_pNetMsgPacker == nullptr)
+		return;
+
+	memset(m_pBuf, 0, sizeof EMSG_BUF);
+
+	m_pBuf->MsgPath = EMSG_PATH::TO_SERVER;
+	m_pBuf->MsgType = MSG_TYPE::COT_PERCYC;
+	m_pBuf->FuncCode = MSG_TYPE::COT_PERCYC;
+	//第一个pair 为起始OccNo 第二个为元素数目
+	std::vector<std::pair<int32u, int32u > > arrChannelNums;
+	m_pNetMsgPacker->GetChannelPackageNum(arrChannelNums);
+
+	int32u nSize;
+
+	for (auto iter : arrChannelNums)
+	{
+		m_pNetMsgPacker->PackageSyncChannelInfo(m_pBuf, iter, nSize);
+		int nRet = NBSendData("FES", reinterpret_cast<int8u*>(m_pBuf), nSize);
+		if (!nRet)
+		{
+			//TODO LOG
+		}
+	}
+}
+void CNetbusSvc::RedBackupSvc()
+{
+	if (m_bIsRedNode == false)
+		return;
+
+	if (m_pRedTask == nullptr)
+		return;
+
+	CFesSvc *pSvr = GetFesSvc();
+	Q_ASSERT(pSvr);
+	if (pSvr == nullptr)
+		return;
+
+	std::shared_ptr<CDbSvc> pDBSvc = pSvr->GetDBSvc();
+	Q_ASSERT(pDBSvc);
+	if (pDBSvc)
+	{
+		if (pDBSvc->IsDBAlive(0))
+		{
+			if (pDBSvc->GetMyHostState() == STATE_MAIN)
+			{
+
+			}
+			else if (pDBSvc->GetMyHostState() == STATE_SLAVE)		 
+			{
+
+			}
+		}
+	}
+
+	
 }
 
 /** @}*/

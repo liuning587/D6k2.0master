@@ -313,11 +313,11 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole)const;
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 public:
-	void SetColumnCount(int nCount)
+	void SetColumnCount(size_t nCount)
 	{ 
 		m_nColumnCount = nCount; 
 	}
-	void SetRowCount(int nCount)
+	void SetRowCount(size_t nCount)
 	{ 
 		m_nRowCount = nCount; 
 	}
@@ -355,8 +355,8 @@ private:
 	bool GetTotalInfo();
 
 private:
-	int m_nRowCount;
-	int m_nColumnCount;
+	size_t m_nRowCount;
+	size_t m_nColumnCount;
 	QStringList m_szHeaderList;
 private:
 	//直接传参使用

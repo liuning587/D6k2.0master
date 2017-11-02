@@ -7,6 +7,7 @@
 extern QString g_FileName;
 
 class CCommThread;
+class QTimer;
 class CFileTransWgt : public QWidget
 {
 	Q_OBJECT
@@ -30,7 +31,8 @@ public slots:
 	void Slot_ItemDoubleClicke(QTreeWidgetItem *item, int column);
 	//
 	void Slot_UpdateConform(int nFlag);
-
+	//
+	void SLot_TimeOut();
 
 private:
 	Ui::CFileTransWgt ui;
@@ -38,4 +40,6 @@ private:
 	CCommThread *m_pCommuncate;
 	//文件保存的路径
 	QString m_strFilePath;
+	//
+	QTimer *m_pTimer;
 };

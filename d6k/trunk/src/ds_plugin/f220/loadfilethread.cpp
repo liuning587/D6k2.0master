@@ -32,7 +32,7 @@ void CLoadFileThread::Slot_CreateNewFile(QString strFileName, QByteArray byData)
 
     QString strRunPath = qApp->applicationDirPath();
 
-	if (strFileName.contains("/tffs0//iec104sList.ini"))
+	if (strFileName.contains("/tffs0//prot_list.ini"))
 	{
 		//点表文件
 		strFileName = strRunPath + REMOTE_TABLE + strFileName;

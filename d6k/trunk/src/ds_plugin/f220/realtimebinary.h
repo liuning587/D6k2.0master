@@ -40,12 +40,20 @@ private:
 	CCommThread *m_pCommunicate;
 	//id item
 	QMap<int, QStandardItem*> m_mapIdItemObj;
+	//双点  item  id
+	QMap<int, QStandardItem*> m_mapDoubleIdItemObj;
 	//tableview
 	QTableView *m_pTableView;
+	//双点遥信
+	QTableView *m_pDoubleTableView;
+	//双点
+	QStandardItemModel *m_pDoubleTableModel;
 	//model
 	QStandardItemModel *m_pTableModel;
 	//当前个数
 	int m_iCurrentPointsNum;
+	//当前double个数
+	int m_nICurrentDoubelPointNum;
 	//点表数据
 	CPointInfo *m_pPointInfo;
     //

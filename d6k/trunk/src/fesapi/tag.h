@@ -148,6 +148,10 @@ public:
 	void LoadConfig();
 protected:
 	bool NormalUpdate(int8u nValue, int8u nQua, bool bCpuEnable, TIMEPAK * pTm);
+	// 通知DB_SVC测值发生变化
+	void NotifyValueChange(int8u nNewValue, TIMEPAK *pTm);
+	// 通知DB_SVC品质发生变化
+	void NotifyQuaChange(int8u nNewValue, TIMEPAK *pTm);
 
 public:
 	//! 获取告警的occno

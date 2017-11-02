@@ -23,34 +23,32 @@ enum  NODE_ENUM
 
 struct NODE_MEM
 {
-	int OccNo;                           //节点OccNo号
-	int Type;                            //节点类型
+	int32u OccNo;                           //节点OccNo号
+	int32u Type;                            //节点类型
 	char NodeTagName[MAX_NAME_LEN];      //节点tagname
-	int  NodeOffSet;                     //节点偏移
-	int  NodeSize;                       //节点内存大小
+	int32u  NodeOffSet;                     //节点偏移
+	int32u  NodeSize;                       //节点内存大小
 };
-
-
 
 
 struct NODE_APP_MAGIC                   
 {
-	int MagicNum1;
-	int MagicNum2;
-	int nCount;                          //APP 或者 数目
+	int32u MagicNum1;
+	int32u MagicNum2;
+	int32u nCount;                          //APP 或者 数目
 	int32u nOccNo;
-	int ShmSize;                         //节点偏移
+	int32u ShmSize;                         //节点偏移
 };
 
 struct NODE_SCD_MAGIC
 {
-	int MagicNum1;
-	int MagicNum2;
-	int NodeServerCount;                 //server节点数目
-	int NodeFesCount;                    //fes节点数目
-	int NodeClientCount;				 //client节点数目
-	int AllNodeCount;                    //所有节点数目
-	int ShmSize;                         //节点偏移
+	int32u MagicNum1;
+	int32u MagicNum2;
+	int32u NodeServerCount;                 //server节点数目
+	int32u NodeFesCount;                    //fes节点数目
+	int32u NodeClientCount;				    //client节点数目
+	int32u AllNodeCount;                    //所有节点数目
+	int32u ShmSize;                         //节点偏移
 };
 
 struct APP_INFO
@@ -71,6 +69,8 @@ enum
 	DIN_TYPE = 2,
 	USERVAR_TYPE = 3 ,
 	SYSVAR_TYPE = 4 ,
+	SYNC_CHANNEL_TYPE = 5,
+	SYNC_DEVICE_TYPE = 6,
 	MAX_DATA_TYPE = 100,
 };
 
@@ -87,20 +87,16 @@ enum
 	COT_INCIDENT_ENENT = 2,    //突发事件
 };
 
-class DATA_BASE
-{
-public:
-	int m_nType;                      //!<传送数据类型
-	int m_nCount;                     //!<传送数据数目
-	int m_nNodeOccNo;                 //!<节点OccNo
-	int m_nStartOccNo;                //!<传送数据起始地址
-	int m_nTransReason;               //!<数据传送原因
-	int m_nExtraLen;
+struct DATA_BASE
+{ 
+	int32u m_nType;                      //!<传送数据类型
+	int32u m_nCount;                     //!<传送数据数目
+	int32u m_nNodeOccNo;                 //!<节点OccNo
+	int32u m_nStartOccNo;                //!<传送数据起始地址
+	int32u m_nTransReason;               //!<数据传送原因
+	int32u m_nExtraLen;
 };
-
-
-
-
+ 
 
 //节点组
 class CNodeGroup

@@ -22,6 +22,7 @@
 #include "mem_db.h"
 
 #include "fesapi/fesdatadef.h"
+#include "scadaapi.h"
 
 #include "log/log.h"
 #include <QObject> 
@@ -29,9 +30,14 @@
 #include <QDebug>
 
 
-CMemDB::CMemDB() :m_bStopFlag(false)
+CMemDB::CMemDB() :m_bStopFlag(false),m_pScada(nullptr)
 { 
 	 
+}
+
+CMemDB::CMemDB(CScadaApi *pScada) : m_bStopFlag(false), m_pScada(pScada)
+{
+	Q_ASSERT(pScada);
 }
 
 CMemDB::~CMemDB(void)
@@ -149,6 +155,45 @@ bool CMemDB::GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const
 	Q_ASSERT(false);
 
 	return true;
+}
+
+NODE_STATE CMemDB::GetMyHostState() const
+{
+	Q_ASSERT(m_pScada);
+	if (m_pScada == nullptr)
+	{
+		return STATE_UNKOWN;
+	}
+
+	return m_pScada->GetNodeHostState(m_nMyNodeOccNo);
+}
+/*! \fn bool  CMemDB::GetOccNoByTagName(const char*pszTagName, int32u &nIddType, int32u &nOccNo, int32u &nFiledID)const
+********************************************************************************************************* 
+** \brief CMemDB::GetOccNoByTagName 
+** \details 根据tagname获取occno
+** \param pszTagName 
+** \param nIddType 
+** \param nOccNo 
+** \param nFiledID 
+** \return bool 
+** \author LiJin 
+** \date 2017年9月14日 
+** \note 
+********************************************************************************************************/
+bool  CMemDB::GetOccNoByTagName(const char*pszTagName, int32u &nIddType, int32u &nOccNo, int32u &nFiledID)const
+{
+	Q_ASSERT(pszTagName && strlen(pszTagName) > 0 && strlen(pszTagName)<= MAX_NAME_LENGTH);
+	if (pszTagName == nullptr || strlen(pszTagName) == 0 || strlen(pszTagName) > MAX_NAME_LENGTH)
+	{
+		return false;
+	}
+	Q_ASSERT(m_pScada);
+	if (m_pScada == nullptr)
+	{
+		return false;
+	}
+	nFiledID = 0;
+	return m_pScada->GetOccNoByTagName(pszTagName, m_nMyNodeOccNo, nIddType, nOccNo);
 }
 
 /** @}*/

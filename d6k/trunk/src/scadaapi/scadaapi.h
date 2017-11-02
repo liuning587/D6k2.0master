@@ -11,6 +11,8 @@
 #include <map>
 #include <unordered_map>
 #include <functional>
+#include <atomic>
+
 class CMemDB;
 class CTagNamePool;
 class CServerDB;
@@ -30,14 +32,18 @@ public:
 	void Run();
 	void Shutdown();
 public:
-	bool GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int32u *pIddType, int32u *pOccNo, int32u *pFiledID);
-	// 测点类型、节点索引、测点索引、测点属性
-	bool GetRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pRetData);
-	bool PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc);
-	 
-	NODE_TYPE GetNodeType(int32u nNodeOccNo);
+	bool GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int32u *pIddType, int32u *pOccNo, int32u *pFiledID)const;
 
-	SAPP* GetNodeAppInfoByName(int32u nNodeOccNo,char* pszAppName);
+	bool GetOccNoByTagName(const char *pszTagName, int32u nNodeOccNo, int32u &nIddType, int32u &nOccNo)const;
+
+	// 测点类型、节点索引、测点索引、测点属性
+	bool GetRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pRetData) ;
+	bool PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName, void *pExt);
+	 
+	NODE_TYPE GetNodeType(int32u nNodeOccNo)const;
+	NODE_STATE GetNodeHostState(int32u nNodeOccNo) const;
+
+	SAPP* GetNodeAppInfoByName(int32u nNodeOccNo, const char* pszAppName);
 	bool  GetNodeAppInfoByOccNo(int32u nNodeOccNo, int32u nProOccNo, SAPP** pApp) const;
 
 private:
@@ -46,15 +52,16 @@ private:
 	bool GetAppHeatbeat(int32u nNodeOccNo, int32u nOccNo, IO_VARIANT& pData) const ;
 protected:
 	bool   GetNodeTagNameByOccNo(int32u nOccNo, std::string& tagName);
-	int32u GetNodeOccNoByTagName(const std::string& tagName);
-	bool   GetIOOccNoByTagName(int32u nNodeOccNo, const std::string& tagName, const std::string& szAttr, int32u* pOccNo, int32u* pIddType, int32u *pFiledID);
+	int32u GetNodeOccNoByTagName(const std::string& tagName)const;
+	bool   GetOccNoByTagName(int32u nNodeOccNo, const std::string& tagName, const std::string& szAttr, int32u* pOccNo, int32u* pIddType, int32u *pFiledID)const;
 	
-	CFesDB* GetFesDBByOccNO(int32u nOccNo);
+	CFesDB* GetFesDbByOccNo(int32u nOccNo);
 	CServerDB* GetScadaDbByOccNo(int32u nOccNo);
-	CClientDB* GetClientDBByOccNo(int32u nOccNo);
+	CClientDB* GetClientDbByOccNo(int32u nOccNo);
 	void LogMsg(const char * pszText, int nLevel);
 private:
-	int m_nRefCount;
+	std::atomic <int> m_nRefCount;
+	//int m_nRefCount;
 protected:
 	bool BuildTagNamePool(const char* pszFilePath);
 protected:
@@ -95,6 +102,7 @@ private:
 	NODE_SCD_MAGIC* m_pNodeMagicHead;
 	NODE_MEM       * m_pNodeGIHead;
 	CFesDB         * m_pFesHead;
+	// 共享内存中的各个节点状态信息
 	NODE* m_pNodes;
 protected:
 	bool   CreateScdAndClientDB(const char* pszFilePath);
@@ -124,7 +132,7 @@ private:
 	std::map < int32u, std::vector <SAPP* > > m_arrAppInfos;
 
 private:
-	std::array< std::function<bool(int32u,int32u,IO_VARIANT&)  >, ATT_MAX> m_arrGetSappRTDataFuncs;
+	std::array< std::function<bool(int32u,int32u,IO_VARIANT&)  >, ATT_MAX> m_arrGetSAppRTDataFuncs;
 };
 
 #endif // SCADAAPI_H

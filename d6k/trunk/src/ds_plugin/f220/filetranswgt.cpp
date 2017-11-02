@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDir>
+#include <QTimer>
 
 QString g_FileName = "";
 
@@ -13,7 +14,6 @@ CFileTransWgt::CFileTransWgt(CCommThread *pCommunicate, QWidget *parent)
 	ui.setupUi(this);
 
 	m_pCommuncate = pCommunicate;
-
 	connect(ui.pushButton,SIGNAL(clicked()),this,SLOT(Slot_RefreshItems()));
 	connect(ui.pushButton_2, SIGNAL(clicked()), this, SLOT(Slot_DownLoadItems()));
 	connect(ui.pushButton_3, SIGNAL(clicked()), this, SLOT(Slot_upLoadItems()));
@@ -21,6 +21,17 @@ CFileTransWgt::CFileTransWgt(CCommThread *pCommunicate, QWidget *parent)
 	connect(ui.treeWidget,SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int )),this,SLOT(Slot_ItemDoubleClicke(QTreeWidgetItem *, int)));
 
 	connect(m_pCommuncate,SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)),this,SLOT(Slot_upDataITems(QList<Catalog_Info>&)));
+
+	ui.treeWidget->header()->setSortIndicator(0, Qt::AscendingOrder);
+	ui.treeWidget->header()->setSortIndicatorShown(true);
+	ui.treeWidget->header()->setSectionsClickable(true);
+
+	m_pTimer = new QTimer(this);
+	m_pTimer->setInterval(2000);
+
+	connect(m_pTimer,SIGNAL(timeout()),this,SLOT(SLot_TimeOut()));
+
+	//Slot_UpdateConform(0);
 }
 
 CFileTransWgt::~CFileTransWgt()
@@ -113,9 +124,40 @@ void CFileTransWgt::SendUpdateFile(const QString & fileName, const QString & tDi
 	}
 
 }
-
+#include <QLabel>
+#include <QLineEdit>
 void CFileTransWgt::Slot_RefreshItems()
 {
+	QLabel *pLabelCattalog = new QLabel;
+	pLabelCattalog->setText(tr("目录"));
+	QLineEdit *pLineEdCatalog = new QLineEdit;
+	QPushButton *pPushBtn = new QPushButton;
+	pPushBtn->setText(tr("确定"));
+
+	QDialog *pCatalogDlg = new QDialog;
+	QHBoxLayout *playout = new QHBoxLayout(pCatalogDlg);
+	playout->addWidget(pLabelCattalog);
+	playout->addWidget(pLineEdCatalog);
+	playout->addWidget(pPushBtn);
+	pCatalogDlg->resize(300, 60);
+
+	connect(pPushBtn,SIGNAL(clicked()),pCatalogDlg,SLOT(accept()));
+
+	QString strCatalog;
+	if (pCatalogDlg->exec())
+	{
+		strCatalog.append(pLineEdCatalog->text().remove(" "));
+	}
+	else
+	{
+		return;
+	}
+
+
+	ui.pushButton->setEnabled(false);
+	m_pTimer->setSingleShot(true);
+	m_pTimer->start();
+
 	ui.treeWidget->clear();
 
 	FILE_CATALOG_REQUEST_1 tCatalogRequest;
@@ -128,7 +170,7 @@ void CFileTransWgt::Slot_RefreshItems()
 	tCatalogRequest.m_nOperatorType = 1;    //读目录
 	tCatalogRequest.m_nCatalogID.SetAddr(0);       //目录ID  暂时置为0
 
-	strcpy(tCatalogRequest.m_cCatalogName, "/tffs0/\0");    //目录
+	strcpy(tCatalogRequest.m_cCatalogName, strCatalog.toStdString().c_str());    //目录
 	tCatalogRequest.m_uCatalogLength = strlen(tCatalogRequest.m_cCatalogName);   //目录长度
 
 	tCatalogRequest.m_nCallFlag = 0;   //目录下所有文件
@@ -398,11 +440,46 @@ void CFileTransWgt::Slot_UpdateConform(int nFlag)
 
 
 	QDir tDir(qApp->applicationDirPath() + "/ini/f220/updatefile/");
-	QFileInfoList lstFiles = tDir.entryInfoList(QDir::Files);
 
-	for (int i = 0; i < lstFiles.count(); i++)
+	QString strPath = qApp->applicationDirPath() + "/ini/f220/updatefile/";
+
+	QString fileName = QFileDialog::getOpenFileName(NULL, tr("Open File"), strPath);
+
+	if (fileName.isEmpty())
 	{
-		SendUpdateFile(qApp->applicationDirPath() + "/ini/f220/updatefile/" + lstFiles.at(i).fileName(), "");
+		return;
+	}
+	else
+	{
+		SendUpdateFile(fileName, "");
 
 	}
+	/*
+	QFileInfoList lstFiles = tDir.entryInfoList(QDir::Files);
+
+	if (lstFiles.count() > 1)
+	{
+		QMessageBox::warning(this,tr("告警"),tr("updatefile 目录下存在多个文件,请检查!"));
+		return;
+	}
+	for (int i = 0; i < lstFiles.count(); i++)
+	{
+		if (lstFiles.at(i).fileName().endsWith(".bin"))
+		{
+			SendUpdateFile(qApp->applicationDirPath() + "/ini/f220/updatefile/" + lstFiles.at(i).fileName(), "");
+		}
+		else
+		{
+			QMessageBox::warning(this, tr("告警"), tr("updatefile 目录下存下文件名格式不对!"));
+			return;
+
+		}
+
+	}
+	*/
+}
+
+void CFileTransWgt::SLot_TimeOut()
+{
+	ui.pushButton->setEnabled(true);
 }

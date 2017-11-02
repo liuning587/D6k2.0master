@@ -65,28 +65,36 @@ void CRealTimeSOE::AnalyseRealSeoBinaryData(int iDeviceID, int nPointID, int nVa
 {
     Q_UNUSED(iDeviceID);
 
+	//获取当前的行数
+	int iRowNum = m_pTableModel->rowCount();
+
 	if (nQuality == 0)
 	{
 		//单点
 		nPointID = nPointID - m_pConfgWgt->GetBinaryStartAddr();
+
+		QMap<unsigned int, RPT> mapPoint = m_pPointInfo->GetBinaryMap();
+		//站点ID
+		m_pTableModel->setItem(iRowNum, 1, new QStandardItem(mapPoint[nPointID].Destriber));
+
 	}
 	else
 	{
 		//双点
 		nPointID = nPointID - m_pConfgWgt->GetDoubleBinaryStartAddr();
+		QMap<unsigned int, RPT> mapPoint = m_pPointInfo->GetDoubleBinaryMap();
+		//站点ID
+		m_pTableModel->setItem(iRowNum, 1, new QStandardItem(mapPoint[nPointID].Destriber));
+
 	}
 
 	//插入
-    QMap<unsigned int, RPT> mapPoint = m_pPointInfo->GetBinaryMap();
-	//获取当前的行数
-	int iRowNum = m_pTableModel->rowCount();
+
 	//插入数据
 	//序号
 	m_pTableModel->setItem(iRowNum, 0, new QStandardItem(QString::number(iRowNum + 1)));
-	//站点ID
-    m_pTableModel->setItem(iRowNum, 1, new QStandardItem(mapPoint[nPointID].Destriber));
-	//地址
-	m_pTableModel->setItem(iRowNum, 2, new QStandardItem(QString::number(nPointID)));
+	//地址  modify by wangwei 显示的地址从1开始  这样可以和soe文件对应  只是显示用
+	m_pTableModel->setItem(iRowNum, 2, new QStandardItem(QString::number(nPointID+1)));
 	//点值
 	m_pTableModel->setItem(iRowNum, 3, new QStandardItem(QString::number(nValue)));
 	//遥信类型  单点  双点

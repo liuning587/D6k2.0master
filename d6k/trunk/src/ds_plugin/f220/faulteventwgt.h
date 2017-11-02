@@ -19,10 +19,19 @@ public:
 public slots:
     void Slot_MalFuction(ASDUGZ gzData);
 
+	void Slot_ContextMenuRequest(const QPoint &point);
+	//
+	void Slot_clearAction();
 private:
     Ui::CFaultEventWgt ui;
     //
     CCommThread *m_pCommunicate;
+	//
+	//点表数据
+	CPointInfo *m_pPointInfo;
+	//
+	CInfoConfigWgt *m_pConfgWgt;
+
 };
 
 #endif // FAULTEVENTWGT_H

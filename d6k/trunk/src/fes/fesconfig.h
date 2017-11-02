@@ -53,7 +53,7 @@ public:
 		return m_ChannelPtr;
 	}
 
-	CDevicePtr GetDevice(int nIndex)
+	CDevicePtr GetDevice(size_t nIndex)
 	{
 		if (nIndex >=  m_VecDev.size())
 		{
@@ -158,7 +158,7 @@ public:
 		return m_DeviceVec.size();
 	}
 
-	CDevicePtr GetDevice(int nIndex)
+	CDevicePtr GetDevice(size_t nIndex)
 	{
 		if (nIndex > m_DeviceVec.size())
 		{
@@ -189,7 +189,7 @@ public:
 	void AddAout(AOUT_PTR pAout);
 	void AddDout(DOUT_PTR pDout);
 
-	AIN_PTR GetAIN(int nIndex)
+	AIN_PTR GetAIN(size_t nIndex)
 	{
 		if (nIndex > m_Ains.size())
 		{
@@ -201,7 +201,7 @@ public:
 		}
 	}
 
-	DIN_PTR GetDin(int nIndex)
+	DIN_PTR GetDin(size_t nIndex)
 	{
 		if (nIndex>m_Dins.size())
 		{
@@ -213,7 +213,7 @@ public:
 		}
 	}
 
-	AOUT_PTR GetAout(int nIndex)
+	AOUT_PTR GetAout(size_t nIndex)
 	{
 		if (nIndex >m_Aouts.size())
 		{
@@ -225,7 +225,7 @@ public:
 		}
 	}
 
-	DOUT_PTR GetDout(int nIndex)
+	DOUT_PTR GetDout(size_t nIndex)
 	{
 		if (nIndex >m_Douts.size())
 		{

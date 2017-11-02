@@ -15,7 +15,7 @@
 
 extern "C"
 {
-	// APP必须实现的接口
+	// APP必须实现的接口  返回0 为成功 非0值为错误码
 	SCDAPP int StartScadaApp(const char * pszName, int32u nAppOccNo, int nExtraArgc, char *pszExtraArgv[]);
 
 	SCDAPP int StopScadaApp(const char * pszName, int32u nAppOccNo);

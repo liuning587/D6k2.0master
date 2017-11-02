@@ -24,6 +24,7 @@
 
 #include "datatypes.h"
 #include "../scdpub/variant_data.h"
+#include "fesapi/fescnst.h"
 
 #include "base_mem_db.h"
 
@@ -60,10 +61,14 @@ using DIN_ALARM_DEF = std::shared_ptr<DIN_ALARM>;
 using AIN_ALARM_LIMIT_DEF = std::shared_ptr<AIN_ALARM_LIMIT>;
 using DIN_ALARM_LIMIT_DEF = std::shared_ptr<DIN_ALARM_LIMIT> ; 
 
+class CScadaApi;
+
 class CMemDB : public CBaseMemDB
 {
 public:
 	CMemDB( );
+	explicit CMemDB(CScadaApi *pScada);
+
 	virtual ~CMemDB( );
 
 public:
@@ -77,7 +82,11 @@ public:
 	virtual bool GetAinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
 	virtual bool GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const;
 	// 获取数据库节点的主从状态
-	virtual int32u GetMyHostState();
+	virtual NODE_STATE GetMyHostState() const;
+
+
+	bool GetOccNoByTagName(const char*pszTagName, int32u &nIddType, int32u &nOccNo, int32u &nFiledID)const;
+
 
 #if 0
 	// 预估所需共享内存的尺寸
@@ -131,6 +140,7 @@ private:
 	bool    m_bIsThreadRunning;
 	bool    m_bIsThreadStopped;
 
+	CScadaApi * m_pScada;
 };
 
 #endif // _DBGSVR_MODULE_H

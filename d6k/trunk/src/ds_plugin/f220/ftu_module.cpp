@@ -70,6 +70,11 @@ extern "C" DS_EXPORT IPluginModule *CreateModule()
 //	return  s_ptrModule.get();
 }
 
+CFtuModule * GetFtuModel()
+{
+	return s_ptrModule;
+}
+
 typedef ICommPlugin *(*FunCommModel)();
 
 CFtuModule::CFtuModule()
@@ -229,7 +234,7 @@ void CFtuModule::Init(IMainModule *pMainModule)
 
     m_pChoosePointWgt->SetProjectPath(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName());
 
-	m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + "iec104sList.ini");
+	m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + "prot_list.ini");
 
 	m_pChoosePointWgt->Slot_UpdateBinaryPointData();
 	m_pChoosePointWgt->Slot_UpdateKwhPointData();
@@ -262,7 +267,7 @@ void CFtuModule::Init(IMainModule *pMainModule)
     m_pLcdWgt = new CLcdoperatorWgt;
 
     //维护调试功能
-    m_pMaintencanceWgt = new CMaintecanceWgt(m_pCommThread,m_pConfigWgt, m_pLcdWgt, strRunPath + REMOTETABLE + "iec104sList.ini");
+    m_pMaintencanceWgt = new CMaintecanceWgt(m_pCommThread,m_pConfigWgt, m_pLcdWgt, strRunPath + REMOTETABLE + "prot_list.ini");
     m_pMaintencanceWgt->SetRecordConifgName(strRunPath + RECORDPATH + strPointTableName + ".xml");
 
 	//文件传输
@@ -315,6 +320,8 @@ void CFtuModule::Init(IMainModule *pMainModule)
     m_pReomteControl->SetRemoteTableInfo(m_pPointInfo);
 
 
+	//展开
+	m_pMainWindow->GetLeftTree()->expandAll();
 }
 
 CFtuModule::~CFtuModule()
@@ -469,6 +476,9 @@ void CFtuModule::Slot_SetConfigAct()
 		QString strPointTableName = m_pConfigWgt->GetPointTable();
 
         m_pCommThread->SetGeneralTimes(m_pConfigWgt->GetGereralTime(), m_pConfigWgt->GetSyncGenertalTime(), m_pConfigWgt->GetKwhCallTime());
+
+		m_pCommThread->SendDisConnectRequest();
+
 		m_pCommThread->StartRun(strIP.toStdString().c_str(), iPort);
 
 		QString strRunPath = qApp->applicationDirPath();
@@ -479,7 +489,7 @@ void CFtuModule::Slot_SetConfigAct()
             m_pChoosePointWgt->SetProjectPath(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName());
 
 
-			m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + "iec104sList.ini");
+			m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + "prot_list.ini");
 
 			m_pChoosePointWgt->Slot_UpdateBinaryPointData();
 			m_pChoosePointWgt->Slot_UpdateKwhPointData();
@@ -491,7 +501,7 @@ void CFtuModule::Slot_SetConfigAct()
 			QString strRunPath = qApp->applicationDirPath();
 			m_pFixDeploy->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
 
-			mPIecConfigWgt->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
+			//mPIecConfigWgt->InitWgt(strRunPath + DEVCONFIGPATH + strPointTableName + ".conf");
 			return;
 		}
 	}
@@ -583,15 +593,15 @@ void CFtuModule::CreateTreeItem()
 	pFtuItem->appendRow(pIecValueSet);
 
     //录波  Recorder
-    QStandardItem *pRecord = new QStandardItem(tr("Recorder"));
-    pRecord->setData(TREE_RECORD_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
-    //pRecord->setIcon(QIcon(":/icons/analog.png"));
-    pFtuItem->appendRow(pRecord);
+//     QStandardItem *pRecord = new QStandardItem(tr("Recorder"));
+//     pRecord->setData(TREE_RECORD_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
+//     //pRecord->setIcon(QIcon(":/icons/analog.png"));
+//     pFtuItem->appendRow(pRecord);
     //调试维护
-    QStandardItem *pMaintecance = new QStandardItem(tr("Maintecance"));
-    pMaintecance->setData(TREE_DEBUG_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
-    //pMaintecance->setIcon(QIcon(":/icons/analog.png"));
-    pFtuItem->appendRow(pMaintecance);
+//     QStandardItem *pMaintecance = new QStandardItem(tr("Maintecance"));
+//     pMaintecance->setData(TREE_DEBUG_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
+//     //pMaintecance->setIcon(QIcon(":/icons/analog.png"));
+//     pFtuItem->appendRow(pMaintecance);
     //历史数据文件
     QStandardItem *pHistory = new QStandardItem(tr("History"));
     pHistory->setData(TREE_HISTORY_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
@@ -603,20 +613,20 @@ void CFtuModule::CreateTreeItem()
     //pHistory->setIcon(QIcon(":/icons/analog.png"));
     pFtuItem->appendRow(pCmdHistory);
     //模拟液晶
-    QStandardItem *pLed = new QStandardItem(tr("LED"));
-    pLed->setData(TREE_LED_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
-    //pHistory->setIcon(QIcon(":/icons/analog.png"));
-    pFtuItem->appendRow(pLed);
+//     QStandardItem *pLed = new QStandardItem(tr("LED"));
+//     pLed->setData(TREE_LED_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
+//     //pHistory->setIcon(QIcon(":/icons/analog.png"));
+//     pFtuItem->appendRow(pLed);
     //故障事件
     QStandardItem *pMal = new QStandardItem(tr("MalFunction"));
     pMal->setData(TREE_MAL_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
     //pHistory->setIcon(QIcon(":/icons/analog.png"));
     pFtuItem->appendRow(pMal);
 	//web
-	QStandardItem *pWeb = new QStandardItem(tr("WebDevice"));
-	pWeb->setData(TREE_WEB_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
-	//pHistory->setIcon(QIcon(":/icons/analog.png"));
-	pFtuItem->appendRow(pWeb);
+// 	QStandardItem *pWeb = new QStandardItem(tr("WebDevice"));
+// 	pWeb->setData(TREE_WEB_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
+// 	//pHistory->setIcon(QIcon(":/icons/analog.png"));
+// 	pFtuItem->appendRow(pWeb);
 	//file
 	QStandardItem *pFile = new QStandardItem(tr("File"));
 	pFile->setData(TREE_FILE_ITEM + m_iCurrentPluginIndex, Qt::UserRole);
@@ -1000,6 +1010,18 @@ void CFtuModule::InitCallZt()
 
 	connect(pConnect, SIGNAL(triggered()), this, SLOT(Slot_ConnectDevice()));
 	connect(pDisConnect, SIGNAL(triggered()), this, SLOT(Slot_DisConnect()));
+	//布局
+	QMenu *pLayoutMenu = m_pMainWindow->menuBar()->addMenu(tr("布局(L)"));
+
+	QAction *pShowLogAct = new QAction(tr("显示日志(S)"), pLayoutMenu);
+	pLayoutMenu->addAction(pShowLogAct);
+
+	QAction *pHideLogAct = new QAction(tr("隐藏日志(S)"), pLayoutMenu);
+	pLayoutMenu->addAction(pHideLogAct);
+
+	connect(pShowLogAct, SIGNAL(triggered()), this, SLOT(SLot_ShowLog()));
+	connect(pHideLogAct,SIGNAL(triggered()),this,SLOT(Slot_HiddenLog()));
+
 }
 
 void CFtuModule::Slot_CallCommConfig()
@@ -1086,7 +1108,7 @@ void CFtuModule::Slot_UpdateProcess()
 {
 	ASDU211_UPDATE pUpateInfo;
 	pUpateInfo.asduAddr.SetAddr(m_pConfigWgt->GetDeviceAddr());
-	pUpateInfo.m_qds.OV = 1;
+	pUpateInfo.m_qds.IV = 1;
 
 	m_pCommThread->SendUpdateRequest(pUpateInfo);
 
@@ -1094,6 +1116,16 @@ void CFtuModule::Slot_UpdateProcess()
 
 	m_pMainModule->LogString(m_strDeviceName.toLocal8Bit().data(), byDestr.data(), 1);
 
+}
+
+void CFtuModule::Slot_HiddenLog()
+{
+	((QDockWidget*)m_pMainWindow->GetOutputTableView()->parent()->parent()->parent())->setHidden(true);
+}
+
+void CFtuModule::SLot_ShowLog()
+{
+	((QDockWidget*)m_pMainWindow->GetOutputTableView()->parent()->parent()->parent())->setHidden(false);
 }
 
 
@@ -1136,5 +1168,5 @@ void CFtuModule::AnalyseSycsTime(const QByteArray &btData, int nLength, int nDFl
 void CFtuModule::Slot_SavePoints()
 {
     QString strRunPath = qApp->applicationDirPath();
-    m_pChoosePointWgt->SaveChooseBinFile(strRunPath + REMOTETABLE + "iec104sList.ini");
+    m_pChoosePointWgt->SaveChooseBinFile(strRunPath + REMOTETABLE + "prot_list.ini");
 }

@@ -34,6 +34,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>  
+#include <atomic>
 
 
 class CSimuChannel : public CIoChannel
@@ -70,13 +71,12 @@ private:
 	{
 		return m_bStopFlag;
 	}
-	mutable std::mutex m_LogLock;
 
 	//! Ö÷ÈÎÎñ
 	std::shared_ptr< std::thread > m_pMainTask;
-	mutable std::mutex m_mutThread;
+	mutable std::mutex m_mtxThread;
 	std::condition_variable m_cvThread;
-	bool m_bStopFlag;
+	std::atomic <bool> m_bStopFlag;
 
 private:
 	bool    m_bIsThreadRunning;

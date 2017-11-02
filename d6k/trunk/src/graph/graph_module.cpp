@@ -48,6 +48,8 @@
 #include <QTranslator> 
 #include <QMessageBox>
 
+#include <QQuickWidget>
+
 //м╪пн
 #define GRAPH_ROOT_ITEM 22
 #define GRAPH_GROUP_CHILD_ITEM 225
@@ -177,7 +179,6 @@ CGraphApi::CGraphApi()
 
 CGraphApi::~CGraphApi()
 {
-	
 }
 
 int CGraphApi::CallBackBeforeCloseTab(void *pData)
@@ -187,12 +188,13 @@ int CGraphApi::CallBackBeforeCloseTab(void *pData)
 	return 1;
 }
 
+#include <QQuickWidget>
 void CGraphApi::Init(IMainModuleInterface *pCore)
 {
 	Q_ASSERT(pCore);
 	if (pCore == nullptr)
 		return;
-
+	
 	// these are defaults:
 // 	qApp->setOrganizationName("scadastudio");
 // 	qApp->setOrganizationDomain("scadastudio");
@@ -217,6 +219,7 @@ void CGraphApi::Init(IMainModuleInterface *pCore)
 	CreateDockWidgets(m_pUi);
 
 	m_pUi->GetRightDock()->resize(QSize(500, 1000));
+
 }
 
 void CGraphApi::UnInit()

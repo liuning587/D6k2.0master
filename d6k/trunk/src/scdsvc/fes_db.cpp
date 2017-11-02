@@ -229,10 +229,8 @@ bool  CFesDB::UpdateChannel( CHANNEL *pChannel)
 	m_pChannels[pChannel->OccNo - 1].IsDefined = pChannel->IsDefined;
 	m_pChannels[pChannel->OccNo - 1].Init = pChannel->Init;
 	m_pChannels[pChannel->OccNo - 1].Quality = pChannel->Quality;
-	m_pChannels[pChannel->OccNo - 1].PeerQuality = pChannel->PeerQuality;
-	//.....
-
-
+	//m_pChannels[pChannel->OccNo - 1].PeerQuality = pChannel->PeerQuality;
+	//......
 	return true;
 }
 
@@ -241,6 +239,18 @@ bool  CFesDB::UpdateDevice(DEVICE *pDevice)
 	Q_ASSERT(pDevice);
 	if (pDevice == nullptr)
 		return false;
+
+	Q_ASSERT(pDevice->OccNo != INVALID_OCCNO && pDevice->OccNo <= m_nDeviceCount);
+	if (pDevice->OccNo == INVALID_OCCNO || pDevice->OccNo > m_nDeviceCount)
+	{
+		return false;
+	}
+
+	m_pDevices[pDevice->OccNo - 1].ScanEnable = pDevice->ScanEnable;
+	m_pDevices[pDevice->OccNo - 1].IsDefined = pDevice->IsDefined;
+	m_pDevices[pDevice->OccNo - 1].Init = pDevice->Init;
+	m_pDevices[pDevice->OccNo - 1].Quality = pDevice->Quality;
+	//.........
 
 	return true;
 }
@@ -1678,6 +1688,8 @@ void CFesDB::SkipUnknownElement()
 	}
 }
 
+
+
 /*! \fn size_t CFesDB::EstimateMemSize()
 ********************************************************************************************************* 
 ** \brief CFesDB::GetEstimateSize 
@@ -2012,7 +2024,37 @@ size_t CFesDB::BuildAinAlarmLimits(char* pAddr)
 	return  sizeof AIN_ALARM_LIMIT * m_nAinAlarmLimitCount;
 		 
 }
+bool CFesDB::GetChannelByOccNo(int32u nOccNo, CHANNEL** pChannel)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo < MAX_CHANNEL_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_CHANNEL_OCCNO)
+	{
+		return false;
+	}
+	if (nOccNo > m_nChannelCount)
+	{
+		return false;
+	}
+	*pChannel = &m_pChannels[nOccNo - 1];
 
+	return true;
+}
+
+bool CFesDB::GetDeviceByOccNo(int32u nOccNo, DEVICE** pData)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo < MAX_CHANNEL_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_CHANNEL_OCCNO)
+	{
+		return false;
+	}
+	if (nOccNo > m_nDeviceCount)
+	{
+		return false;
+	}
+	*pData = &m_pDevices[nOccNo - 1];
+
+	return true;
+}
 size_t CFesDB::BuildDinAlarms(char* pAddr)
 {
 	Q_ASSERT(pAddr);

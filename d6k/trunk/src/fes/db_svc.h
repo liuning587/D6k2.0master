@@ -29,10 +29,10 @@
 #include <QDomDocument>
 #include <QXmlStreamReader>
 #include <QMap>
+#include <QtCore/QtGlobal>
 
 #include <vector>
 #include <unordered_map>
-#include <QtCore/QtGlobal>
 #include <ace/Event.h>
 
 struct FesInfo;
@@ -53,6 +53,7 @@ struct DIN_ALARM;
 struct DIN_ALARM_LIMIT;
 struct TAG_OCCNO;
 struct VARDATA;
+struct DMSG;
 
 typedef std::shared_ptr<TRANSFORM_LINEAR>    TRANSFORM_LINEAR_DEF;
 typedef std::shared_ptr<TRANSFORM_NONLINEAR> TRANSFORM_NONLINEAR_DEF;
@@ -67,6 +68,7 @@ class CServer;
 class CIoChannel;
 class CFTChannel;
 class CSysVarSvc;
+class CTagAttMgr;
 
 enum XmlReaderType
 {
@@ -88,12 +90,12 @@ public:
 	// 本节点的Node的排行号，如果是主从机，则返回默认主机
 	int32u GetMyNodeOccNo()
 	{
-		//todo :待实现
+		//!todo :待实现
 		//return 0;
 		return m_nMyNodeOccNo;
 	}
 
-	std::pair<unsigned int, NODE*> GetNodeData()
+	std::pair<size_t, NODE*> GetNodeData()
 	{
 		return std::make_pair(m_nNodeCount, m_pNodes);
 	}
@@ -120,7 +122,7 @@ public:
 	// 前置内核的内部数据访问接口
 	int32u GetNodeOccNo(const char *pszHostName);
 
-	size_t GetDeviceCount(int32u nChannelOccNo);
+	size_t GetDeviceCount(int32u nChannelOccNo)const;
 	// 获取通道中的装置列表
 	size_t GetDeviceOccNos(int32u nChannelOccNo, std::vector<int32u> & arrOccNos);
 
@@ -129,10 +131,10 @@ public:
 	size_t GetAoutCountInChannel(int32u nChannelOccNo);
 	size_t GetDoutCountInChannel(int32u nChannelOccNo);
 
-	size_t GetAinCountInDevice(int32u nDeviceOccNo);
-	size_t GetDinCountInDevice(int32u nDeviceOccNo);
-	size_t GetAoutCountInDevice(int32u nDeviceOccNo);
-	size_t GetDoutCountInDevice(int32u nDeviceOccNo);
+	size_t GetAinCountInDevice(int32u nDeviceOccNo)const;
+	size_t GetDinCountInDevice(int32u nDeviceOccNo)const;
+	size_t GetAoutCountInDevice(int32u nDeviceOccNo)const;
+	size_t GetDoutCountInDevice(int32u nDeviceOccNo)const;
 
 	// 获取通道中测点的列表
 	size_t GetAinOccNosInChannel(int32u nChannelOccNo, std::vector<int32u> & arrOccNos);
@@ -171,23 +173,35 @@ public:
 	{
 		return m_nDoutCount;
 	}
-
 	size_t GetUserVarCount() const
 	{
 		return m_nUserVariableCount;
 	}
-
 	size_t GetSysVarCount() const
 	{
 		return m_nSystemVariableCount;
 	}
+
 	// 通过序号获取模拟量指针，nIdx 从0开始
+	CHANNEL* GetChannelByIndex(int32u nIndex);
+	DEVICE* GetDeviceByIndex(int32u nIndex);
 	AIN*GetAinByIndex(int32u nIdx);
 	DIN*GetDinByIndex(int32u nIdx);
 	AOUT*GetAoutByIndex(int32u nIdx);
 	DOUT*GetDoutByIndex(int32u nIdx);
 	VARDATA * GetUserVarByIndex(int32u nIdx);
 	VARDATA * GetSysVarByIndex(int32u nIdx);
+
+	NODE * GetNodeByOccNo(int32u nOccNo);
+	CHANNEL* GetChannelByOccNo(int32u nOccNo);
+	DEVICE* GetDeviceByOccNo(int32u nOccNo);
+	AIN*GetAinByOccNo(int32u nOccNo);
+	DIN*GetDinByOccNo(int32u nOccNo);
+	AOUT*GetAoutByOccNo(int32u nOccNo);
+	DOUT*GetDoutByOccNo(int32u nOccNo);
+	VARDATA * GetUserVarByOccNo(int32u nOccNo);
+	VARDATA * GetSysVarByOccNo(int32u nOccNo);
+
 	std::string GetTagName(int32u nOccNo, int32u nDataType) const;
 
 	size_t GetIoChannelNames(std::vector<std::string>& arrTagNames)const;
@@ -211,9 +225,9 @@ public:
 	bool IoGetAinValue(int32u nOccNo, fp64 &fValue, int8u &nQuality) const;
 
 	// 设开出
-	bool FesSetDoutValue(int32u nOccNo, int8u Value, int8u nSource);
+	bool FesSetDoutValue(int32u nOccNo, int8u Value, const char *pszAppTagName);
 	// 写值
-	bool FesSetAoutValue(int32u nOccNo, fp64 Value, int32u nSource);
+	bool FesSetAoutValue(int32u nOccNo, fp64 Value, const char *pszAppTagName);
 
 	void IoDiagAlarm(int32u nChannleNo, int32u nDeviceNo, const char* pszAlarmTxt, TIMEPAK * pTm);
 	// 操作报警
@@ -222,6 +236,19 @@ public:
 	void IoRelayDiagAlarm(int32u nChannleNo, int32u nDeviceNo, const char* pszAlarmTxt, TIMEPAK * pTm);
 	// 通用的告警
 	void IoAlarmMsg(int32u nChannleNo, int32u nAlarmType, const char* pszAlarmTxt, TIMEPAK * pTm);
+
+	bool FesSetNodeValueImpl(DMSG *pMsg);
+	bool FesSetChannelValueImpl(DMSG *pMsg);
+	bool FesSetDeviceValueImpl(DMSG *pMsg);
+
+	bool FesSetAinValueImpl(DMSG *pMsg);
+	bool FesSetDinValueImpl(DMSG *pMsg);
+
+	bool FesSetAoutValueImpl(DMSG *pMsg);
+	bool FesSetDoutValueImpl(DMSG *pMsg);
+
+	bool FesSetUserVarValueImpl(DMSG *pMsg);
+	bool FesSetSysVarValueImpl(DMSG *pMsg);
 
 
 private:
@@ -233,6 +260,26 @@ private:
 	bool GetFesInfo(const char* szName);
 	//判断节点是否配置
 	bool IsNodeAdded(const QString& str,QDomElement nEle);
+
+	// 开出遥控的具体执行函数
+//	bool FesSetDoutValueImpl(int32u nOccNo, int8u Value, int8u nSource);
+	// 写值
+//	bool FesSetAoutValueImpl(int32u nOccNo, fp64 Value, int32u nSource);
+
+
+	bool SetNodeAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+	bool SetIoChannelAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+	bool SetFtChannelAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+
+	bool SetDeviceAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+	bool SetAinAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+	bool SetDinAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+
+	bool SetAoutAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+	bool SetDoutAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+
+	bool SetUserVarAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+	bool SetSysVarAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
 
 private:
 	QString m_szNodeName;
@@ -390,69 +437,69 @@ private:
 
 	// 共享内存中的各数据的排布
 	NODE*  m_pNodes;
-	unsigned int m_nNodeCount;
+	size_t m_nNodeCount;
 
 	CHANNEL *m_pChannels;
-	unsigned int m_nChannelCount;
+	size_t m_nChannelCount;
 	//! 记住地址，方便遍历
 	std::vector<CHANNEL*> m_arrChannelPtrs;
 	std::vector<std::shared_ptr<CIoChannel>> m_arrIoChannels;
 
 	DEVICE *m_pDevices;
-	unsigned int m_nDeviceCount;
+	size_t m_nDeviceCount;
 	std::vector<DEVICE*> m_arrDevices;
 
 	AIN *m_pAins;
-	unsigned int m_nAinCount;
+	size_t m_nAinCount;
 	std::vector<AIN*> m_arrAins;
 
 	DIN *m_pDins;
-	unsigned int m_nDinCount;
+	size_t m_nDinCount;
 	std::vector<DIN*> m_arrDins;
 
 	DOUT *m_pDouts;
-	unsigned int m_nDoutCount;
+	size_t m_nDoutCount;
 	std::vector<DOUT*> m_arrDouts;
 
 	AOUT *m_pAouts;
-	unsigned int m_nAoutCount;
+	size_t m_nAoutCount;
 	std::vector<AOUT*> m_arrAouts;
 
 
 	TRANSFORM_LINEAR *m_pLinear;
-	unsigned int m_nLinearCount;
+	size_t m_nLinearCount;
 	std::vector<TRANSFORM_LINEAR*> m_arrLinears;
 
 	TRANSFORM_NONLINEAR *m_pNonLinear;
-	unsigned int m_nNonLinearCount;
+	size_t m_nNonLinearCount;
 	std::vector<TRANSFORM_NONLINEAR*> m_arrNonLinears;
 
 	AIN_ALARM  *m_pAinAlarm;
-	unsigned int m_nAinAlarmCount;
+	size_t m_nAinAlarmCount;
 	std::vector<AIN_ALARM*> m_arrAinAlarms;
 
 	AIN_ALARM_LIMIT *m_pAinAlarmLimit;
-	unsigned int m_nAinAlarmLimitCount;
+	size_t m_nAinAlarmLimitCount;
 	std::vector<AIN_ALARM_LIMIT*> m_arrAinAlarmLimits;
 
 	DIN_ALARM *m_pDinAlarm;
-	unsigned int m_nDinAlarmCount;
+	size_t m_nDinAlarmCount;
 	std::vector<DIN_ALARM*> m_arrDinAlarms;
 
 	DIN_ALARM_LIMIT *m_pDinAlarmLimit;
-	unsigned int m_nDinAlarmLimitCount;
+	size_t m_nDinAlarmLimitCount;
 	std::vector<DIN_ALARM_LIMIT*> m_arrDinAlarmLimits;
 
 	VARDATA * m_pSystemVariable;
-	unsigned int m_nSystemVariableCount;
+	size_t m_nSystemVariableCount;
 	std::vector<VARDATA* >m_arrSystemVariables;
 
 	VARDATA*  m_pUserVariable;
-	unsigned int m_nUserVariableCount;
+	size_t m_nUserVariableCount;
 	std::vector<VARDATA* >m_arrUserVariables;
 
 	FT_CHANNEL *m_pFTChannels;
-	unsigned int m_nFTChannelCount;
+	size_t m_nFTChannelCount;
 	//! 记住地址，方便遍历
 	std::vector<CHANNEL*> m_arrFTChannelPtrs;
 	std::vector<std::shared_ptr<CFTChannel>> m_arrFTChannels;
@@ -496,6 +543,9 @@ private:
 	StringUnit * m_pStringUnit;
 	std::vector< std::shared_ptr < StringUnit > > m_arrStrings;
 	std::unordered_map<int32u, std::shared_ptr < StringUnit > >m_MapNo2String;
+
+
+	std::shared_ptr<CTagAttMgr> m_pTagAttrMgr;
 private:
 	bool BuildStringNamePool(const char* pszPathName);
 	bool LoadStringNamePool(const char* pszPatnName);

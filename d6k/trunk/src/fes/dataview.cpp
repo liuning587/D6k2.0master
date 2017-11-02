@@ -927,77 +927,77 @@ void CDataView::SetGridData(DataModel_PTR ptrData, int nOccNo)
 
 	switch (m_nDataType)
 	{
-	case PROJECT_TYPE:              //工程信息 显示所有通道信息
-	{
-		ptrData->SetRowCount(m_pMemDB->GetChannelMgr()->GetChannelCount());
-		ptrData->SetColumnCount(m_szHeaderList.size());
-	}
-	break;
-	case CHANNEL_GERENAL_TYPE:      //通道信息显示当下装置和点信息
-	{
-		ptrData->SetRowCount(m_szHeaderList.size());
-		ptrData->SetColumnCount(1);
-		break;
-	}
-	case DEVICE_GERENAL_TYPE:       //装置信息页显示当下所有点信息
-	{
-		ptrData->SetRowCount(m_szHeaderList.size());
-		ptrData->SetColumnCount(1);
-		break;
-	}
-	case AIN_TYPE:
-	{
-		CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
-		Q_ASSERT(pDev);
-		if (pDev)
+		case PROJECT_TYPE:              //工程信息 显示所有通道信息
 		{
-			ptrData->SetRowCount(pDev->GetAinCount());
+			ptrData->SetRowCount(m_pMemDB->GetChannelMgr()->GetChannelCount());
+			ptrData->SetColumnCount(m_szHeaderList.size());
 		}
-		ptrData->SetColumnCount(m_szHeaderList.size());
 		break;
-	}
-	case DIN_TYPE:
-	{
-		CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
-		Q_ASSERT(pDev);
-		if (pDev)
+		case CHANNEL_GERENAL_TYPE:      //通道信息显示当下装置和点信息
 		{
-			ptrData->SetRowCount(pDev->GetDinCount());
+			ptrData->SetRowCount(m_szHeaderList.size());
+			ptrData->SetColumnCount(1);
+			break;
 		}
-		ptrData->SetColumnCount(m_szHeaderList.size());
-		break;
-	}
-	case AOUT_TYPE:
-	{
-		CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
-		Q_ASSERT(pDev);
-		if (pDev)
+		case DEVICE_GERENAL_TYPE:       //装置信息页显示当下所有点信息
 		{
-			ptrData->SetRowCount(pDev->GetAoutCount());
+			ptrData->SetRowCount(m_szHeaderList.size());
+			ptrData->SetColumnCount(1);
+			break;
 		}
-		ptrData->SetColumnCount(m_szHeaderList.size());
-		break;
-	}
-	case DOUT_TYPE:
-	{
-		CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
-		Q_ASSERT(pDev);
-		if (pDev)
+		case AIN_TYPE:
 		{
-			ptrData->SetRowCount(pDev->GetDoutCount());
+			CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
+			Q_ASSERT(pDev);
+			if (pDev)
+			{
+				ptrData->SetRowCount(pDev->GetAinCount());
+			}
+			ptrData->SetColumnCount(m_szHeaderList.size());
+			break;
 		}
-		ptrData->SetColumnCount(m_szHeaderList.size());
-		break;
-	}
-	case USERVAR_TYPE:
-		ptrData->SetRowCount(m_pMemDB->GetUserVarCount());
-		ptrData->SetColumnCount(m_szHeaderList.size());
-		break;
-	case SYSVAR_TYPE:
-		ptrData->SetRowCount(m_pMemDB->GetSysVarCount());
-		ptrData->SetColumnCount(m_szHeaderList.size());
-	default:
-		break;
+		case DIN_TYPE:
+		{
+			CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
+			Q_ASSERT(pDev);
+			if (pDev)
+			{
+				ptrData->SetRowCount(pDev->GetDinCount());
+			}
+			ptrData->SetColumnCount(m_szHeaderList.size());
+			break;
+		}
+		case AOUT_TYPE:
+		{
+			CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
+			Q_ASSERT(pDev);
+			if (pDev)
+			{
+				ptrData->SetRowCount(pDev->GetAoutCount());
+			}
+			ptrData->SetColumnCount(m_szHeaderList.size());
+			break;
+		}
+		case DOUT_TYPE:
+		{
+			CDevicePtr pDev = m_pMemDB->GetChannelMgr()->GetDevice(nOccNo - 1);
+			Q_ASSERT(pDev);
+			if (pDev)
+			{
+				ptrData->SetRowCount(pDev->GetDoutCount());
+			}
+			ptrData->SetColumnCount(m_szHeaderList.size());
+			break;
+		}
+		case USERVAR_TYPE:
+			ptrData->SetRowCount(m_pMemDB->GetUserVarCount());
+			ptrData->SetColumnCount(m_szHeaderList.size());
+			break;
+		case SYSVAR_TYPE:
+			ptrData->SetRowCount(m_pMemDB->GetSysVarCount());
+			ptrData->SetColumnCount(m_szHeaderList.size());
+		default:
+			break;
 	}
 }
 

@@ -96,8 +96,10 @@ bool CScadaDB::InitMailBoxInfo(std::vector<std::shared_ptr<SAPP>>& arrApps)
 
 	return  true;
 }
+
 void CScadaDB::Run()
 {
+	// 启动每个app
 	for (auto iter:m_arrApps)
 	{
 		iter->Start(m_szPathName.toStdString().c_str());
@@ -106,7 +108,11 @@ void CScadaDB::Run()
 
 void CScadaDB::Shutdown()
 {
-
+	// 停止每个app
+	for (auto iter : m_arrApps)
+	{
+		iter->Stop(m_szPathName.toStdString().c_str());
+	}
 }
 
 /*! \fn void  CScadaDB::CreateMailBoxs()

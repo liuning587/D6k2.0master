@@ -138,8 +138,10 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\fespub\data_size.cpp" />
     <ClCompile Include="aoutoperdialog.cpp" />
     <ClCompile Include="base_module.cpp" />
+    <ClCompile Include="base_task.cpp" />
     <ClCompile Include="datamodel.cpp" />
     <ClCompile Include="dataview.cpp" />
     <ClCompile Include="db_api.cpp" />
@@ -183,10 +185,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="io_channel.cpp" />
+    <ClCompile Include="message_executer.cpp" />
+    <ClCompile Include="message_pump.cpp" />
     <ClCompile Include="nb_svc.cpp" />
     <ClCompile Include="netmsg_packer.cpp" />
     <ClCompile Include="parseproj.cpp" />
     <ClCompile Include="..\fespub\sharemem.cpp" />
+    <ClCompile Include="red_task.cpp" />
     <ClCompile Include="sys_var.cpp" />
     <ClCompile Include="..\fespub\tag_att.cpp" />
   </ItemGroup>
@@ -201,6 +206,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DUSE_QT_SHM -DMODULE_LIB -DQT_WIDGETS_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -D_WINDLL "-I." "-I.\GeneratedFiles" "-I.\GeneratedFiles\Debug" "-I.\..\..\include" "-I.\..\..\include\alarmwin" "-I.\..\..\thirdparty\ACE_wrappers" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtCore" "-I.\GeneratedFiles\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\GeneratedFiles" "-I$(NOINHERIT)\." "-IC:\Program Files (x86)\Visual Leak Detector\include" "-Ic:\boost"</Command>
     </CustomBuild>
+    <ClInclude Include="..\fespub\data_size.h" />
     <ClInclude Include="base_module.h" />
     <CustomBuild Include="datamodel.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DUSE_QT_SHM -DMODULE_LIB -DQT_WIDGETS_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_GUI_LIB -DQT_CORE_LIB -D_WINDLL  "-I." "-I.\GeneratedFiles" "-I.\GeneratedFiles\Debug" "-I.\..\..\include" "-I.\..\..\include\alarmwin" "-I.\..\..\thirdparty\ACE_wrappers" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtCore" "-I.\GeneratedFiles\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\GeneratedFiles" "-I$(NOINHERIT)\." "-IC:\Program Files (x86)\Visual Leak Detector\include" "-Ic:\boost"</Command>
@@ -222,6 +228,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
+    <ClInclude Include="base_task.h" />
     <ClInclude Include="db_svc.h" />
     <ClInclude Include="dbg_svc.h" />
     <CustomBuild Include="doutoperdialog.h">
@@ -247,8 +254,11 @@
     <ClInclude Include="GeneratedFiles\ui_doutoperdialog.h" />
     <ClInclude Include="io_channel.h" />
     <ClInclude Include="..\..\include\log\log.h" />
+    <ClInclude Include="message_executer.h" />
+    <ClInclude Include="message_pump.h" />
     <ClInclude Include="nb_svc.h" />
     <ClInclude Include="netmsg_packer.h" />
+    <ClInclude Include="red_task.h" />
     <ClInclude Include="rtnet_msg_packer.h" />
     <ClInclude Include="..\fespub\sharemem.h" />
     <ClInclude Include="singleton.h" />

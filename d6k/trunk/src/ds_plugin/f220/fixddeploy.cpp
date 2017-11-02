@@ -10,9 +10,13 @@
 #include <QMenu>
 #include <QTimer>
 #include <QDir>
+#include <QLineEdit>
+#include <QDialog>
+#include <QPushButton>
 #include "commthread.h"
 #include "devicestudio/main_module.h"
 #include "fixddeploy.h"
+#include "ftu_module.h"
 
 CFixdDeploy::CFixdDeploy(CCommThread *pCommunicate, IMainModule *pCore, const QString &deviceName, QWidget *parent)
 	: QWidget(parent),
@@ -133,7 +137,7 @@ void CFixdDeploy::AnalyseXmlData(QIODevice *pDevice)
 				s_DevItems devItemData;
 
 				devItemData.valueType = xmlReader.attributes().value("valueType").toString();
-				devItemData.defalutVlaue = xmlReader.attributes().value("defValue").toString().toInt();
+				devItemData.defalutVlaue = xmlReader.attributes().value("defValue").toString();
 				devItemData.ItemName = xmlReader.attributes().value("name").toString();
 				devItemData.ItemDesc = xmlReader.attributes().value("desc").toString();
 				devItemData.rangeFt = xmlReader.attributes().value("range").toString();
@@ -253,12 +257,12 @@ void CFixdDeploy::InitDataToTable(QTableWidget* pCurrentTable, const s_DevParam 
 		pCurrentTable->setItem(iInsertRow, 0, item0);
 
 		QTableWidgetItem *item1 = new QTableWidgetItem;
-		item1->setText(QString::number(devParamDatas.lstItems.at(i).defalutVlaue));
+		item1->setText(devParamDatas.lstItems.at(i).defalutVlaue);
 		item1->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
 		pCurrentTable->setItem(iInsertRow, 1, item1);
 
 		QTableWidgetItem *item2 = new QTableWidgetItem;
-		item2->setText(QString::number(devParamDatas.lstItems.at(i).defalutVlaue));
+		item2->setText(devParamDatas.lstItems.at(i).defalutVlaue);
 		item2->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 		pCurrentTable->setItem(iInsertRow, 2, item2);
 
@@ -544,6 +548,26 @@ void CFixdDeploy::Slot_SendUpdatePoints()
 		return;
 	}
 
+	QLineEdit *ppLineDit = new QLineEdit;
+	QPushButton *m_pPushBtn = new QPushButton;
+	m_pPushBtn->setText(tr("确定"));
+	QDialog *pWgt = new QDialog;
+	QHBoxLayout *layout = new QHBoxLayout(pWgt);
+	layout->addWidget(ppLineDit);
+	layout->addWidget(m_pPushBtn);
+	connect(m_pPushBtn, SIGNAL(clicked()), pWgt, SLOT(accept()));
+
+	if (pWgt->exec())
+	{
+		GetFtuModel()->SetFixCode(ppLineDit->text().toInt());
+	}
+	else
+	{
+		return;
+	}
+
+	pWgt->deleteLater();
+
 	if (pClickAct->parent() != nullptr)
 	{
 		QTableWidget *pCurrentTableWgt = qobject_cast<QTableWidget*>(pClickAct->parent());
@@ -589,6 +613,9 @@ void CFixdDeploy::Slot_SendUpdatePoints()
 	}
 }
 //发送所有的点      请求数据
+#include <QLineEdit>
+#include <QPushButton>
+#include "ftu_module.h"
 void CFixdDeploy::Slot_SendUpateAllPoints()
 {
 	//
@@ -598,6 +625,27 @@ void CFixdDeploy::Slot_SendUpateAllPoints()
 	{
 		return;
 	}
+
+	QLineEdit *ppLineDit = new QLineEdit;
+	QPushButton *m_pPushBtn = new QPushButton;
+	m_pPushBtn->setText(tr("确定"));
+	QDialog *pWgt = new QDialog;
+	QHBoxLayout *layout = new QHBoxLayout(pWgt);
+	layout->addWidget(ppLineDit);
+	layout->addWidget(m_pPushBtn);
+	connect(m_pPushBtn, SIGNAL(clicked()), pWgt, SLOT(accept()));
+
+	if (pWgt->exec())
+	{
+		GetFtuModel()->SetFixCode(ppLineDit->text().toInt());
+	}
+	else
+	{
+		return;
+	}
+
+	pWgt->deleteLater();
+
 
 	if (pClickAct->parent() != nullptr)
 	{
@@ -645,6 +693,26 @@ void CFixdDeploy::Slot_SendCurrentPoints()
 	{
 		return;
 	}
+
+	QLineEdit *ppLineDit = new QLineEdit;
+	QPushButton *m_pPushBtn = new QPushButton;
+	m_pPushBtn->setText(tr("确定"));
+	QDialog *pWgt = new QDialog;
+	QHBoxLayout *layout = new QHBoxLayout(pWgt);
+	layout->addWidget(ppLineDit);
+	layout->addWidget(m_pPushBtn);
+	connect(m_pPushBtn, SIGNAL(clicked()), pWgt, SLOT(accept()));
+
+	if (pWgt->exec())
+	{
+		GetFtuModel()->SetFixCode(ppLineDit->text().toInt());
+	}
+	else
+	{
+		return;
+	}
+
+	pWgt->deleteLater();
 
 	if (pClickAct->parent() != nullptr)
 	{
@@ -696,6 +764,26 @@ void CFixdDeploy::Slot_SendCurrentAllPoints()
 	{
 		return;
 	}
+
+	QLineEdit *ppLineDit = new QLineEdit;
+	QPushButton *m_pPushBtn = new QPushButton;
+	m_pPushBtn->setText(tr("确定"));
+	QDialog *pWgt = new QDialog;
+	QHBoxLayout *layout = new QHBoxLayout(pWgt);
+	layout->addWidget(ppLineDit);
+	layout->addWidget(m_pPushBtn);
+	connect(m_pPushBtn, SIGNAL(clicked()), pWgt, SLOT(accept()));
+
+	if (pWgt->exec())
+	{
+		GetFtuModel()->SetFixCode(ppLineDit->text().toInt());
+	}
+	else
+	{
+		return;
+	}
+
+	pWgt->deleteLater();
 
 	if (pClickAct->parent() != nullptr)
 	{

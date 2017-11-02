@@ -40,9 +40,9 @@ CTagAttMgr::CTagAttMgr()
 	m_arrNodeAtts[Node_NameOccNo] = { Node_NameOccNo,offsetof(NODE,NameOccNo), DT_DWORD, ATT_NO, 0, ATT_RO, "NameOccNo", "" };
 	m_arrNodeAtts[Node_SlaveOccNo] = { Node_SlaveOccNo,offsetof(NODE,SlaveOccNo), DT_DWORD, ATT_NO, 0, ATT_RO, "SlaveOccNo", "" };
 
-	m_arrNodeAtts[Node_IsDefined] = { Node_IsDefined, offsetof(NODE,IsDefined), DT_CHAR, ATT_RW, 0, ATT_RO, "IsDefined", "" };
+	m_arrNodeAtts[Node_IsDefined] = { Node_IsDefined, offsetof(NODE,IsDefined), DT_CHAR, ATT_NO, 0, ATT_RO, "IsDefined", "" };
 	m_arrNodeAtts[Node_ScanEnable] = { Node_ScanEnable, offsetof(NODE,ScanEnable), DT_CHAR, ATTR_IN_OUT, 0, ATT_RW, "ScanEnable", "" };
-	m_arrNodeAtts[Node_Init] = { Node_Init, offsetof(NODE,Init), DT_CHAR, ATT_RW, 0, ATT_RO, "Init", "" };
+	m_arrNodeAtts[Node_Init] = { Node_Init, offsetof(NODE,Init), DT_CHAR, ATT_NO, 0, ATT_RO, "Init", "" };
 	m_arrNodeAtts[Node_Quality] = { Node_Quality, offsetof(NODE,Quality), DT_CHAR, ATT_QUA, 0, ATT_RO, "Quality", "" };
 	m_arrNodeAtts[Node_RedState] = { Node_RedState, offsetof(NODE,RedState), DT_CHAR, ATT_STATE, 0, ATT_RO, "RedState", "" };
 	m_arrNodeAtts[Node_NodeType]   = { Node_NodeType, offsetof(NODE,NodeType), DT_CHAR, ATT_RW, 0, ATT_RO, "NodeType", "" };
@@ -51,7 +51,7 @@ CTagAttMgr::CTagAttMgr()
 	m_arrNodeAtts[Node_Net1State] = { Node_Net1State, offsetof(NODE,Net1State), DT_SHORT, ATT_NETA, 0, ATT_RO, "Net1State", "" };
 	m_arrNodeAtts[Node_Net2State] = { Node_Net2State, offsetof(NODE,Net2State), DT_SHORT, ATT_NETB, 0, ATT_RO, "Net2State", "" };
 	
-	m_arrNodeAtts[Node_PointCount] = { Node_PointCount, offsetof(NODE,PointCount), DT_DWORD, ATT_RW, 0, ATT_RO, "PointCount", "" };
+	m_arrNodeAtts[Node_PointCount] = { Node_PointCount, offsetof(NODE,PointCount), DT_DWORD, ATT_NO, 0, ATT_RO, "PointCount", "" };
 	m_arrNodeAtts[Node_Net1IPAddr] = { Node_Net1IPAddr, offsetof(NODE,NetAIPAddr), DT_DWORD, ATT_NETA, 0, ATT_RO, "Net1IPAddr", "" };
 	m_arrNodeAtts[Node_Net2IPAddr] = { Node_Net2IPAddr, offsetof(NODE,NetBIPAddr), DT_DWORD, ATT_NETB, 0, ATT_RO, "Net2IPAddr", "" };
 	
@@ -71,7 +71,7 @@ CTagAttMgr::CTagAttMgr()
 	m_arrChannelAtts[Channel_IsDefined]  = { Channel_IsDefined, offsetof(CHANNEL,IsDefined), DT_CHAR, ATT_NO, 0, ATT_RO, "IsDefined", "" };
 	
 	m_arrChannelAtts[Channel_ScanEnable] = { Channel_ScanEnable, offsetof(CHANNEL,ScanEnable), DT_CHAR, ATTR_IN_OUT, 0, ATT_RW, "", "" };
-	m_arrChannelAtts[Channel_Init]       = { Channel_Init, offsetof(CHANNEL,Init), DT_CHAR, 0, ATT_RW, 0, "Init", "" };
+	m_arrChannelAtts[Channel_Init]       = { Channel_Init, offsetof(CHANNEL,Init), DT_CHAR, 0, ATT_NO, 0, "Init", "" };
 	m_arrChannelAtts[Channel_Quality]    = { Channel_Quality, offsetof(CHANNEL,Quality), DT_CHAR, ATT_QUA, 0, ATT_RO, "Quality", "" };
 	m_arrChannelAtts[Channel_PeerQuality] = { Channel_PeerQuality, offsetof(CHANNEL,PeerQuality), DT_CHAR, ATT_QUA, 0, ATT_RO, "PeerQuality", "" };
 	m_arrChannelAtts[Channel_Heartbeat] = { Channel_Heartbeat, offsetof(CHANNEL,Heartbeat), DT_CHAR, ATT_NO, 0, ATT_RO, "Heartbeat", "" };
@@ -92,18 +92,18 @@ CTagAttMgr::CTagAttMgr()
 	//DEVICE
 	/*ÐòºÅ      Æ«ÒÆ          ÀàÐÍ      ATT    ARRAY   RW        PathName[28]  PathNz[...]   */
 	m_arrDevAtts[Device_Begin] = { Device_Begin, sizeof DEVICE, DT_NULL, ATT_NO, 0, ATT_RO, "", "" };
-	m_arrDevAtts[Device_OccNo] = { Device_OccNo,  offsetof(DEVICE,OccNo), DT_DWORD, ATT_RO, 0, ATT_RO, "OccNo", "" };
-	m_arrDevAtts[Device_NameOccNo] = { Device_NameOccNo, offsetof(DEVICE,NameOccNo), DT_DWORD, ATT_RO, 0, ATT_RO, "NameOccNo", "" };
-	m_arrDevAtts[Device_NodeOccNo] = { Device_NodeOccNo, offsetof(DEVICE,NodeOccNo), DT_DWORD, ATT_RO, 0, ATT_RO, "NodeOccNo", "" };
-	m_arrDevAtts[Device_ChannelOccNo] = { Device_ChannelOccNo, offsetof(DEVICE,ChannelOccNo), DT_DWORD, ATT_RO, 0, ATT_RO, "ChannelOccNo", "" };
+	m_arrDevAtts[Device_OccNo] = { Device_OccNo,  offsetof(DEVICE,OccNo), DT_DWORD, ATT_NO, 0, ATT_RO, "OccNo", "" };
+	m_arrDevAtts[Device_NameOccNo] = { Device_NameOccNo, offsetof(DEVICE,NameOccNo), DT_DWORD, ATT_NO, 0, ATT_RO, "NameOccNo", "" };
+	m_arrDevAtts[Device_NodeOccNo] = { Device_NodeOccNo, offsetof(DEVICE,NodeOccNo), DT_DWORD, ATT_NO, 0, ATT_RO, "NodeOccNo", "" };
+	m_arrDevAtts[Device_ChannelOccNo] = { Device_ChannelOccNo, offsetof(DEVICE,ChannelOccNo), DT_DWORD, ATT_NO, 0, ATT_RO, "ChannelOccNo", "" };
 	m_arrDevAtts[Device_ModelOccNo] = { Device_ModelOccNo,offsetof(DEVICE,ModelOccNo), DT_DWORD, ATT_RO, 0, ATT_RO, "ModelOccNo", "" };
-	m_arrDevAtts[Device_Type] = { Device_Type, offsetof(DEVICE,Type), DT_CHAR, ATT_RW, 0, ATT_RO, "Type", "" };
-	m_arrDevAtts[Device_Pad1] = { Device_Pad1, offsetof(DEVICE,Pad1), DT_CHAR, ATT_RW, 0, ATT_RO, "Pad1", "" };
-	m_arrDevAtts[Device_Pad2] = { Device_Pad2,offsetof(DEVICE,Pad2), DT_WORD,ATT_RW, 0, ATT_RO, "Pad2", "" };
-	m_arrDevAtts[Device_Heartbeat] = { Device_Heartbeat, offsetof(DEVICE,Heartbeat), DT_DWORD, ATT_RW, 0, ATT_RO, "Heartbeat", "" };
+	m_arrDevAtts[Device_Type] = { Device_Type, offsetof(DEVICE,Type), DT_CHAR, ATT_NO, 0, ATT_RO, "Type", "" };
+	m_arrDevAtts[Device_Pad1] = { Device_Pad1, offsetof(DEVICE,Pad1), DT_CHAR, ATT_NO, 0, ATT_RO, "Pad1", "" };
+	m_arrDevAtts[Device_Pad2] = { Device_Pad2,offsetof(DEVICE,Pad2), DT_WORD,ATT_NO, 0, ATT_RO, "Pad2", "" };
+	m_arrDevAtts[Device_Heartbeat] = { Device_Heartbeat, offsetof(DEVICE,Heartbeat), DT_DWORD, ATT_NO, 0, ATT_RO, "Heartbeat", "" };
 	m_arrDevAtts[Device_Address] = { Device_Address, offsetof(DEVICE,Address), DT_CHAR, ATT_RW, 0, ATT_RO, "Address", "" };
-	m_arrDevAtts[Device_Extention] = { Device_Extention, offsetof(DEVICE,Extention), DT_CHAR, ATT_RW, 0, ATT_RO, "Extention", "" };
-	m_arrDevAtts[Device_IsDefined] = { Device_IsDefined,offsetof(DEVICE,IsDefined), DT_CHAR, ATT_RW, 0, ATT_RO, "IsDefined", "" };
+	m_arrDevAtts[Device_Extention] = { Device_Extention, offsetof(DEVICE,Extention), DT_CHAR, ATT_NO, 0, ATT_RO, "Extention", "" };
+	m_arrDevAtts[Device_IsDefined] = { Device_IsDefined,offsetof(DEVICE,IsDefined), DT_CHAR, ATT_NO, 0, ATT_RO, "IsDefined", "" };
 	
 	m_arrDevAtts[Device_ScanEnable] = { Device_ScanEnable,offsetof(DEVICE,ScanEnable), DT_CHAR, ATTR_IN_OUT, 0, ATT_RO, "ScanEnable", "" };
 	m_arrDevAtts[Device_Init] = { Device_Init, offsetof(DEVICE,Init), DT_CHAR, ATT_NO, 0, ATT_RO, "Init", "" };

@@ -152,6 +152,21 @@
     <ClCompile Include="ft_channel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="message_executer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="message_pump.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fespub\data_size.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="red_task.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="base_task.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base_module.h">
@@ -230,6 +245,21 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ft_channel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="message_executer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="message_pump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fespub\data_size.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="red_task.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="base_task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

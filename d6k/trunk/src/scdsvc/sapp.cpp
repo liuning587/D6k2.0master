@@ -132,7 +132,12 @@ bool CScadaApp::Start(const char * pszName)
 
 		if (m_fnStartApp)
 		{
-			m_fnStartApp(pszName, m_pData->OccNo,0,nullptr);
+			int nRet = m_fnStartApp(pszName, m_pData->OccNo, 0, nullptr);
+			if (nRet != 0)
+			{
+				szLog = "Start [ " + QString("Programme:%1").arg(m_pData->ProgramName) + " ] failed.";
+				LogString(szLog.toStdString().c_str(), 1);
+			}
 		}
 		else
 		{

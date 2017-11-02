@@ -33,6 +33,8 @@ enum
 	DIN_TYPE=2,
 	USERVAR_TYPE = 3,
 	SYSVAR_TYPE = 4,
+	SYNC_CHANNEL_TYPE = 5,
+	SYNC_DEVICE_TYPE= 6 ,
 	MAX_DATA_TYPE=100,
 };
 
@@ -49,9 +51,8 @@ enum
 	COT_INCIDENT_ENENT=2,    //突发事件
 };
 
-class DATA_BASE
+struct DATA_BASE
 {
-public:
 	int m_nType;                      //!<传送数据类型
 	int m_nCount;                     //!<传送数据数目
 	int m_nNodeOccNo;                 //!<节点OccNo
@@ -62,6 +63,8 @@ public:
 
 const int32u MAX_AIN_COUNT = (MAX_NETBUS_PAK_LENGTH - sizeof DATA_BASE)/ (sizeof (FP64) );
 const int32u MAX_DIN_COUNT = (MAX_NETBUS_PAK_LENGTH - sizeof DATA_BASE) / (sizeof(int8u));
+//最多能传输的通道以及设备状态个数
+const int32u MAX_NUM_COUNT = (MAX_NETBUS_PAK_LENGTH - sizeof DATA_BASE) / (sizeof(SyncDataInfo));
 
 class CAIN_DATA : public DATA_BASE
 {
@@ -79,7 +82,7 @@ public:
 		m_nCount = nCount;
 	}
 
-	int GetAinCount()
+	int GetAinCount()const
 	{
 		return m_nCount;
 	}
@@ -104,7 +107,7 @@ public:
 		m_nStartOccNo = nOccNo;
 	}
 
-	int GetPakLength()
+	int GetPakLength()const
 	{
 		return sizeof fp64 * m_nCount + sizeof DATA_BASE;
 	}
@@ -188,8 +191,8 @@ public:
 	}
 	size_t PackageAllRTData(unsigned char *pInBuff, size_t nBuffLen)
 	{
-		size_t nDiCount = 0;
-		int32u nNodeOccNO = m_pDBSvc->GetMyNodeOccNo();
+		int32u nDiCount = 0;
+		int32u nNodeOccNO = static_cast<int32u>(m_pDBSvc->GetMyNodeOccNo());
 
 		if (m_pDBSvc->IsDBAlive(0))
 		{
@@ -205,11 +208,11 @@ public:
 		if (m_pDBSvc == nullptr)
 			return;
 
-		size_t nEstimateCount = 0;
+		int32u nEstimateCount = 0;
 
 		if (m_pDBSvc->IsDBAlive(0))
 		{
-			size_t nCount = m_pDBSvc->GetDINCount();
+			int32u nCount = static_cast<int32u> (m_pDBSvc->GetDINCount());
 
 			if (nCount > 0)
 			{
@@ -228,7 +231,7 @@ public:
 				}
 				else
 				{
-					for (int i = 0; i < nEstimateCount - 1; ++i)
+					for (int32u i = 0; i < nEstimateCount - 1; ++i)
 					{
 						arrNums.push_back(std::make_pair(1 + i*MAX_AIN_COUNT, MAX_AIN_COUNT));
 					}
@@ -245,11 +248,11 @@ public:
 		if (m_pDBSvc == nullptr)
 			return ;
 
-		size_t nEstimateCount = 0;
+		int32u nEstimateCount = 0;
 
 		if (m_pDBSvc->IsDBAlive(0))
 		{
-			size_t nCount = m_pDBSvc->GetDINCount();
+			int32u nCount = static_cast<int32u> (m_pDBSvc->GetDINCount());
 
 			if (nCount>0)
 			{
@@ -268,7 +271,7 @@ public:
 				}
 				else
 				{
-					for (int i = 0; i < nEstimateCount-1;++i)
+					for (int32u i = 0; i < nEstimateCount-1;++i)
 					{
 						arrNums.push_back(std::make_pair(1+i*MAX_DIN_COUNT,MAX_DIN_COUNT));
 					}
@@ -286,11 +289,11 @@ public:
 		if (m_pDBSvc == nullptr)
 			return;
 
-		size_t nEstimateCount = 0;
+		int32u nEstimateCount = 0;
 
 		if (m_pDBSvc->IsDBAlive(0))
 		{
-			int nCount = m_pDBSvc->GetUserVarCount();
+			int32u nCount = static_cast<int32u> (m_pDBSvc->GetUserVarCount());
 
 			if (nCount > 0)
 			{
@@ -309,7 +312,7 @@ public:
 				}
 				else
 				{
-					for (int i = 0; i < nEstimateCount - 1; ++i)
+					for (int32u i = 0; i < nEstimateCount - 1; ++i)
 					{
 						arrNums.push_back(std::make_pair(1 + i*MAX_AIN_COUNT, MAX_AIN_COUNT));
 					}
@@ -327,11 +330,11 @@ public:
 		if (m_pDBSvc == nullptr)
 			return;
 
-		size_t nEstimateCount = 0;
+		int32u nEstimateCount = 0;
 
 		if (m_pDBSvc->IsDBAlive(0))
 		{
-			int nCount = m_pDBSvc->GetSysVarCount();
+			int32u nCount = static_cast<int32u>(m_pDBSvc->GetSysVarCount());
 
 			if (nCount > 0)
 			{
@@ -350,7 +353,7 @@ public:
 				}
 				else
 				{
-					for (int i = 0; i < nEstimateCount - 1; ++i)
+					for (int32u i = 0; i < nEstimateCount - 1; ++i)
 					{
 						arrNums.push_back(std::make_pair(1 + i*MAX_AIN_COUNT, MAX_AIN_COUNT));
 					}
@@ -361,6 +364,88 @@ public:
 		}
 	}
 
+	void GetChannelPackageNum(std::vector<std::pair<int32u, int32u > >& arrNums)
+	{
+		assert(m_pDBSvc);
+
+		if (m_pDBSvc == nullptr)
+			return;
+
+		int32u nEstimateCount = 0;
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			int32u nCount = static_cast<int32u>(m_pDBSvc->GetChannelCount());
+
+			if (nCount > 0)
+			{
+				if ((nCount % MAX_NUM_COUNT))
+				{
+					nEstimateCount = nCount / MAX_NUM_COUNT + 1;
+				}
+				else
+				{
+					nEstimateCount = nCount / MAX_NUM_COUNT;
+				}
+
+				if (nEstimateCount == 1)
+				{
+					arrNums.push_back(std::make_pair(1, nCount));
+				}
+				else
+				{
+					for (int32u i = 0; i < nEstimateCount - 1; ++i)
+					{
+						arrNums.push_back(std::make_pair(1 + i * MAX_NUM_COUNT, MAX_NUM_COUNT));
+					}
+					//最后一帧
+					arrNums.push_back(std::make_pair(1 + (nEstimateCount - 1) * MAX_NUM_COUNT, nCount % MAX_NUM_COUNT));
+				}
+			}
+		}
+	}
+	
+	void GetDevicePackageNum(std::vector<std::pair<int32u, int32u > >& arrNums)
+	{
+		assert(m_pDBSvc);
+
+		if (m_pDBSvc == nullptr)
+			return;
+
+		int32u nEstimateCount = 0;
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			int32u nCount = static_cast<int32u>(m_pDBSvc->GetDeviceCount());
+
+			if (nCount > 0)
+			{
+				if ((nCount % MAX_NUM_COUNT))
+				{
+					nEstimateCount = nCount / MAX_NUM_COUNT + 1;
+				}
+				else
+				{
+					nEstimateCount = nCount / MAX_NUM_COUNT;
+				}
+
+				if (nEstimateCount == 1)
+				{
+					arrNums.push_back(std::make_pair(1, nCount));
+				}
+				else
+				{
+					for (int32u i = 0; i < nEstimateCount - 1; ++i)
+					{
+						arrNums.push_back(std::make_pair(1 + i*MAX_NUM_COUNT, MAX_NUM_COUNT));
+					}
+					//最后一帧
+					arrNums.push_back(std::make_pair(1 + (nEstimateCount - 1) * MAX_NUM_COUNT, nCount % MAX_NUM_COUNT));
+				}
+			}
+		}
+	}
+	
 	size_t PackageAllDI(EMSG_BUF *pInBuff, std::pair<int32u, int32u> data, int32u& nSize)
 	{
 		assert(m_pDBSvc);
@@ -404,15 +489,15 @@ public:
 			pInBuff->MsgDataSize = sizeof EMSG_BUF_HEAD  + sizeof DATA_BASE + nNumCount * sizeof int8u;
 			memset(pInBuff->BuffData, 0, sizeof DATA_BASE + nNumCount * sizeof int8u);
 			
-			DATA_BASE dataBase;
-			dataBase.m_nCount = nNumCount;
-			dataBase.m_nNodeOccNo = nNodeOccNO;
-			dataBase.m_nStartOccNo = nOccNo;
-			dataBase.m_nTransReason = COT_NORMAL_ASYNC;
-			dataBase.m_nType = DIN_TYPE;
-			dataBase.m_nExtraLen = nNumCount * sizeof int8u;
+			DATA_BASE db;
+			db.m_nCount = nNumCount;
+			db.m_nNodeOccNo = nNodeOccNO;
+			db.m_nStartOccNo = nOccNo;
+			db.m_nTransReason = COT_NORMAL_ASYNC;
+			db.m_nType = DIN_TYPE;
+			db.m_nExtraLen = nNumCount * sizeof int8u;
 
-			memcpy(pInBuff->BuffData,&dataBase,sizeof DATA_BASE);
+			memcpy(pInBuff->BuffData,&db,sizeof DATA_BASE);
 			
 			std::vector<int8u> arrValues;
 
@@ -732,6 +817,166 @@ public:
 			}
 			memcpy(&pInBuff->BuffData[sizeof DATA_BASE], arrValues.data(), sizeof fp64 * arrValues.size());
 			nSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof FP64;
+		}
+
+		return 0;
+	}
+
+	size_t PackageSyncChannelInfo(EMSG_BUF *pInBuff, std::pair<int32u, int32u> data, int32u& nSize)
+	{
+		assert(m_pDBSvc);
+		if (m_pDBSvc == nullptr)
+		{
+			return 0;
+		}
+
+		Q_ASSERT(pInBuff);
+		if (pInBuff == nullptr)
+		{
+			return 0;
+		}
+
+		int32u nOccNo = data.first;
+		Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+
+		if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		{
+			return 0;
+		}
+
+		int32u nNumCount = data.second;
+		Q_ASSERT(nNumCount <= MAX_NUM_COUNT);
+		if (nNumCount > MAX_NUM_COUNT)
+		{
+			return 0;
+		}
+
+		int32u nNodeOccNO = m_pDBSvc->GetMyNodeOccNo();
+
+		Q_ASSERT(nNodeOccNO != INVALID_OCCNO && nNodeOccNO < MAX_NODE_OCCNO);
+
+		if (nNodeOccNO == INVALID_OCCNO || nNodeOccNO > MAX_NODE_OCCNO)
+		{
+			return 0;
+		}
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			pInBuff->MsgDataSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof SyncDataInfo;
+			memset(pInBuff->BuffData, 0, sizeof DATA_BASE + nNumCount * sizeof SyncDataInfo);
+
+			DATA_BASE dataBase;
+			dataBase.m_nCount = nNumCount;
+			dataBase.m_nNodeOccNo = nNodeOccNO;
+			dataBase.m_nStartOccNo = nOccNo;
+			dataBase.m_nTransReason = COT_NORMAL_ASYNC;
+			dataBase.m_nType = SYNC_CHANNEL_TYPE;
+			dataBase.m_nExtraLen = nNumCount * sizeof SyncDataInfo;
+
+			memcpy(pInBuff->BuffData, &dataBase, sizeof DATA_BASE);
+
+			std::vector<SyncDataInfo> arrValues;
+
+			for (int32u i = nOccNo; i < nOccNo + nNumCount; i++)
+			{
+				CHANNEL* pFB = m_pDBSvc->GetChannelByIndex(i - 1);
+				assert(pFB);
+
+				SyncDataInfo fVal;
+
+				if (!pFB)
+				{
+					continue;
+				}
+				fVal.Init = pFB->Init;
+				fVal.IsDefined = pFB->IsDefined;
+				fVal.Quality = pFB->Quality;
+				fVal.ScanEnable = pFB->ScanEnable;
+
+				arrValues.push_back(fVal);
+			}
+			memcpy(&pInBuff->BuffData[sizeof DATA_BASE], arrValues.data(), sizeof SyncDataInfo * arrValues.size());
+			nSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof SyncDataInfo ;
+		}
+
+		return 0;
+	}
+
+	size_t PackageSyncDeviceInfo(EMSG_BUF *pInBuff, std::pair<int32u, int32u> data, int32u& nSize)
+	{
+		assert(m_pDBSvc);
+		if (m_pDBSvc == nullptr)
+		{
+			return 0;
+		}
+
+		Q_ASSERT(pInBuff);
+		if (pInBuff == nullptr)
+		{
+			return 0;
+		}
+
+		int32u nOccNo = data.first;
+		Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+
+		if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+		{
+			return 0;
+		}
+
+		int32u nNumCount = data.second;
+		Q_ASSERT(nNumCount <= MAX_NUM_COUNT);
+		if (nNumCount > MAX_NUM_COUNT)
+		{
+			return 0;
+		}
+
+		int32u nNodeOccNO = m_pDBSvc->GetMyNodeOccNo();
+
+		Q_ASSERT(nNodeOccNO != INVALID_OCCNO && nNodeOccNO < MAX_NODE_OCCNO);
+
+		if (nNodeOccNO == INVALID_OCCNO || nNodeOccNO > MAX_NODE_OCCNO)
+		{
+			return 0;
+		}
+
+		if (m_pDBSvc->IsDBAlive(0))
+		{
+			pInBuff->MsgDataSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof SyncDataInfo;
+			memset(pInBuff->BuffData, 0, sizeof DATA_BASE + nNumCount * sizeof SyncDataInfo);
+
+			DATA_BASE dataBase;
+			dataBase.m_nCount = nNumCount;
+			dataBase.m_nNodeOccNo = nNodeOccNO;
+			dataBase.m_nStartOccNo = nOccNo;
+			dataBase.m_nTransReason = COT_NORMAL_ASYNC;
+			dataBase.m_nType = SYNC_DEVICE_TYPE;
+			dataBase.m_nExtraLen = nNumCount * sizeof SyncDataInfo;
+
+			memcpy(pInBuff->BuffData, &dataBase, sizeof DATA_BASE);
+
+			std::vector<SyncDataInfo> arrValues;
+
+			for (int32u i = nOccNo; i < nOccNo + nNumCount; i++)
+			{
+				DEVICE* pFB = m_pDBSvc->GetDeviceByIndex(i - 1);
+				assert(pFB);
+
+				SyncDataInfo fVal;
+
+				if (!pFB)
+				{
+					continue;
+				}
+				fVal.Init = pFB->Init;
+				fVal.IsDefined = pFB->IsDefined;
+				fVal.Quality = pFB->Quality;
+				fVal.ScanEnable = pFB->ScanEnable;
+
+				arrValues.push_back(fVal);
+			}
+			memcpy(&pInBuff->BuffData[sizeof DATA_BASE], arrValues.data(), sizeof SyncDataInfo * arrValues.size());
+			nSize = sizeof EMSG_BUF_HEAD + sizeof DATA_BASE + nNumCount * sizeof SyncDataInfo;
 		}
 
 		return 0;

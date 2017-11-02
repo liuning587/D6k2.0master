@@ -69,13 +69,6 @@
        </property>
       </column>
      </widget>
-     <widget class="QTreeWidget" name="treeWidget">
-      <column>
-       <property name="text">
-        <string>DetailInfomation</string>
-       </property>
-      </column>
-     </widget>
     </widget>
    </item>
   </layout>

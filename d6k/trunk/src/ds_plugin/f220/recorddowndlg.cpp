@@ -6,6 +6,7 @@ CRecordDownDlg::CRecordDownDlg(QWidget *parent)
     : QDialog(parent)
 {
     ui.setupUi(this);
+	setWindowFlags(Qt::WindowCloseButtonHint);
     m_pFtp = nullptr;
     ui.progressBar->setHidden(true);
 

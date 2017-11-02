@@ -68,6 +68,8 @@ public:
 
 	bool GetUserVarByOccNo(int32u nOccNo,VARDATA ** pData);
 	bool GetSysVarByOccNo(int32u nOccNo,VARDATA ** pData);
+	bool GetChannelByOccNo(int32u nOccNo,CHANNEL** pData);
+	bool GetDeviceByOccNo(int32u nOccNo, DEVICE** pData);
 	//Ô¤¹ÀÄÚ´æ´óÐ¡
 	size_t EstimateMemSize();
 	size_t BuildDB(char* pAddr);

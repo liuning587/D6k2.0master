@@ -84,6 +84,8 @@ enum DRAW_TOOLS
 
 	//三方控件
 	DRAW_ADDR_CURE_PLOT,   //曲线图
+	//3d surface
+	DRAW_3D_SURFACE,          //3d曲面图
 };
 
 class CBaseWidget;

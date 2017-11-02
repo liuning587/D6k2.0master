@@ -34,7 +34,7 @@ CSoeHistoryWgt::CSoeHistoryWgt(CNetManager *pNetManager, QWidget *parent)
 
 	connect(m_pFtp, SIGNAL(dataTransferProgress(qint64, qint64)), this, SLOT(Slot_DownloadProcess(qint64, qint64)));
 	connect(m_pFtp, SIGNAL(done(bool)), this, SLOT(Slot_FtpDone(bool)));
-
+	connect(m_pFtp,SIGNAL(stateChanged(int)),this,SLOT(Slot_FtpStateChange(int)));
 
 	m_pDownLoadFile = new QFile(this);
 
@@ -183,6 +183,16 @@ void CSoeHistoryWgt::Slot_ContextMenuRequest(const QPoint & point)
 	{
 		QMenu *pMenu = new QMenu((QTableWidget*)sender());
 
+
+		if ((QTableWidget*)sender() == ui.tableWidget_5)
+		{
+			QAction *pOpenAct = new QAction(QStringLiteral("打开"), (QTableWidget*)sender());
+			pMenu->addAction(pOpenAct);
+
+			connect(pOpenAct, SIGNAL(triggered()), this, SLOT(Slot_OpenWaveFile()));
+
+		}
+
 		QAction *pClearAct = new QAction(QStringLiteral("清空"), (QTableWidget*)sender());
 		pMenu->addAction(pClearAct);
 
@@ -239,16 +249,20 @@ void CSoeHistoryWgt::Slot_ItemDoubleClicked(QTableWidgetItem *item)
 	{
 		return;
 	}
+
+	GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("准备连接FTP服务器:%1").arg(m_strFtpIp).toLocal8Bit().data(), 1);
+
 	if (m_pFtp->state() == QFtp::Unconnected)
 	{
 		m_pFtp->connectToHost(m_strFtpIp, 21);
 		m_pFtp->login(m_strFtpUserName, m_strFtpPassWd);
 		m_pFtp->setTransferMode(QFtp::Active);
-
 	}
-
-
-	FtpDownLoadFile(m_lstFilelst.first());
+	else
+	{
+		FtpDownLoadFile(m_lstFilelst.first());
+	}
+	
 }
 
 void CSoeHistoryWgt::Slot_DownloadProcess(qint64 bytesReceived, qint64 bytesTotal)
@@ -272,6 +286,8 @@ void CSoeHistoryWgt::Slot_DownloadProcess(qint64 bytesReceived, qint64 bytesTota
 
 		if (m_lstFilelst.count() == 0)
 		{
+			GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("FTP文件下载成功").toLocal8Bit().data(), 1);
+
 			//全部下载完成
 			StartWaveExe(qApp->applicationDirPath() + LB_FILE_DIR + strFilename + ".cfg");
 			return;
@@ -388,6 +404,50 @@ void CSoeHistoryWgt::SaveHistoryEvent()
 
 	QMessageBox::information(this, QStringLiteral("导出数据成功"), QStringLiteral("信息已保存在%1！").arg(fileName), QStringLiteral("确定"));
 	file.close();
+}
+
+void CSoeHistoryWgt::Slot_OpenWaveFile()
+{
+	if (ui.tableWidget_5->currentRow() > -1)
+	{
+		Slot_ItemDoubleClicked(ui.tableWidget_5->currentItem());
+	}
+	else
+	{
+		QMessageBox::warning(this,QStringLiteral("错误"),QStringLiteral("请选择一行进行操作!"));
+	}
+}
+
+void CSoeHistoryWgt::Slot_FtpStateChange(int nIndex)
+{
+
+	if (nIndex == QFtp::Unconnected)
+	{
+		GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("当前FTP状态:Unconnected").toLocal8Bit().data(),1);
+	}
+	else if (nIndex == QFtp::HostLookup)
+	{
+		GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("当前FTP状态:HostLookup").toLocal8Bit().data(), 1);
+	}
+	else if (nIndex == QFtp::Connecting)
+	{
+		GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("当前FTP状态:Connecting").toLocal8Bit().data(), 1);
+	}
+	else if (nIndex == QFtp::Connected)
+	{
+		GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("当前FTP状态:Connected").toLocal8Bit().data(), 1);
+	}
+	else if (nIndex == QFtp::LoggedIn)
+	{
+		GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("当前FTP状态:LoggedIn").toLocal8Bit().data(), 1);
+
+		FtpDownLoadFile(m_lstFilelst.first());
+	}
+	else if (nIndex == QFtp::Closing)
+	{
+		GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("当前FTP状态:Closing").toLocal8Bit().data(), 1);
+	}
+
 }
 
 //处理action数据
@@ -786,6 +846,9 @@ void CSoeHistoryWgt::FtpDownLoadFile(const QString &strFilename)
 
 	if (m_pDownLoadFile->open(QIODevice::WriteOnly))
 	{
+		//开始加载
+		GetBreakerModuleApi()->WriteRunLog(tr("Breaker").toLocal8Bit().data(), QStringLiteral("开始下载FTP服务器文件:%1").arg(m_strDir + strFilename).toLocal8Bit().data(), 1);
+
 		m_pFtp->get(m_strDir + strFilename, m_pDownLoadFile);
 	}
 

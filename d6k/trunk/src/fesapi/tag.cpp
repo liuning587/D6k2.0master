@@ -639,6 +639,21 @@ bool CFesDin::NormalUpdate(int8u nValue, int8u nQua, bool bCpuEnable, TIMEPAK * 
 		m_pFB->NegValue = (int8u)!m_pFB->Value;
 		return false;
 	}
+
+	bool bValChanged = false;
+	bool bQuaChanged = false;
+	if (m_pFB->NeedTranmitFlag == FES_YES)
+	{
+		if (m_pFB->RawValue != nValue)
+		{
+			bValChanged = true;
+		}
+		if (m_pFB->Quality != nQua)
+		{
+			bQuaChanged = true;
+		}
+	}
+	
 	m_pFB->RawValue = nValue;
 	m_pFB->Quality = nQua;
 
@@ -664,6 +679,20 @@ bool CFesDin::NormalUpdate(int8u nValue, int8u nQua, bool bCpuEnable, TIMEPAK * 
 		if (m_pAlarm)
 		{
 			m_pAlarm->Update(m_pFB,nValue, m_pFB->Quality, pTm);
+		}
+	}
+
+	if (m_pFB->NeedTranmitFlag == FES_YES)
+	{
+		if (bValChanged)
+		{// 如果测值发生变化
+
+
+		}
+		if (bQuaChanged)
+		{// 如果品质发生变化
+
+
 		}
 	}
 	

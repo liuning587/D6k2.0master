@@ -28,7 +28,7 @@ size_t CDbSvc::BuildNodeDB(char* pAddress)
 		std::memcpy(pNode, i.get(), sizeof(NODE));
 		nIndex++;
 	}
-	m_pMagicMem->NodeCount = m_arrTempNodes.size();
+	m_pMagicMem->NodeCount = static_cast<int32u> (m_arrTempNodes.size());
 
 	m_nNodeCount = m_arrTempNodes.size();
 
@@ -72,9 +72,9 @@ size_t CDbSvc::BuildChannelDB(char* pAddress)
 
 	m_nChannelCount = m_arrTempChannels.size();
 
-	m_pMagicMem->ChannelCount = m_arrTempChannels.size();
+	m_pMagicMem->ChannelCount = static_cast<int32u>(m_arrTempChannels.size());
 
-	m_pMagicMem->ChannelTableOffset = m_pMagicMem->NodeTableOffset + sizeof(NODE)*m_arrTempNodes.size();
+	m_pMagicMem->ChannelTableOffset = m_pMagicMem->NodeTableOffset + static_cast<int32u> (sizeof(NODE)*m_arrTempNodes.size());
 
 	return sizeof CHANNEL * m_arrChannelPtrs.size();
 }
@@ -110,9 +110,9 @@ size_t CDbSvc::BuildDeviceDB(char* pAddress)
 	}
 	m_nDeviceCount = m_arrTempDevices.size();
 
-	m_pMagicMem->DeviceCount = m_arrTempDevices.size();
+	m_pMagicMem->DeviceCount = static_cast<int32u> (m_arrTempDevices.size());
 
-	m_pMagicMem->DeviceTableOffset = m_pMagicMem->ChannelTableOffset + sizeof(CHANNEL)*m_arrTempChannels.size();
+	m_pMagicMem->DeviceTableOffset = m_pMagicMem->ChannelTableOffset + static_cast<int32u> (sizeof(CHANNEL)*m_arrTempChannels.size());
 
 	return sizeof DEVICE * m_arrTempDevices.size();
 }
@@ -154,9 +154,9 @@ size_t CDbSvc::BuildAinDB(char* pAddress)
 	}
 	m_nAinCount = m_arrTempAins.size();
 
-	m_pMagicMem->AinCount = m_arrTempAins.size();
+	m_pMagicMem->AinCount = static_cast<int32u>(m_arrTempAins.size());
 
-	m_pMagicMem->AinTableOffset = m_pMagicMem->DinAlarmLimtTableOffset + sizeof(DIN_ALARM_LIMIT)*m_arrTempDinLimitAlarms.size();
+	m_pMagicMem->AinTableOffset = m_pMagicMem->DinAlarmLimtTableOffset + static_cast<int32u>(sizeof(DIN_ALARM_LIMIT)*m_arrTempDinLimitAlarms.size());
 
 	return sizeof AIN * m_arrTempAins.size();
 }
@@ -200,9 +200,9 @@ size_t CDbSvc::BuildDinDB(char* pAddress)
 
 	m_nDinCount = m_arrTempDins.size();
 
-	m_pMagicMem->DinCount = m_arrTempDins.size();
+	m_pMagicMem->DinCount = static_cast<int32u>(m_arrTempDins.size());
 
-	m_pMagicMem->DinTableOffset = m_pMagicMem->AinTableOffset + sizeof(AIN)*m_arrTempAins.size();
+	m_pMagicMem->DinTableOffset = m_pMagicMem->AinTableOffset + static_cast<int32u>(sizeof(AIN)*m_arrTempAins.size());
 
 	return sizeof DIN * m_arrTempDins.size();
 }
@@ -237,9 +237,9 @@ size_t CDbSvc::BuildAoutDB(char* pAddress)
 	}
 	m_nAoutCount = m_arrTempAouts.size();
 
-	m_pMagicMem->AoutCount = m_arrTempAouts.size();
+	m_pMagicMem->AoutCount = static_cast<int32u>(m_arrTempAouts.size());
 
-	m_pMagicMem->AoutTableOffset = m_pMagicMem->DinTableOffset + sizeof(DIN)*m_arrTempDins.size();
+	m_pMagicMem->AoutTableOffset = m_pMagicMem->DinTableOffset + static_cast<int32u>(sizeof(DIN)*m_arrTempDins.size());
 
 	return sizeof AOUT * m_arrTempAouts.size();
 }
@@ -276,9 +276,9 @@ size_t CDbSvc::BuildDoutDB(char* pAddress)
 
 	m_nDoutCount = m_arrTempDouts.size();
 
-	m_pMagicMem->DoutCount = m_arrTempDouts.size();
+	m_pMagicMem->DoutCount = static_cast<int32u>(m_arrTempDouts.size());
 
-	m_pMagicMem->DountTableOffset = m_pMagicMem->AoutTableOffset + sizeof(AOUT)*m_arrTempAouts.size();
+	m_pMagicMem->DountTableOffset = m_pMagicMem->AoutTableOffset + static_cast<int32u>(sizeof(AOUT)*m_arrTempAouts.size());
 
 	return sizeof DOUT * m_arrTempDouts.size();
 }
@@ -369,9 +369,9 @@ size_t CDbSvc::BuildAinAlarmDB(char* pAddress)
 
 	m_nAinAlarmCount = m_arrAinAlarms.size();
 
-	m_pMagicMem->AinAlarmCount = m_arrAinAlarms.size();
+	m_pMagicMem->AinAlarmCount = static_cast<int32u>(m_arrAinAlarms.size());
 
-	m_pMagicMem->AinAlarmTableOffset = m_pMagicMem->DeviceTableOffset + sizeof(DEVICE)*m_arrTempDevices.size();
+	m_pMagicMem->AinAlarmTableOffset = m_pMagicMem->DeviceTableOffset + static_cast<int32u>(sizeof(DEVICE)*m_arrTempDevices.size());
 
 	//创建模拟量限制表
 	nIndex = 0;
@@ -395,9 +395,9 @@ size_t CDbSvc::BuildAinAlarmDB(char* pAddress)
 
 	m_nAinAlarmLimitCount = m_arrTempAinLimitAlarms.size();
 
-	m_pMagicMem->AinAlarmLimitCount = m_arrTempAinLimitAlarms.size();
+	m_pMagicMem->AinAlarmLimitCount = static_cast<int32u>(m_arrTempAinLimitAlarms.size());
 
-	m_pMagicMem->AinAlarmTableOffset = m_pMagicMem->AinAlarmTableOffset + sizeof(AIN_ALARM)*m_arrAinAlarms.size();
+	m_pMagicMem->AinAlarmTableOffset = m_pMagicMem->AinAlarmTableOffset + static_cast<int32u>(sizeof(AIN_ALARM)*m_arrAinAlarms.size());
 
 	//offset
 	return sizeof AIN_ALARM * m_arrTempAinAlarms.size() + sizeof AIN_ALARM_LIMIT* m_arrTempAinLimitAlarms.size();
@@ -436,9 +436,9 @@ size_t CDbSvc::BuildDinAlarmDB(char* pAddress)
 
 	m_nDinAlarmCount = m_arrTempDinAlarms.size();
 
-	m_pMagicMem->DinAlarmCount = m_arrTempDinAlarms.size();
+	m_pMagicMem->DinAlarmCount = static_cast<int32u>(m_arrTempDinAlarms.size());
 
-	m_pMagicMem->DinAlarmTableOffset = m_pMagicMem->AinAlarmLimitTableOffset + sizeof(AIN_ALARM)*m_arrAinAlarms.size();
+	m_pMagicMem->DinAlarmTableOffset = m_pMagicMem->AinAlarmLimitTableOffset + static_cast<int32u>(sizeof(AIN_ALARM)*m_arrAinAlarms.size());
 
 	//创建开关量限值告警
 
@@ -463,9 +463,9 @@ size_t CDbSvc::BuildDinAlarmDB(char* pAddress)
 
 	m_nDinAlarmLimitCount = m_arrDinAlarmLimits.size();
 
-	m_pMagicMem->DinAlarmLimitCount = m_arrDinAlarmLimits.size();
+	m_pMagicMem->DinAlarmLimitCount = static_cast<int32u>(m_arrDinAlarmLimits.size());
 
-	m_pMagicMem->DinAlarmLimtTableOffset = m_pMagicMem->DinAlarmTableOffset + sizeof(DIN_ALARM)*m_arrDinAlarms.size();
+	m_pMagicMem->DinAlarmLimtTableOffset = m_pMagicMem->DinAlarmTableOffset + static_cast<int32u>(sizeof(DIN_ALARM)*m_arrDinAlarms.size());
 
 	//offset
 	return sizeof DIN_ALARM * m_arrTempDinAlarms.size() + sizeof  DIN_ALARM_LIMIT * m_arrTempDinLimitAlarms.size();
@@ -502,9 +502,9 @@ size_t CDbSvc::BuildLinearDB(char* pAddress)
 
 	m_nLinearCount = m_arrTempTransFormLinears.size();
 
-	m_pMagicMem->LinearCount = m_arrTempTransFormLinears.size();
+	m_pMagicMem->LinearCount = static_cast<int32u>(m_arrTempTransFormLinears.size());
 
-	m_pMagicMem->LinearTableOffset = m_pMagicMem->DountTableOffset + sizeof(AOUT)*m_arrTempDouts.size();
+	m_pMagicMem->LinearTableOffset = m_pMagicMem->DountTableOffset + static_cast<int32u>(sizeof(AOUT)*m_arrTempDouts.size());
 
 	return sizeof TRANSFORM_LINEAR * m_arrTempTransFormLinears.size();
 }
@@ -541,9 +541,9 @@ size_t CDbSvc::BuildNonLinearDB(char* pAddress)
 
 	m_nNonLinearCount = m_arrTempTransFormNonLinears.size();
 
-	m_pMagicMem->NonLinearCount = m_arrTempTransFormNonLinears.size();
+	m_pMagicMem->NonLinearCount = static_cast<int32u>(m_arrTempTransFormNonLinears.size());
 
-	m_pMagicMem->NonLinearTableOffset = m_pMagicMem->LinearTableOffset + sizeof(TRANSFORM_LINEAR)*m_arrTempTransFormLinears.size();
+	m_pMagicMem->NonLinearTableOffset = m_pMagicMem->LinearTableOffset + static_cast<int32u>(sizeof(TRANSFORM_LINEAR)*m_arrTempTransFormLinears.size());
 
 	return sizeof TRANSFORM_NONLINEAR * m_arrTempTransFormNonLinears.size();
 }
@@ -572,9 +572,9 @@ size_t CDbSvc::BuildSystemVariableDB(char* pAddress)
 
 	m_nSystemVariableCount = m_arrSystemVariables.size();
 
-	m_pMagicMem->SystemVariableCount = m_arrSystemVariables.size();
+	m_pMagicMem->SystemVariableCount = static_cast<int32u>(m_arrSystemVariables.size());
 
-	m_pMagicMem->SystemVariableOffSet = m_pMagicMem->NonLinearTableOffset + sizeof(TRANSFORM_NONLINEAR)*m_arrTempTransFormNonLinears.size();
+	m_pMagicMem->SystemVariableOffSet = m_pMagicMem->NonLinearTableOffset + static_cast<int32u>(sizeof(TRANSFORM_NONLINEAR)*m_arrTempTransFormNonLinears.size());
 
 	return sizeof VARDATA * m_arrTempSystemVariables.size();
 }
@@ -602,9 +602,9 @@ size_t CDbSvc::BuildUserVariableDB(char* pAddress)
 
 	m_nUserVariableCount = m_arrUserVariables.size();
 
-	m_pMagicMem->UserVariableCount = m_arrUserVariables.size();
+	m_pMagicMem->UserVariableCount = static_cast<int32u>(m_arrUserVariables.size());
 
-	m_pMagicMem->UserVariableOffset = m_pMagicMem->SystemVariableOffSet + sizeof(VARDATA)*m_arrTempSystemVariables.size();
+	m_pMagicMem->UserVariableOffset = m_pMagicMem->SystemVariableOffSet + static_cast<int32u>(sizeof(VARDATA)*m_arrTempSystemVariables.size());
 
 	return sizeof VARDATA * m_arrTempUserVariables.size();
 }

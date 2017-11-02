@@ -31,34 +31,41 @@
 #include <QObject> 
 #include <QString>  
 
-CFesDB::CFesDB( )
+CFesDB::CFesDB()
 {
 	m_bStopFlag = false;
-	m_nEstimateSize = 0; 
+	m_nEstimateSize = 0;
+	InitFuncArrary();
+}
+
+CFesDB::CFesDB(CScadaApi * pScada) :CMemDB(pScada)
+{
+	m_bStopFlag = false;
+	m_nEstimateSize = 0;
 	InitFuncArrary();
 }
 
 CFesDB::~CFesDB(void)
 {
-	
+
 }
 
 /*! \fn bool CFesDB::Initialize(RUN_MODE mode)
-********************************************************************************************************* 
-** \brief CFesDB::Initialize 
+*********************************************************************************************************
+** \brief CFesDB::Initialize
 ** \details 初始化
-** \return bool 
-** \author LiJin 
-** \date 2016年9月1日 
-** \note  
+** \return bool
+** \author LiJin
+** \date 2016年9月1日
+** \note
 ********************************************************************************************************/
 bool CFesDB::Initialize(const char *pszDataPath, unsigned int nMode, int32u nOccNo)
 {
 	QString szLog;
 	m_nOccNo = nOccNo;
 
-	Q_ASSERT(nOccNo!=INVALID_OCCNO && nOccNo <MAX_NODE_OCCNO );
-	if (nOccNo==INVALID_OCCNO || nOccNo >MAX_NODE_OCCNO)
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo < MAX_NODE_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_NODE_OCCNO)
 	{
 		return false;
 	}
@@ -70,7 +77,7 @@ bool CFesDB::Initialize(const char *pszDataPath, unsigned int nMode, int32u nOcc
 	{
 		szLog = QObject::tr("Start project...");
 	}
-	
+
 	LogMsg(szLog.toStdString().c_str(), 0);
 
 	return true;
@@ -78,11 +85,11 @@ bool CFesDB::Initialize(const char *pszDataPath, unsigned int nMode, int32u nOcc
 
 void CFesDB::Run()
 {
- 
+
 }
 
 void CFesDB::Shutdown()
-{ 
+{
 
 }
 
@@ -107,7 +114,7 @@ bool CFesDB::GetDinValue(int32u nOccNo, CVariant & val, int8u &nQuality)const
 
 	val = m_pDins[nOccNo - 1].Value;
 	nQuality = m_pDins[nOccNo - 1].Quality;
-	 
+
 	return true;
 }
 
@@ -127,6 +134,23 @@ bool CFesDB::GetChannelByOccNo(int32u nOccNo, CHANNEL** pChannel)
 	return true;
 }
 
+bool CFesDB::GetDeviceByOccNo(int32u nOccNo, DEVICE** pData)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo < MAX_CHANNEL_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_CHANNEL_OCCNO)
+	{
+		return false;
+	}
+	if (nOccNo > m_nDeviceCount)
+	{
+		return false;
+	}
+	*pData = &m_pDevices[nOccNo - 1];
+
+	return true;
+}
+
+/*
 bool CFesDB::GetDeviceByOccNo(int32u nOccNo, DEVICE** pDev)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo < MAX_DEVICE_OCCNO);
@@ -134,16 +158,16 @@ bool CFesDB::GetDeviceByOccNo(int32u nOccNo, DEVICE** pDev)
 	{
 		return false;
 	}
-	if (nOccNo >m_nDeviceCount)
+	if (nOccNo > m_nDeviceCount)
 	{
 		return false;
 	}
-	*pDev = &m_pDevices[nOccNo-1];
+	*pDev = &m_pDevices[nOccNo - 1];
 
 	return true;
-}
+}*/
 
-bool  CFesDB::GetAinByOccNo(int32u nOccNo,AIN** pAin)
+bool  CFesDB::GetAinByOccNo(int32u nOccNo, AIN** pAin)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -153,7 +177,7 @@ bool  CFesDB::GetAinByOccNo(int32u nOccNo,AIN** pAin)
 	{
 		return false;
 	}
-	*pAin = &m_pAins[nOccNo-1];
+	*pAin = &m_pAins[nOccNo - 1];
 
 	return true;
 }
@@ -216,110 +240,108 @@ bool CFesDB::GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIA
 
 	switch (nIddType)
 	{
-	case IDD_CHANNEL:
-	{
-		Q_ASSERT(m_arrGetChannelRTDataFuncs[nFiledID]);
-		if (m_arrGetChannelRTDataFuncs[nFiledID])
+		case IDD_CHANNEL:
 		{
-			bRet = m_arrGetChannelRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetChannelRTDataFuncs[nFiledID]);
+			if (m_arrGetChannelRTDataFuncs[nFiledID])
+			{
+				bRet = m_arrGetChannelRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_DEVICE:
-	{
-		Q_ASSERT(m_arrGetDeviceRTDataFuncs[nFiledID]);
-		if (m_arrGetDeviceRTDataFuncs[nFiledID])
+		case IDD_DEVICE:
 		{
-			bRet = m_arrGetDeviceRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetDeviceRTDataFuncs[nFiledID]);
+			if (m_arrGetDeviceRTDataFuncs[nFiledID])
+			{
+				bRet = m_arrGetDeviceRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_AIN:
-	{
-		Q_ASSERT(m_arrGetAinRTDataFuncs[nFiledID]);
-		if (m_arrGetAinRTDataFuncs[nFiledID])
+		case IDD_AIN:
 		{
-			bRet = m_arrGetAinRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetAinRTDataFuncs[nFiledID]);
+			if (m_arrGetAinRTDataFuncs[nFiledID])
+			{
+				bRet = m_arrGetAinRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_DIN:
-	{
-		Q_ASSERT(m_arrGetDinRTDataFuncs[nFiledID]);
-		if (m_arrGetDinRTDataFuncs[nFiledID])
+		case IDD_DIN:
 		{
-			bRet = m_arrGetDinRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetDinRTDataFuncs[nFiledID]);
+			if (m_arrGetDinRTDataFuncs[nFiledID])
+			{
+				bRet = m_arrGetDinRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_AOUT:
-	{
-		Q_ASSERT(m_arrGetAoutRTDataFuncs[nFiledID]);
-		if (m_arrGetAoutRTDataFuncs[nFiledID])
+		case IDD_AOUT:
 		{
-			bRet = m_arrGetAoutRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetAoutRTDataFuncs[nFiledID]);
+			if (m_arrGetAoutRTDataFuncs[nFiledID])
+			{
+				bRet = m_arrGetAoutRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_DOUT:
-	{
-		Q_ASSERT(m_arrGetDoutRTDataFuncs[nFiledID]);
-		if (m_arrGetDoutRTDataFuncs[nFiledID])
+		case IDD_DOUT:
 		{
-			bRet = m_arrGetDoutRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetDoutRTDataFuncs[nFiledID]);
+			if (m_arrGetDoutRTDataFuncs[nFiledID])
+			{
+				bRet = m_arrGetDoutRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_USERVAR:
-	{
-		Q_ASSERT(m_arrGetUserVariablesFuncs[nFiledID]);
-		if (m_arrGetUserVariablesFuncs[nFiledID])
+		case IDD_USERVAR:
 		{
-			bRet = m_arrGetUserVariablesFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetUserVariablesFuncs[nFiledID]);
+			if (m_arrGetUserVariablesFuncs[nFiledID])
+			{
+				bRet = m_arrGetUserVariablesFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}		
-	case IDD_SYSVAR:
-	{
-		Q_ASSERT(m_arrGetSystemVariablesFuncs[nFiledID]);
-		if (m_arrGetSystemVariablesFuncs[nFiledID])
+		case IDD_SYSVAR:
 		{
-			bRet = m_arrGetSystemVariablesFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetSystemVariablesFuncs[nFiledID]);
+			if (m_arrGetSystemVariablesFuncs[nFiledID])
+			{
+				bRet = m_arrGetSystemVariablesFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
 
-	default:
-		Q_ASSERT(false);
-		bRet = false;
-		break;
+		default:
+			Q_ASSERT(false);
+			bRet = false;
+			break;
 	}
 
 	return bRet;
 }
 
-/*! \fn bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
-********************************************************************************************************* 
-** \brief CFesDB::PutRtData 
+/*! \fn bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName, void *pExt)
+*********************************************************************************************************
+** \brief CFesDB::PutRtData
 ** \details  关于写的属性（遥控 遥调 设置 设置相关状态等……）
-** \param nIddType 
-** \param nOccNo 
-** \param nFiledID 
-** \param pData 
-** \param pExt 
-** \param pSrc 
-** \return bool 
+** \param nIddType
+** \param nOccNo
+** \param nFiledID
+** \param pData
+** \param pExt
+** \param pSrc
+** \return bool
 ** \author xingzhibing
-** \date 2017年5月17日 
-** \note 
+** \date 2017年5月17日
+** \note
 ********************************************************************************************************/
-bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
 		return false;
-
-	bool bRet = false;
 
 	//! fixed by LiJin 2017.8.9
 	int32u nMyState = GetMyHostState();
@@ -334,64 +356,76 @@ bool CFesDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIA
 		return false;
 	}
 
+	bool bRet = false;
+
+	int32u nSrcAppOccNo = 0;
+	int32u nTempIddType = 0, nTempFiledID = 0;
+	bRet = GetOccNoByTagName(pszAppTagName, nTempIddType, nSrcAppOccNo, nTempFiledID);
+	Q_ASSERT(bRet);
+	if (bRet == false)
+	{// log
+
+	}
+	Q_ASSERT(nTempIddType == IDD_SAPP && nTempFiledID == 0);
+	//! todo: 此处不对，LiJin 2017.9.9
 	switch (nIddType)
 	{
-	case IDD_CHANNEL:
-	{
-		break;
-	}
-	case IDD_DEVICE:
-	{
-		break;
-	}
-	case IDD_AIN:
-	{
-		break;
-	}
-	case IDD_DIN:
-	{
-		break;
-	}
-	case IDD_AOUT:
-	{
-		Q_ASSERT(m_arrAoutSetFunctions[nFiledID]);
-		if (m_arrAoutSetFunctions[nFiledID])
+		case IDD_CHANNEL:
 		{
-			bRet = m_arrAoutSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+			break;
 		}
-		break;
-	}
-	case IDD_DOUT:
-	{
-		Q_ASSERT(m_arrDoutSetFunctions[nFiledID]);
-		if (m_arrDoutSetFunctions[nFiledID])
+		case IDD_DEVICE:
 		{
-			bRet = m_arrDoutSetFunctions[nFiledID](nOccNo,pData,pExt,pSrc);
+			break;
 		}
-		break;
-	}
-	case IDD_USERVAR:
-		break;
-	case IDD_SYSVAR:
-		break;
-	default:
-		Q_ASSERT(false);
-		bRet = false;
-		break;
+		case IDD_AIN:
+		{
+			break;
+		}
+		case IDD_DIN:
+		{
+			break;
+		}
+		case IDD_AOUT:
+		{
+			Q_ASSERT(m_arrAoutSetFunctions[nFiledID]);
+			if (m_arrAoutSetFunctions[nFiledID])
+			{
+				bRet = m_arrAoutSetFunctions[nFiledID](nOccNo, pData, nSrcAppOccNo, pExt);
+			}
+			break;
+		}
+		case IDD_DOUT:
+		{
+			Q_ASSERT(m_arrDoutSetFunctions[nFiledID]);
+			if (m_arrDoutSetFunctions[nFiledID])
+			{
+				bRet = m_arrDoutSetFunctions[nFiledID](nOccNo, pData, nSrcAppOccNo, pExt);
+			}
+			break;
+		}
+		case IDD_USERVAR:
+			break;
+		case IDD_SYSVAR:
+			break;
+		default:
+			Q_ASSERT(false);
+			bRet = false;
+			break;
 	}
 
 	return bRet;
 }
 
 /*! \fn bool CFesDB::LoadMem(unsigned char* pAddr)
-********************************************************************************************************* 
-** \brief CFesDB::LoadMem 
-** \details 
-** \param pAddr 
-** \return bool 
+*********************************************************************************************************
+** \brief CFesDB::LoadMem
+** \details
+** \param pAddr
+** \return bool
 ** \author xingzhibing
-** \date 2017年2月12日 
-** \note 
+** \date 2017年2月12日
+** \note
 ********************************************************************************************************/
 bool CFesDB::LoadMem(unsigned char* pAddr)
 {
@@ -448,10 +482,10 @@ bool CFesDB::LoadMem(unsigned char* pAddr)
 	nSize = CreateAinLimitAlarm((unsigned char*)pAddr);
 	pAddr += nSize;
 
-	nSize = CreateDinAlarm((unsigned char* )pAddr);
+	nSize = CreateDinAlarm((unsigned char*)pAddr);
 	pAddr += nSize;
 
-	nSize = CreateDinLimitAlarm((unsigned char* )pAddr);
+	nSize = CreateDinLimitAlarm((unsigned char*)pAddr);
 	pAddr += nSize;
 
 	nSize = CreateSystemVariable((unsigned char*)pAddr);
@@ -720,7 +754,7 @@ size_t CFesDB::CreateDinLimitAlarm(unsigned char* pAddr)
 		}
 		m_arrDinAlarmLimits.push_back(&m_pDinAlarmLimit[i]);
 	}
-	return m_nDinAlarmLimitCount* sizeof DIN_ALARM_LIMIT;
+	return m_nDinAlarmLimitCount * sizeof DIN_ALARM_LIMIT;
 }
 
 size_t CFesDB::CreateSystemVariable(unsigned char* pAddr)
@@ -747,7 +781,7 @@ size_t CFesDB::CreateSystemVariable(unsigned char* pAddr)
 		}
 		m_arrSystemVariables.push_back(&m_pSystemVariable[i]);
 	}
-	return m_nSystemVariableCount* sizeof VARDATA;
+	return m_nSystemVariableCount * sizeof VARDATA;
 }
 
 size_t CFesDB::CreateUserVariable(unsigned char* pAddr)
@@ -774,7 +808,7 @@ size_t CFesDB::CreateUserVariable(unsigned char* pAddr)
 		}
 		m_arrUserVariables.push_back(&m_pUserVariable[i]);
 	}
-	return m_nUserVariableCount* sizeof VARDATA;
+	return m_nUserVariableCount * sizeof VARDATA;
 }
 
 void CFesDB::InitFuncArrary()
@@ -793,7 +827,7 @@ void CFesDB::InitFuncArrary()
 
 	m_arrGetAinRTDataFuncs[ATT_VALUE] = std::bind(&CFesDB::GetAinValEx, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAinRTDataFuncs[ATT_SIGNAL_VALUE] = std::bind(&CFesDB::GetAinSignalValEx, this, std::placeholders::_1, std::placeholders::_2);
-	
+
 	m_arrGetAinRTDataFuncs[ATT_MANSET] = std::bind(&CFesDB::GetAinManSet, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAinRTDataFuncs[ATT_MINOUTPUT] = std::bind(&CFesDB::GetAinLowOutPut, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAinRTDataFuncs[ATT_MAXOUTPUT] = std::bind(&CFesDB::GetAinHighOutPut, this, std::placeholders::_1, std::placeholders::_2);
@@ -834,15 +868,15 @@ void CFesDB::InitFuncArrary()
 }
 
 /*! \fn bool CFesDB::GetChannelScanEnable(int32u nOccNo, IO_VARIANT &RetData) const
-********************************************************************************************************* 
-** \brief CFesDB::GetChannelScanEnable 
-** \details 
-** \param nOccNo 
-** \param RetData 
-** \return bool 
+*********************************************************************************************************
+** \brief CFesDB::GetChannelScanEnable
+** \details
+** \param nOccNo
+** \param RetData
+** \return bool
 ** \author xingzhibing
-** \date 2017年2月12日 
-** \note 
+** \date 2017年2月12日
+** \note
 ********************************************************************************************************/
 bool CFesDB::GetChannelScanEnable(int32u nOccNo, IO_VARIANT &RetData) const
 {
@@ -1480,7 +1514,7 @@ bool CFesDB::SetAoutValue(int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, voi
 	return true;
 }*/
 
-bool CFesDB::SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CFesDB::SetAoutValue(int32u nOccNo, IO_VARIANT *pData, int32u nAppOccNo, void *pExt)
 {
 	//! 判断 OccNo是否有效
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
@@ -1534,9 +1568,9 @@ bool CFesDB::SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 	//! 再次封装成邮件发送MSG_EVT_SETVAL
 	DMSG dmsg;
 	std::memset(&dmsg, 0, sizeof(DMSG));
-
+	//! todo 此处的发送者id 有点问题
 	dmsg.Type = MSG_EVT_SETVAL;
-	dmsg.SenderID = pFB->NodeOccNo;
+	dmsg.SenderID = nAppOccNo;
 
 	dmsg.Size = sizeof(SETVAL_MSG);
 	memcpy(dmsg.Buff, pSetValeEvt.get(), std::min<size_t>(static_cast <size_t> (dmsg.Size), static_cast <size_t>(MAIL_MAX_SIZE)));
@@ -1562,15 +1596,18 @@ bool CFesDB::SetAoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 	return true;
 }
 
-bool CFesDB::SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CFesDB::SetDoutValue(int32u nOccNo, IO_VARIANT *pData, int32u nAppOccNo, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
 		return false;
-	if (nOccNo>m_nDoutCount)
+	if (nOccNo > m_nDoutCount)
 	{
 		return false;
 	}
+
+	Q_ASSERT(nAppOccNo > 0);
+
 	QString szLog;
 	DOUT * pFB;
 	bool bRet = GetDoutByOccNo(nOccNo, &pFB);
@@ -1616,7 +1653,7 @@ bool CFesDB::SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 	pSetValeEvt->Att = ATTW_DOUT;
 	pSetValeEvt->NodeOccNo = pFB->NodeOccNo;
 	pSetValeEvt->Occno = nOccNo;
-//	pSetValeEvt->Source1=*((int8u*)(pSrc));   //Todo :please notice!!!! 
+	//	pSetValeEvt->Source1=*((int8u*)(pSrc));   //Todo :please notice!!!! 
 	pSetValeEvt->Datatype = DT_BOOLEAN;
 
 	S_BOOL(&pSetValeEvt->Value[0], &pData);
@@ -1626,14 +1663,14 @@ bool CFesDB::SetDoutValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pS
 	std::memset(&dmsg, 0, sizeof(DMSG));
 
 	dmsg.Type = MSG_EVT_SETVAL;
-	dmsg.SenderID = pFB->NodeOccNo;
+	dmsg.SenderID = nAppOccNo;
 
 	dmsg.Size = sizeof(SETVAL_MSG);
 	memcpy(dmsg.Buff, pSetValeEvt.get(), std::min<size_t>(static_cast <size_t> (dmsg.Size), static_cast <size_t>(MAIL_MAX_SIZE)));
 
 	//直接发送给总线，然后通过总线转发到相应的前置
-	int nMailID = QueryMailBoxID("SCADA","NB_SVC");
-	if (nMailID==INVALID_OCCNO)
+	int nMailID = QueryMailBoxID("SCADA", "NB_SVC");
+	if (nMailID == INVALID_OCCNO)
 	{
 		szLog = QObject::tr("Set dout [OccNo=%1] failed. Channel's MailBoxID is incorrect.").arg(nOccNo);
 		LogMsg(szLog.toStdString().c_str(), 1);

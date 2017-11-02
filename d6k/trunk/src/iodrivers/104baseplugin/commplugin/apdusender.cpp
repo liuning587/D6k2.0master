@@ -28,6 +28,7 @@ CApduSender::CApduSender(QObject *parent):
     m_w = 0;
     m_nSendNum = 0;
 	m_nStartNode = 0;
+	m_nCurrentOperFlag = 0;
 
 	m_pFileTransfor = new QTimer(this);
 	//
@@ -36,6 +37,8 @@ CApduSender::CApduSender(QObject *parent):
 	m_nDevIndex = 0;
 	m_pDevTimer = new QTimer(this);
 	m_pDevTimer->setInterval(1000);
+
+	m_nUpdateFlag = 0;
 
 	connect(m_pDevTimer, SIGNAL(timeout()), this, SLOT(Slot_OnSendMidDevData()));
 }
@@ -638,7 +641,12 @@ void CApduSender::OnSendUpdateRequest(ASDU211_UPDATE & pUpdate)
 
 	pAsdu211->infoaddr.SetAddr(0x00);
 
-	pAsdu211->m_qds.OV = pUpdate.m_qds.OV;   //第一个位
+	pAsdu211->m_qds.IV = pUpdate.m_qds.IV;   //第一个位
+
+	if (pAsdu211->m_qds.IV == 1)
+	{
+		m_nUpdateFlag = 0;
+	}
 
 	int nResult = Send_I(buf, sizeof(ASDU211_UPDATE));
 
@@ -648,6 +656,7 @@ void CApduSender::OnSendUpdateRequest(ASDU211_UPDATE & pUpdate)
 //定值获取
 bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 {
+	m_nCurrentOperFlag = 1;
 
 	if (pRequestDz->m_nCommandType == D_FIX_READ)         //定值读取
 	{
@@ -1247,6 +1256,15 @@ bool CApduSender::OnSendGetCatalogRequest(const FILE_CATALOG_REQUEST_1 &lbCatalo
 {
 	char buf[255] = { 0 };
 
+	if (m_nCurrentOperFlag == 1)
+	{
+		QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
+
+		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("文件传输中,请稍后再试").toLocal8Bit().data(), 1);
+
+		return true;
+
+	}
 
 	if (!m_strFilePath.isEmpty())
 	{
@@ -1316,6 +1334,19 @@ bool CApduSender::OnSendReadFileAction(const FILE_ATTR_INFO& fileAttr)
 		return true;
 	}
 
+	if (m_nCurrentOperFlag == 1)
+	{
+		QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
+
+		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("文件传输中,请稍后再试").toLocal8Bit().data(), 1);
+
+		return true;
+
+	}
+
+
+	//不可操作
+	m_nCurrentOperFlag = 1;
 	//m_pComm104Pln->GetRecver()->InsertToFileLists(fileAttr);
 
 	char buf[255] = { 0 };
@@ -1382,6 +1413,17 @@ bool CApduSender::OnSendWriteFileAction(const FILE_ATTR_INFO& fileAttr)
 
 	m_nStartNode = 0;
  
+	if (m_nCurrentOperFlag == 1)
+	{
+		QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
+
+		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("文件传输中,请稍后再试").toLocal8Bit().data(), 1);
+
+		return true;
+
+	}
+	m_nCurrentOperFlag = 1;
+
 
 	char buf[255] = { 0 };
 
@@ -1446,6 +1488,7 @@ bool CApduSender::OnSendWriteFileData()
 	{
 		m_pFileTransfor->start();
 	}
+
 
 	int nMaxDataSize = MAX_ASDU_SIZE - sizeof(FILE_BASE) - 11;
 

@@ -1749,7 +1749,8 @@ public:
 public:
 	unsigned char m_BinayNum;     //遥信个数
     unsigned char m_BinaryType;    //遥信类型
-	ASDUADDR2 m_BinaryAddr;        //遥信点号
+	//modify 2017 0907  三字节
+	INFOADDR3 m_BinaryAddr;        //遥信点号
     unsigned char m_BinaryValue;   //遥信值
     CP56Time2a m_BinaryTime;       //故障时刻标志
 
@@ -1760,7 +1761,7 @@ public:
     //enum { MAX_DATA_PER_ASDU_GZ = 8, };
     //ASDU_GZ_DATA m_data[MAX_DATA_PER_ASDU_GZ];
 
-	char m_pGzDats[MAX_ASDU_SIZE - sizeof(ASDU_BASE)-5-sizeof(ASDUADDR2)-sizeof(CP56Time2a)];
+	char m_pGzDats[MAX_ASDU_SIZE - sizeof(ASDU_BASE)-5-sizeof(INFOADDR3)-sizeof(CP56Time2a)];
 };
  
 //////////////////////////////////////////////////////////////////////////

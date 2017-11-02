@@ -99,7 +99,7 @@ void CDoutOperDialog::slot_on_BtnSelect()
 {
 	if (m_pMemDB)
 	{
-		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 1, 1);
+		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 1, nullptr);
 	}
 }
 
@@ -107,7 +107,7 @@ void CDoutOperDialog::slot_on_BtnPre()
 {
 	if (m_pMemDB)
 	{
-		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 2, 2);
+		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 2, nullptr);
 	}
 //	AppSetDoutValue(m_nDoutOccNo, 2, 2);
 }
@@ -116,7 +116,7 @@ void CDoutOperDialog::slot_on_BtnExec()
 {
 	if (m_pMemDB)
 	{
-		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 3, 3);
+		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 3, nullptr);
 	}
 //	AppSetDoutValue(m_nDoutOccNo, 3, 3);
 }
@@ -125,7 +125,7 @@ void CDoutOperDialog::slot_on_AutoExec()
 {
 	if (m_pMemDB)
 	{
-		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 4, 4);
+		m_pMemDB->FesSetDoutValue(m_nDoutOccNo, 4, nullptr);
 	}
 //	AppSetDoutValue(m_nDoutOccNo, 4, 4);
 }

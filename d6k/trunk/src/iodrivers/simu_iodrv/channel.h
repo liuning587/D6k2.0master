@@ -45,7 +45,7 @@ public:
 	virtual bool Stop() = 0;
 	virtual bool LoadData(int32u nOccNo) = 0;
 
-	int32u GetOccNo()
+	int32u GetOccNo() const
 	{
 		return m_nOccNo;
 	}

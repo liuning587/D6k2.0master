@@ -35,6 +35,7 @@ struct NODE;
 class CServer;
 class CDbSvc;
 struct EMSG_BUF;
+class CRedTask;
 
 template<typename DBSvc> class CRTNetMsgPacker;
 
@@ -55,7 +56,7 @@ protected:
 	//邮件转发
 	void TransEmails();
 	//指令接收
-	void RecvSvcInfo();
+	void RecvNetData();
 	//传送数据
 	void TransDataInfo();
 	//DI全数据同步
@@ -65,26 +66,30 @@ protected:
 	//uservar全数据同步
 	void SendUserVarToSvr();
 	//sysvar全数据同步
-	void SendSysVarToSvr();
+	void SendSysVarToSvr();	
+	//设备信息同步
+	void SyncDeviceInfo();
+	//场站信息同步
+	void SyncChannelInfo();
 	//告警数据同步
 	void SendAlarmData();
 
 	void SendAinAlarmData(EMSG_BUF *pEMsgBuf);
+
+	void RedBackupSvc();
 	 
 	EMSG_BUF * m_pBuf;
 //	size_t PackageAllRTData(std::shared_ptr<CDbSvc> pDB,unsigned char *pInBuff,size_t nBuffLen);
 private:
 	NODE *m_pNodes;
-	unsigned int m_nNodeCount;
+	size_t m_nNodeCount;
 
 	NODE_CONFIG  * m_pNodeConfigs;
 	std::shared_ptr<NET_CONFIG> m_pNetConfig;
 
-	std::shared_ptr< CRTNetMsgPacker<CDbSvc> >  m_pNetMsgPacker;
-	 
+	std::shared_ptr< CRTNetMsgPacker<CDbSvc> >  m_pNetMsgPacker;	 
 
 	bool m_bIsRedNode;  //! 本机是否是冗余节点
-
 
 	std::deque<BASE_MSG*> m_arrAlarmMsg;
 
@@ -97,6 +102,9 @@ private:
 
 	//! 模拟量的越限复限告警，模拟量发生告警时，可以不立即上送，缓存5-10秒左右再上送
 	std::deque<AINALARM_MSG*> m_arrAinAlarmMsg;
+
+	//! 主从同步冗余任务
+	std::shared_ptr<CRedTask> m_pRedTask;
 };
 
 #endif // NB_SVC_MODULE_H

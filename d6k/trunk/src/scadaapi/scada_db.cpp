@@ -32,6 +32,13 @@ CScadaDB::CScadaDB( )
 	m_nAppCount = 0;
 }
 
+CScadaDB::CScadaDB(CScadaApi *pScada):CMemDB(pScada)
+{
+	m_bStopFlag = false;
+	m_pScadaApps = nullptr;
+	m_nAppCount = 0;
+}
+
 CScadaDB::~CScadaDB(void)
 {
 	m_arrApps.clear();

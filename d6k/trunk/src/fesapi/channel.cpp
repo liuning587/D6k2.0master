@@ -27,9 +27,8 @@
 #include "log/log.h"  
 
 #include <QObject>
+#include <QDebug> 
 #include <memory>
-#include <QDebug>
- 
 
 CFesChannel::CFesChannel()
 {

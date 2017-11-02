@@ -38,6 +38,8 @@ class CServerDB : public CScadaDB
 {
 public:
 	CServerDB( );
+	explicit CServerDB(CScadaApi *pScada);
+
 	virtual ~CServerDB(void);
 
 public:
@@ -54,7 +56,7 @@ public:
 	bool  GetSysVarByOccNo(int32u nOccNo,  VARDATA** pSysVar);
 
 	bool  GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT &RetData);
-	bool  PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc);
+	bool  PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName, void *pExt);
 
 private:
 	void  InitFuncArrary();
@@ -62,8 +64,8 @@ private:
 	std::array< std::function<bool(int32u, IO_VARIANT&)  >, ATT_MAX> m_arrGetUserVarRTDataFuncs;
 	std::array< std::function<bool(int32u, IO_VARIANT&)  >, ATT_MAX> m_arrGetSysVarRTDataFuncs;
 	//…Ë÷√ Ù–‘
-	std::array< std::function<bool(int32u, IO_VARIANT*, void*, void*)   >, ATT_MAX> m_arrUserVarSetFunctions;
-	std::array< std::function<bool(int32u, IO_VARIANT*, void*, void*)   >, ATT_MAX> m_arrSysVarSetFunctions;
+	std::array< std::function<bool(int32u, IO_VARIANT*, int32u, void*)   >, ATT_MAX> m_arrUserVarSetFunctions;
+	std::array< std::function<bool(int32u, IO_VARIANT*, int32u, void*)   >, ATT_MAX> m_arrSysVarSetFunctions;
 
 private:
 	//uservar
@@ -100,8 +102,8 @@ private:
 	bool GetSysVarMaxRange(int32u nOccNo, IO_VARIANT &RetData)const;
 	bool GetSysVarMinRange(int32u nOccNo, IO_VARIANT &RetData)const;
 
-	bool SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
-	bool SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc);
+	bool SetUserVarValue(int32u nOccNo, IO_VARIANT *pData,int32u nSrcAppOccNo, void *pExt);
+	bool SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, int32u nSrcAppOccNo, void *pExt);
 
 private:
 	size_t m_nEstimateSize;

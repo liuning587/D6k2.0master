@@ -310,7 +310,7 @@ void CNetbusSvc::RecvNodeData()
 										for (int i = 0; i < pBase->m_nCount; ++i)
 										{
 											fp64 fVal;
-											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof fp64], sizeof fp64);
 											pSvr->GetDBSvc()->UpdateUserVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
 										}
 									}
@@ -319,8 +319,26 @@ void CNetbusSvc::RecvNodeData()
 										for (int i = 0; i < pBase->m_nCount; ++i)
 										{
 											fp64 fVal;
-											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof int8u], sizeof int8u);
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof fp64], sizeof fp64);
 											pSvr->GetDBSvc()->UpdateSysVarValue(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										}
+									}
+									else if (pBase->m_nType==SYNC_CHANNEL_TYPE)
+									{
+										for (int i = 0; i < pBase->m_nCount; ++i)
+										{
+											SyncDataInfo fVal;
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof SyncDataInfo], sizeof SyncDataInfo);
+											pSvr->GetDBSvc()->UpdateChannelInfo(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
+										}
+									}
+									else if (pBase->m_nType=SYNC_DEVICE_TYPE)
+									{
+										for (int i = 0; i < pBase->m_nCount; ++i)
+										{
+											SyncDataInfo fVal;
+											memcpy(&fVal, &msg->BuffData[sizeof DATA_BASE + i * sizeof SyncDataInfo], sizeof SyncDataInfo);
+											pSvr->GetDBSvc()->UpdateDeviceInfo(pBase->m_nNodeOccNo, i + pBase->m_nStartOccNo, fVal);
 										}
 									}
 								}

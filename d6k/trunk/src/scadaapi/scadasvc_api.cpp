@@ -150,7 +150,7 @@ SCADA_API bool GetRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int3
 	return true;
 }
 
-SCADA_API bool PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
+SCADA_API bool PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName,void *pExt)
 {
 	Q_ASSERT(nIddType != IDD_NULL  && nIddType <= MAX_IDD);
 	if (nIddType == IDD_NULL || nIddType > MAX_IDD)
@@ -167,7 +167,7 @@ SCADA_API bool PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int3
 	{
 		return false;
 	}
-	bool bRet = s_ScdApi.PutRTData(nIddType, nNodeOccNo, nOccNo, nFiledID, pData, pExt, pSrc);
+	bool bRet = s_ScdApi.PutRTData(nIddType, nNodeOccNo, nOccNo, nFiledID, pData, pszAppTagName,pExt);
 	Q_ASSERT(bRet);
 	if (!bRet)
 	{

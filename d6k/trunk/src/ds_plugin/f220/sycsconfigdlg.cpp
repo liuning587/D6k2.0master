@@ -4,7 +4,7 @@ CSycsConfigDlg::CSycsConfigDlg(QWidget *parent)
     : QDialog(parent)
 {
     ui.setupUi(this);
-
+	setWindowFlags(Qt::WindowCloseButtonHint);
     ui.timeEdit_2->setTime(QDateTime::currentDateTime().time());
     //È·¶¨
     connect(ui.pushButton_2, SIGNAL(clicked()), this, SLOT(Slot_Comform()));

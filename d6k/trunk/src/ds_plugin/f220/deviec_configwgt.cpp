@@ -68,7 +68,7 @@ CDevIecConfigWgt::CDevIecConfigWgt(CCommThread *pCommunicate, IMainModule *pCore
 	m_mapTypeCode.insert(38, "Float");
 	m_mapTypeCode.insert(39, "Double");
 	m_mapTypeCode.insert(4, "String");
-
+	m_strDeviceName = "FTU220";
 }
 
 CDevIecConfigWgt::~CDevIecConfigWgt()

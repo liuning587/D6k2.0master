@@ -80,7 +80,7 @@ extern "C"
 		auto pMemDB = s_FesApi.GetMemDB();
 		if (pMemDB)
 		{
-			*pCount = static_cast<int32u> (pMemDB->GetChannelCount());
+			*pCount = static_cast<int32u> (pMemDB->GetIoChannelCount());
 			return true;
 		}
 		return false;
@@ -835,7 +835,7 @@ extern "C"
 		auto pMemDB = s_FesApi.GetMemDB();
 		if (pMemDB)
 		{
-			return pMemDB->ReadHostCmd(nChannleNo, pCmd, nTimeout);
+			return pMemDB->IoDrvReadHostCmd(nChannleNo, pCmd, nTimeout);
 		}
 		return false;
 	}
@@ -848,6 +848,28 @@ extern "C"
 			return pMemDB->SendIOCmd( nOccNo , pVal, nTimeout );
 		}
 		return true;
+	}
+	/*! \fn FESAPI bool ReadFesMsg(int32u nOccNo, int32u nIddType, BASE_MSG *pMsg, int32u nTimeOut)
+	********************************************************************************************************* 
+	** \brief ReadFesMsg 
+	** \details  读取前置的消息
+	** \param nOccNo 
+	** \param nIddType 
+	** \param pMsg 
+	** \param nTimeOut 
+	** \return FESAPI bool 
+	** \author LiJin 
+	** \date 2017年10月5日 
+	** \note 
+	********************************************************************************************************/
+	FESAPI bool ReadFesMsg(int32u nOccNo, int32u nIddType, BASE_MSG *pMsg, int32u nTimeOut)
+	{
+		auto pMemDB = s_FesApi.GetMemDB();
+		if (pMemDB)
+		{
+			return pMemDB->ReadFesMsg(nOccNo, nIddType, pMsg, nTimeOut);
+		}
+		return false;
 	}
 
 	/*! \fn bool AppGetUserVarValue(int32u nOccNo, IO_VARIANT *pVariant, int8u * pQua)
@@ -1165,7 +1187,8 @@ extern "C"
 		return bRet;
 	}
 
-	FESAPI bool PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData, const char * szOperatorName, const char * szMonitorName, void *pExt, bool bOpLog)
+	FESAPI bool PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData, void *pExt,
+		const char * pszSrcAppTagName, struct OpLogData *pOpLog)
 	{
 		Q_ASSERT(pData);
 		if (pData == nullptr)
@@ -1262,6 +1285,19 @@ extern "C"
 			pMemDB->IoSetChannelHeartBeat(nOccNo);
 		}
 	}
+	FESAPI void FtSetChannelHeartBeat(int32u nOccNo)
+	{
+		Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+		if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+			return;
+
+		auto pMemDB = s_FesApi.GetMemDB();
+		if (pMemDB)
+		{
+			pMemDB->FtSetChannelHeartBeat(nOccNo);
+		}
+	}
+
 	/*! \fn FESAPI void IoDiagAlarm(int32u nChannleNo, int32u nDeviceNo, const char* pszAlarmTxt)
 	*********************************************************************************************************
 	** \brief IoDiagAlarm
@@ -1292,12 +1328,12 @@ extern "C"
 		}
 	}
 
-	FESAPI bool AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
+	FESAPI bool AppSetDoutValue(int32u nOccNo, int8u Value, const char * pszSrcAppTagName)
 	{
 		auto pMemDB = s_FesApi.GetMemDB();
 		if (pMemDB)
 		{
-			return pMemDB->AppSetDoutValue(nOccNo, Value, nSource);
+			return pMemDB->AppSetDoutValue(nOccNo, Value, pszSrcAppTagName);
 		}
 
 		return false;

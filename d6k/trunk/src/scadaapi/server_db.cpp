@@ -44,7 +44,14 @@ bool SortLFunction(DataItem& data1, DataItem& data2)
 
 
 
-CServerDB::CServerDB( )
+CServerDB::CServerDB()
+{
+	m_bStopFlag = false;
+	m_nEstimateSize = 0;
+	InitFuncArrary();
+}
+
+CServerDB::CServerDB(CScadaApi *pScada) :CScadaDB(pScada)
 {
 	m_bStopFlag = false;
 	m_nEstimateSize = 0;
@@ -53,10 +60,10 @@ CServerDB::CServerDB( )
 
 CServerDB::~CServerDB(void)
 {
-	
+
 }
 
-bool CServerDB::Initialize(const char *pszDataPath, unsigned int nMode,int32u nOccNo)
+bool CServerDB::Initialize(const char *pszDataPath, unsigned int nMode, int32u nOccNo)
 {
 	QString szLog;
 
@@ -76,7 +83,7 @@ bool CServerDB::Initialize(const char *pszDataPath, unsigned int nMode,int32u nO
 	{
 		szLog = QObject::tr("Start project...");
 	}
-	
+
 	LogMsg(szLog.toStdString().c_str(), 0);
 
 	return true;
@@ -84,7 +91,7 @@ bool CServerDB::Initialize(const char *pszDataPath, unsigned int nMode,int32u nO
 
 void CServerDB::Run()
 {
- 
+
 }
 
 void CServerDB::Shutdown()
@@ -101,8 +108,8 @@ size_t CServerDB::LoadMem(unsigned char * pAddr)
 	}
 	m_pMagicMem = (HEAD_MEM*)(pAddr);
 
-	Q_ASSERT(m_pMagicMem->MagicHead1 == MAGIC_HEAD 
-		  && m_pMagicMem->MagicHead2 == MAGIC_HEAD);
+	Q_ASSERT(m_pMagicMem->MagicHead1 == MAGIC_HEAD
+		&& m_pMagicMem->MagicHead2 == MAGIC_HEAD);
 	if (m_pMagicMem->MagicHead1 != MAGIC_HEAD || m_pMagicMem->MagicHead2 != MAGIC_HEAD)
 	{
 		return false;
@@ -120,10 +127,10 @@ size_t CServerDB::LoadMem(unsigned char * pAddr)
 
 	size_t nSize = 0;
 
-	nSize = CreateAinAlarm((unsigned char* )pAddr);
+	nSize = CreateAinAlarm((unsigned char*)pAddr);
 	pAddr += nSize;
 
-	nSize = CreateAinLimitAlarm((unsigned char* )pAddr);
+	nSize = CreateAinLimitAlarm((unsigned char*)pAddr);
 	pAddr += nSize;
 
 	nSize = CreateDinAlarm((unsigned char*)pAddr);
@@ -135,7 +142,7 @@ size_t CServerDB::LoadMem(unsigned char * pAddr)
 	nSize = CreateTransFormLinear((unsigned char*)pAddr);
 	pAddr += nSize;
 
-	nSize = CreateTransFormNonLinear((unsigned char* )pAddr);
+	nSize = CreateTransFormNonLinear((unsigned char*)pAddr);
 	pAddr += nSize;
 
 	nSize = CreateSystemVariable((unsigned char*)pAddr);
@@ -144,7 +151,7 @@ size_t CServerDB::LoadMem(unsigned char * pAddr)
 	nSize = CreateUserVariable((unsigned char*)pAddr);
 	pAddr += nSize;
 
-	m_nEstimateSize = sizeof HEAD_MEM+ sizeof AIN_ALARM * m_nAinAlarmCount +
+	m_nEstimateSize = sizeof HEAD_MEM + sizeof AIN_ALARM * m_nAinAlarmCount +
 		sizeof AIN_ALARM_LIMIT* m_nAinAlarmLimitCount +
 		sizeof DIN_ALARM * m_nDinAlarmCount +
 		sizeof DIN_ALARM_LIMIT* m_nDinAlarmLimitCount +
@@ -158,8 +165,8 @@ size_t CServerDB::LoadMem(unsigned char * pAddr)
 
 bool CServerDB::GetUserVarByOccNo(int32u nOccNo, VARDATA **pUserVar)
 {
-	Q_ASSERT(nOccNo !=INVALID_OCCNO && nOccNo <=MAX_OCCNO);
-	if (nOccNo ==INVALID_OCCNO || nOccNo >MAX_OCCNO)
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
 	{
 		return false;
 	}
@@ -203,33 +210,33 @@ bool CServerDB::GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VA
 	bool bRet = false;
 	switch (nIddType)
 	{
-	case IDD_SYSVAR:
-	{
-		Q_ASSERT(m_arrGetSysVarRTDataFuncs[nFiledID]);
-		if (m_arrGetSysVarRTDataFuncs[nFiledID])
+		case IDD_SYSVAR:
 		{
-			m_arrGetSysVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetSysVarRTDataFuncs[nFiledID]);
+			if (m_arrGetSysVarRTDataFuncs[nFiledID])
+			{
+				m_arrGetSysVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}
-	case IDD_USERVAR:
-	{
-		Q_ASSERT(m_arrGetUserVarRTDataFuncs[nFiledID]);
-		if (m_arrGetUserVarRTDataFuncs[nFiledID])
+		case IDD_USERVAR:
 		{
-			m_arrGetUserVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			Q_ASSERT(m_arrGetUserVarRTDataFuncs[nFiledID]);
+			if (m_arrGetUserVarRTDataFuncs[nFiledID])
+			{
+				m_arrGetUserVarRTDataFuncs[nFiledID](nOccNo, RetData);
+			}
+			break;
 		}
-		break;
-	}		
-	default:
-		Q_ASSERT(false);
-		bRet = false;
-		break;
+		default:
+			Q_ASSERT(false);
+			bRet = false;
+			break;
 	}
 	return true;
 }
 
-bool CServerDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CServerDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -249,30 +256,40 @@ bool CServerDB::PutRtData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VA
 	}
 
 	bool bRet = false;
+	int32u nSrcAppOccNo = 0;
+	int32u nTempIddType = 0 , nTempFiledID = 0;
+	bRet =  GetOccNoByTagName(pszAppTagName, nTempIddType, nSrcAppOccNo, nTempFiledID);
+	Q_ASSERT(bRet);
+	if (bRet == false)
+	{// log
+
+	}
+	Q_ASSERT(nTempIddType == IDD_SAPP && nTempFiledID == 0);
+
 	switch (nIddType)
 	{
-	case IDD_SYSVAR:
-	{
-		Q_ASSERT(m_arrSysVarSetFunctions[nFiledID]);
-		if (m_arrSysVarSetFunctions[nFiledID])
+		case IDD_SYSVAR:
 		{
-			m_arrSysVarSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+			Q_ASSERT(m_arrSysVarSetFunctions[nFiledID]);
+			if (m_arrSysVarSetFunctions[nFiledID])
+			{
+				m_arrSysVarSetFunctions[nFiledID](nOccNo, pData, nSrcAppOccNo, pExt);
+			}
+			break;
 		}
-		break;
-	}		
-	case IDD_USERVAR:
-	{
-		Q_ASSERT(m_arrUserVarSetFunctions[nFiledID]);
-		if (m_arrUserVarSetFunctions[nFiledID])
+		case IDD_USERVAR:
 		{
-			m_arrUserVarSetFunctions[nFiledID](nOccNo, pData, pExt, pSrc);
+			Q_ASSERT(m_arrUserVarSetFunctions[nFiledID]);
+			if (m_arrUserVarSetFunctions[nFiledID])
+			{
+				m_arrUserVarSetFunctions[nFiledID](nOccNo, pData, nSrcAppOccNo, pExt);
+			}
+			break;
 		}
-		break;
-	}		
-	default:
-		Q_ASSERT(false);
-		bRet = false;
-		break;
+		default:
+			Q_ASSERT(false);
+			bRet = false;
+			break;
 	}
 	return true;
 }
@@ -287,9 +304,9 @@ void CServerDB::InitFuncArrary()
 
 	m_arrGetUserVarRTDataFuncs[ATT_OLD_VALUE] = std::bind(&CServerDB::GetUserNegVal, this, std::placeholders::_1, std::placeholders::_2);
 
-	m_arrGetUserVarRTDataFuncs[ATT_MAXRANGE] = std::bind(&CServerDB::GetUserVarMaxRange,this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetUserVarRTDataFuncs[ATT_MINRANGE] = std::bind(&CServerDB::GetUserVarMinRange, this,std::placeholders::_1, std::placeholders::_2);
-	
+	m_arrGetUserVarRTDataFuncs[ATT_MAXRANGE] = std::bind(&CServerDB::GetUserVarMaxRange, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetUserVarRTDataFuncs[ATT_MINRANGE] = std::bind(&CServerDB::GetUserVarMinRange, this, std::placeholders::_1, std::placeholders::_2);
+
 	m_arrGetUserVarRTDataFuncs[ATT_MANSET] = std::bind(&CServerDB::GetUserVaManSet, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetUserVarRTDataFuncs[ATT_MINOUTPUT] = std::bind(&CServerDB::GetUserVaLowOutPut, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetUserVarRTDataFuncs[ATT_MAXOUTPUT] = std::bind(&CServerDB::GetUserVaHighOutPut, this, std::placeholders::_1, std::placeholders::_2);
@@ -303,9 +320,9 @@ void CServerDB::InitFuncArrary()
 	m_arrGetSysVarRTDataFuncs[ATT_STATE] = std::bind(&CServerDB::GetSysVaState, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetSysVarRTDataFuncs[ATT_VALUE] = std::bind(&CServerDB::GetSysVaValEx, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetSysVarRTDataFuncs[ATT_RAW_VALUE] = std::bind(&CServerDB::GetSysValRawValEx, this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetSysVarRTDataFuncs[ATT_OLD_VALUE] = std::bind(&CServerDB::GetSysNegVal,this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetSysVarRTDataFuncs[ATT_MAXRANGE] = std::bind(&CServerDB::GetSysVarMaxRange,this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetSysVarRTDataFuncs[ATT_MINRANGE] = std::bind(&CServerDB::GetSysVarMinRange,this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_OLD_VALUE] = std::bind(&CServerDB::GetSysNegVal, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_MAXRANGE] = std::bind(&CServerDB::GetSysVarMaxRange, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetSysVarRTDataFuncs[ATT_MINRANGE] = std::bind(&CServerDB::GetSysVarMinRange, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetSysVarRTDataFuncs[ATT_MANSET] = std::bind(&CServerDB::GetSysVaManSet, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetSysVarRTDataFuncs[ATT_MINOUTPUT] = std::bind(&CServerDB::GetSysVaLowOutPut, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetSysVarRTDataFuncs[ATT_MAXOUTPUT] = std::bind(&CServerDB::GetSysVaHighOutPut, this, std::placeholders::_1, std::placeholders::_2);
@@ -313,7 +330,7 @@ void CServerDB::InitFuncArrary()
 	m_arrGetSysVarRTDataFuncs[ATT_LOQUA] = std::bind(&CServerDB::GetSysVaLowQua, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetSysVarRTDataFuncs[ATT_DESCRIPTION] = std::bind(&CServerDB::GetSysVaDesc0, this, std::placeholders::_1, std::placeholders::_2);
 
-	m_arrUserVarSetFunctions[ATT_SETRELAYVALUE]= std::bind(&CServerDB::SetUserVarValue, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+	m_arrUserVarSetFunctions[ATT_SETRELAYVALUE] = std::bind(&CServerDB::SetUserVarValue, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 	m_arrSysVarSetFunctions[ATT_SETRELAYVALUE] = std::bind(&CServerDB::SetSysVarValue, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 }
 
@@ -330,8 +347,8 @@ bool CServerDB::GetUserVarScanEnable(int32u nOccNo, IO_VARIANT &RetData) const
 	}
 
 	VARDATA * pFB = &m_pUserVariable[nOccNo - 1];
-	
-	S_BOOL(&RetData,&pFB->ScanEnable);
+
+	S_BOOL(&RetData, &pFB->ScanEnable);
 
 	return true;
 }
@@ -656,7 +673,7 @@ bool CServerDB::GetSysVaValEx(int32u nOccNo, IO_VARIANT &RetData) const
 
 	VARDATA * pFB = &m_pSystemVariable[nOccNo - 1];
 
-	RetData=pFB->Value;
+	RetData = pFB->Value;
 
 	return true;
 }
@@ -852,7 +869,7 @@ bool CServerDB::GetSysVarMinRange(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CServerDB::SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CServerDB::SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, int32u nSrcAppOccNo, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -871,7 +888,7 @@ bool CServerDB::SetUserVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, vo
 	return true;
 }
 
-bool CServerDB::SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CServerDB::SetSysVarValue(int32u nOccNo, IO_VARIANT *pData, int32u nSrcAppOccNo, void *pExt)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -995,7 +1012,7 @@ size_t CServerDB::CreateDinLimitAlarm(unsigned char* pAddr)
 		}
 		m_arrDinAlarmLimits.push_back(&m_pDinAlarmLimit[i]);
 	}
-	return m_nDinAlarmLimitCount* sizeof DIN_ALARM_LIMIT;
+	return m_nDinAlarmLimitCount * sizeof DIN_ALARM_LIMIT;
 }
 
 size_t CServerDB::CreateTransFormLinear(unsigned char* pAddr)
@@ -1022,7 +1039,7 @@ size_t CServerDB::CreateTransFormLinear(unsigned char* pAddr)
 		}
 		m_arrLinears.push_back(&m_pLinear[i]);
 	}
-	return m_nLinearCount* sizeof TRANSFORM_LINEAR;
+	return m_nLinearCount * sizeof TRANSFORM_LINEAR;
 }
 
 size_t CServerDB::CreateTransFormNonLinear(unsigned char* pAddr)
@@ -1049,7 +1066,7 @@ size_t CServerDB::CreateTransFormNonLinear(unsigned char* pAddr)
 		}
 		m_arrNonLinears.push_back(&m_pNonLinear[i]);
 	}
-	return m_nNonLinearCount* sizeof TRANSFORM_NONLINEAR;
+	return m_nNonLinearCount * sizeof TRANSFORM_NONLINEAR;
 }
 
 size_t CServerDB::CreateSystemVariable(unsigned char* pAddr)
@@ -1076,7 +1093,7 @@ size_t CServerDB::CreateSystemVariable(unsigned char* pAddr)
 		}
 		m_arrSystemVariables.push_back(&m_pSystemVariable[i]);
 	}
-	return m_nSystemVariableCount* sizeof VARDATA;
+	return m_nSystemVariableCount * sizeof VARDATA;
 }
 
 size_t CServerDB::CreateUserVariable(unsigned char* pAddr)
@@ -1103,7 +1120,7 @@ size_t CServerDB::CreateUserVariable(unsigned char* pAddr)
 		}
 		m_arrUserVariables.push_back(&m_pUserVariable[i]);
 	}
-	return m_nUserVariableCount* sizeof VARDATA;
+	return m_nUserVariableCount * sizeof VARDATA;
 }
 
 /** @}*/

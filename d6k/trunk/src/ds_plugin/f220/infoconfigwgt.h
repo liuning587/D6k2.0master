@@ -114,6 +114,8 @@ public slots:
     void Slot_UpdateFtpConfig(const QString &strFilename);
     //点击list
     void Slot_ClickListItem(QListWidgetItem *pItem);
+	//list double
+	void Slot_lstDoubleClick(QListWidgetItem *pItem);
 
 private:
     //工程名称

@@ -31,6 +31,9 @@
 
 #include "sys_var.h"
 
+#include "message_pump.h"
+#include "../fespub/tag_att.h"
+
 #include "stl_util-inl.h"
 
 #include <QFileInfo>
@@ -51,6 +54,8 @@ CDbSvc::CDbSvc(CFesSvc* pServer, const std::string& szMailBoxName, int &nMailID)
 	m_pChannelMgr = std::make_shared<CChannelMgr>();
 
 	m_pFesInfo = std::make_shared<FesInfo>();
+
+	m_pTagAttrMgr = std::make_shared<CTagAttMgr>();
 
 	m_arrTempNodes.clear();
 	m_arrTempChannels.clear();
@@ -316,7 +321,7 @@ void CDbSvc::BuildMemDB(const char *szDBName)
 	// …‘Œ¢‘§¡Ù“ªµ„
 	nSize = static_cast<size_t>(nSize*1.1);
 
-	char * pData =(char* ) m_pMem->CreateShareMem(szDBName, nSize);
+	char * pData =(char* ) m_pMem->CreateShareMem(szDBName, static_cast<int>(nSize));
 
 	Q_ASSERT(pData);
 	if (pData == nullptr)
@@ -336,7 +341,7 @@ void CDbSvc::BuildMemDB(const char *szDBName)
 	m_pMagicMem = (HEAD_MEM*)(pData);
 	m_pMagicMem->MagicHead1 = MAGIC_HEAD;
 	m_pMagicMem->MagicHead2 = MAGIC_HEAD;
-	m_pMagicMem->ShmLength = nSize;
+	m_pMagicMem->ShmLength = static_cast<int32u>(nSize);
 	m_pMagicMem->MyNodeOccNo = m_nMyNodeOccNo;
 	strncpy(m_pMagicMem->Config, szDBName, qMin((size_t)MEM_CONFIG_LEN, strlen(szDBName)));
 
@@ -592,7 +597,7 @@ void CDbSvc::BuildTagNamePoolDB(const char* szName)
 	// …‘Œ¢‘§¡Ù“ªµ„
 	nSize = static_cast<size_t>(nSize*1.1);
 
-	char * pData = (char*)m_pTagMem->CreateShareMem(szName, nSize);
+	char * pData = (char*)m_pTagMem->CreateShareMem(szName, static_cast<int>(nSize));
 	Q_ASSERT(pData);
 	if (pData == nullptr)
 	{
@@ -611,7 +616,7 @@ void CDbSvc::BuildTagNamePoolDB(const char* szName)
 	m_pMagicTagMem = (HEAD_MEM*)(pData);
 	m_pMagicTagMem->MagicHead1 = MAGIC_HEAD;
 	m_pMagicTagMem->MagicHead2 = MAGIC_HEAD;
-	m_pMagicTagMem->ShmLength = nSize;
+	m_pMagicTagMem->ShmLength = static_cast<int32u>(nSize);
 	strncpy(m_pMagicTagMem->Config, szName, qMin((size_t)MEM_CONFIG_LEN, strlen(szName)));
 	pData =(char*)pData+ sizeof HEAD_MEM;
 	//2. RDB
@@ -619,80 +624,92 @@ void CDbSvc::BuildTagNamePoolDB(const char* szName)
 	//NODE
 	nLen = BuildTagNameDB(pData, m_arrNodeOccNos);
 	pData +=  nLen;
-	m_pMagicTagMem->NodeCount = m_arrNodeOccNos.size();
+	m_pMagicTagMem->NodeCount = static_cast<int32u>(m_arrNodeOccNos.size());
 	m_pMagicTagMem->NodeTableOffset = sizeof HEAD_MEM;
 
 	//CHANNEL
 	nLen = BuildTagNameDB(pData,m_arrChannelOccNos);
 	pData +=  nLen;
-	m_pMagicTagMem->ChannelCount = m_arrChannelOccNos.size();
-	m_pMagicTagMem->ChannelTableOffset = m_pMagicTagMem->NodeTableOffset + m_pMagicTagMem->NodeCount* sizeof TAG_OCCNO;
+	m_pMagicTagMem->ChannelCount = static_cast<int32u>(m_arrChannelOccNos.size());
+	m_pMagicTagMem->ChannelTableOffset = m_pMagicTagMem->NodeTableOffset + 
+		static_cast<int32u>(m_pMagicTagMem->NodeCount* sizeof TAG_OCCNO);
 
 	//DEVICE
 	nLen = BuildTagNameDB(pData,m_arrDeviceOccNos);
 	pData += nLen;
-	m_pMagicTagMem->DeviceCount = m_arrDeviceOccNos.size();
-	m_pMagicTagMem->DeviceTableOffset = m_pMagicTagMem->ChannelTableOffset+ m_arrTempChannels.size()* sizeof TAG_OCCNO;
+	m_pMagicTagMem->DeviceCount = static_cast<int32u>(m_arrDeviceOccNos.size());
+	m_pMagicTagMem->DeviceTableOffset = m_pMagicTagMem->ChannelTableOffset+ 
+		static_cast<int32u>(m_arrTempChannels.size()* sizeof TAG_OCCNO);
 
 	//AIN_ALARM
 	nLen = BuildTagNameDB(pData, m_arrAinAlarmOccNos);
 	pData += nLen;
-	m_pMagicTagMem->AinAlarmCount = m_arrAinAlarmOccNos.size();
-	m_pMagicTagMem->AinAlarmTableOffset = m_pMagicTagMem->DeviceTableOffset+ m_arrTempDevices.size()* sizeof TAG_OCCNO;
+	m_pMagicTagMem->AinAlarmCount = static_cast<int32u>(m_arrAinAlarmOccNos.size());
+	m_pMagicTagMem->AinAlarmTableOffset = m_pMagicTagMem->DeviceTableOffset+ 
+		static_cast<int32u>(m_arrTempDevices.size()* sizeof TAG_OCCNO);
 
 	//AIN_ALARM_LIMIT
 	nLen = BuildTagNameDB(pData, m_arrAinAlarmLimitOccNos);
 	pData += nLen;
-	m_pMagicTagMem->AinAlarmLimitCount = m_arrAinAlarmLimitOccNos.size();
-	m_pMagicTagMem->AinAlarmLimitTableOffset = m_pMagicTagMem->AinAlarmTableOffset +m_arrTempAinAlarms.size()* sizeof TAG_OCCNO;
+	m_pMagicTagMem->AinAlarmLimitCount = static_cast<int32u>(m_arrAinAlarmLimitOccNos.size());
+	m_pMagicTagMem->AinAlarmLimitTableOffset = m_pMagicTagMem->AinAlarmTableOffset +
+		static_cast<int32u>(m_arrTempAinAlarms.size()* sizeof TAG_OCCNO);
 
 	//DIN_ALARM
 	nLen = BuildTagNameDB(pData, m_arrDinAlarmOccNos);
 	pData += nLen;
-	m_pMagicTagMem->DinAlarmCount = m_arrDinAlarmOccNos.size();
-	m_pMagicTagMem->DinAlarmLimtTableOffset = m_pMagicTagMem->AinAlarmLimitTableOffset+m_arrTempAinLimitAlarms.size()*sizeof TAG_OCCNO;
+	m_pMagicTagMem->DinAlarmCount = static_cast<int32u>(m_arrDinAlarmOccNos.size());
+	m_pMagicTagMem->DinAlarmLimtTableOffset = m_pMagicTagMem->AinAlarmLimitTableOffset+
+		static_cast<int32u>(m_arrTempAinLimitAlarms.size()*sizeof TAG_OCCNO);
 
 	//DIN_ALARM_LIMIT
 	nLen = BuildTagNameDB(pData, m_arrDinAlarmLimitOccNos);
 	pData += nLen;
-	m_pMagicTagMem->DinAlarmLimitCount = m_arrTempDinLimitAlarms.size();
-	m_pMagicTagMem->DinAlarmLimtTableOffset = m_pMagicTagMem->DinAlarmLimtTableOffset+m_arrTempDinAlarms.size() * sizeof TAG_OCCNO;
+	m_pMagicTagMem->DinAlarmLimitCount = static_cast<int32u>(m_arrTempDinLimitAlarms.size());
+	m_pMagicTagMem->DinAlarmLimtTableOffset = m_pMagicTagMem->DinAlarmLimtTableOffset+
+		static_cast<int32u>(m_arrTempDinAlarms.size() * sizeof TAG_OCCNO);
 
 	//AOUT
 	nLen = BuildTagNameDB(pData, m_arrAoutOccNos);
 	pData += nLen;
-	m_pMagicTagMem->AoutCount = m_arrTempAouts.size();
-	m_pMagicTagMem->AoutTableOffset = m_pMagicTagMem->DinAlarmLimtTableOffset +m_arrTempDinLimitAlarms.size()* sizeof TAG_OCCNO;
+	m_pMagicTagMem->AoutCount = static_cast<int32u>(m_arrTempAouts.size());
+	m_pMagicTagMem->AoutTableOffset = m_pMagicTagMem->DinAlarmLimtTableOffset +
+		static_cast<int32u>(m_arrTempDinLimitAlarms.size()* sizeof TAG_OCCNO);
 
 	//DOUT
 	nLen = BuildTagNameDB(pData, m_arrDoutOccNos);
 	pData += nLen;
-	m_pMagicTagMem->DoutCount = m_arrTempDouts.size();
-	m_pMagicTagMem->DountTableOffset = m_pMagicTagMem->AoutTableOffset +m_arrTempAouts.size() * sizeof TAG_OCCNO;
+	m_pMagicTagMem->DoutCount = static_cast<int32u>(m_arrTempDouts.size());
+	m_pMagicTagMem->DountTableOffset = m_pMagicTagMem->AoutTableOffset +
+		static_cast<int32u>(m_arrTempAouts.size() * sizeof TAG_OCCNO);
 
 	//AIN
 	nLen = BuildTagNameDB(pData, m_arrAinOccNos);
 	pData += nLen;
-	m_pMagicTagMem->AinCount = m_arrTempAins.size();
-	m_pMagicTagMem->AinTableOffset =  m_pMagicTagMem->DountTableOffset+ m_arrTempDouts.size() * sizeof TAG_OCCNO;
+	m_pMagicTagMem->AinCount = static_cast<int32u>(m_arrTempAins.size());
+	m_pMagicTagMem->AinTableOffset =  m_pMagicTagMem->DountTableOffset+ 
+		static_cast<int32u>(m_arrTempDouts.size() * sizeof TAG_OCCNO);
 
 	//DIN
 	nLen = BuildTagNameDB(pData, m_arrDinOccNos);
 	pData += nLen;
-	m_pMagicTagMem->DinCount = m_arrTempDins.size();
-	m_pMagicTagMem->DinTableOffset =  m_pMagicTagMem->AinTableOffset + m_arrTempAins.size() * sizeof TAG_OCCNO;
+	m_pMagicTagMem->DinCount = static_cast<int32u>(m_arrTempDins.size());
+	m_pMagicTagMem->DinTableOffset =  m_pMagicTagMem->AinTableOffset + 
+		static_cast<int32u>(m_arrTempAins.size() * sizeof TAG_OCCNO);
 
 	//system var
 	nLen = BuildTagNameDB(pData, m_arrSyetemVarOccNos);
 	pData += nLen;
-	m_pMagicTagMem->SystemVariableCount = m_arrSyetemVarOccNos.size();
-	m_pMagicTagMem->SystemVariableOffSet = m_pMagicTagMem->DinTableOffset + m_arrTempDins.size() * sizeof TAG_OCCNO;
+	m_pMagicTagMem->SystemVariableCount = static_cast<int32u>(m_arrSyetemVarOccNos.size());
+	m_pMagicTagMem->SystemVariableOffSet = m_pMagicTagMem->DinTableOffset +
+		static_cast<int32u>(m_arrTempDins.size() * sizeof TAG_OCCNO);
 
 	//user var
 	nLen = BuildTagNameDB(pData, m_arrUserVarOccNos);
 	pData += nLen;
-	m_pMagicTagMem->UserVariableCount = m_arrUserVarOccNos.size();
-	m_pMagicTagMem->UserVariableOffset = m_pMagicTagMem->SystemVariableOffSet + m_arrTempSystemVariables.size() * sizeof TAG_OCCNO;
+	m_pMagicTagMem->UserVariableCount = static_cast<int32u>(m_arrUserVarOccNos.size());
+	m_pMagicTagMem->UserVariableOffset = m_pMagicTagMem->SystemVariableOffSet +
+		static_cast<int32u>(m_arrTempSystemVariables.size() * sizeof TAG_OCCNO);
 
 	m_pMem->UnLock();
 
@@ -769,8 +786,7 @@ void CDbSvc::OutPutShm(char* pAddress)
 
 	delete []pData;
 
-	file.close();
-	
+	file.close();	
 }
 /*! \fn void CDbSvc::ClearTempArray()
 ********************************************************************************************************* 
@@ -791,8 +807,6 @@ void CDbSvc::ClearTempArray()
 	STLClearObject(&m_arrTempAouts);
 	STLClearObject(&m_arrTempDouts); 
 }
-
-
 /*! \fn std::string  CDbSvc::GetTagName(int32u nOccNo, int32u nDataType) const
 ********************************************************************************************************* 
 ** \brief CDbSvc::GetTagName 
@@ -816,167 +830,167 @@ std::string  CDbSvc::GetTagName(int32u nOccNo, int32u nDataType) const
 
 	switch (nDataType)
 	{
-	case IDD_NODE:
-		if (nOccNo <= m_arrNodeOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrNodeOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrNodeOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
+		case IDD_NODE:
+			if (nOccNo <= m_arrNodeOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrNodeOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrNodeOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_AIN:
+			if (nOccNo <= m_arrAinOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrAinOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrAinOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_DIN:
+			if (nOccNo <= m_arrDinOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrDinOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrDinOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_AOUT:
+			if (nOccNo <= m_arrAoutOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrAoutOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrAoutOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_DOUT:
+			if (nOccNo <= m_arrDoutOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrDoutOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrDoutOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_CHANNEL:
+			if (nOccNo <= m_arrChannelOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrChannelOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrChannelOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_DEVICE:
+			if (nOccNo <= m_arrDeviceOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrDeviceOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrDeviceOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_OBJECT:
 			Q_ASSERT(false);
-		}
-		break;
-	case IDD_AIN:
-		if (nOccNo <= m_arrAinOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrAinOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrAinOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break; 
-	case IDD_DIN:
-		if (nOccNo <= m_arrDinOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrDinOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrDinOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_AOUT:
-		if (nOccNo <= m_arrAoutOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrAoutOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrAoutOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_DOUT:
-		if (nOccNo <= m_arrDoutOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrDoutOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrDoutOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_CHANNEL:
-		if (nOccNo <= m_arrChannelOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrChannelOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrChannelOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_DEVICE:
-		if (nOccNo <= m_arrDeviceOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrDeviceOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrDeviceOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_OBJECT:
-		Q_ASSERT(false);
-		break;
-	case IDD_AINALARM:
-		if (nOccNo <= m_arrAinAlarmOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrAinAlarmOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrAinAlarmOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_DINALARM:
-		if (nOccNo <= m_arrDinAlarmOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrDinAlarmOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrDinAlarmOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_AINALARMLIMIT:
-		if (nOccNo <= m_arrAinAlarmLimitOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrAinAlarmLimitOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrAinAlarmLimitOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_DINALARMLIMIT:
-		if (nOccNo <= m_arrDinAlarmLimitOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrDinAlarmLimitOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrDinAlarmLimitOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_TRANSLINEAR:
-		if (nOccNo <= m_arrTransLinearOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrTransLinearOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrTransLinearOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	case IDD_TRANSNONLINEAR:
-		if (nOccNo <= m_arrTransNonLinearOccNos.size())
-		{
-			Q_ASSERT(nOccNo == m_arrTransNonLinearOccNos[nOccNo - 1]->OccNo);
-			szTagName = m_arrTransNonLinearOccNos[nOccNo - 1]->TagName;
-			Q_ASSERT(szTagName.empty() == false);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-		break;
-	default:
-		break;
+			break;
+		case IDD_AINALARM:
+			if (nOccNo <= m_arrAinAlarmOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrAinAlarmOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrAinAlarmOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_DINALARM:
+			if (nOccNo <= m_arrDinAlarmOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrDinAlarmOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrDinAlarmOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_AINALARMLIMIT:
+			if (nOccNo <= m_arrAinAlarmLimitOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrAinAlarmLimitOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrAinAlarmLimitOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_DINALARMLIMIT:
+			if (nOccNo <= m_arrDinAlarmLimitOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrDinAlarmLimitOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrDinAlarmLimitOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_TRANSLINEAR:
+			if (nOccNo <= m_arrTransLinearOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrTransLinearOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrTransLinearOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		case IDD_TRANSNONLINEAR:
+			if (nOccNo <= m_arrTransNonLinearOccNos.size())
+			{
+				Q_ASSERT(nOccNo == m_arrTransNonLinearOccNos[nOccNo - 1]->OccNo);
+				szTagName = m_arrTransNonLinearOccNos[nOccNo - 1]->TagName;
+				Q_ASSERT(szTagName.empty() == false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+			break;
+		default:
+			break;
 	}
 	return szTagName;
 }
@@ -1147,6 +1161,8 @@ void CDbSvc::MainTask(void *pImpl)
 
 	LogMsg(QObject::tr("FES ::Main Thread Task Started!").toStdString().c_str(), 0);
 
+	std::shared_ptr<CMessagePump> pMessagePump = std::make_shared<CMessagePump>(GetMailBoxID());	 
+
 	while (true)
 	{
 		std::unique_lock<std::mutex> lk(m_mutThread);
@@ -1155,9 +1171,11 @@ void CDbSvc::MainTask(void *pImpl)
 		if (m_bStopFlag)
 		{
 			qDebug() << "exit main task....";
-			//			LogString("exit main task1....", 2);
+//			LogString("exit main task1....", 2);
 			return;
 		}
+
+		pMessagePump->RunInDbSvc(this);
 
 		/*QString szTemp;
 		static int nTestNum = 1;
@@ -1225,7 +1243,7 @@ bool CDbSvc::BuildStringNamePool(const char* pszPathName)
 	}
 	size_t nSize = m_arrStrings.size() * sizeof StringUnit  + sizeof HEAD_STRING;
 
-	char* pData=reinterpret_cast<char *>(m_pStringMen->CreateShareMem(pszPathName, nSize));
+	char* pData=reinterpret_cast<char *>(m_pStringMen->CreateShareMem(pszPathName, static_cast<int>(nSize)));
 	Q_ASSERT(pData);
 	if (!pData)
 	{
@@ -1239,10 +1257,10 @@ bool CDbSvc::BuildStringNamePool(const char* pszPathName)
 	m_pMagicStringMem = (HEAD_STRING*)(pData);
 	m_pMagicStringMem->MagicHead1 = MAGIC_HEAD;
 	m_pMagicStringMem->MagicHead2 = MAGIC_HEAD;
-	m_pMagicStringMem->TotalCount = m_arrStrings.size();
-	m_pMagicStringMem->ShmLength = nSize;
+	m_pMagicStringMem->TotalCount = static_cast<int32u>(m_arrStrings.size());
+	m_pMagicStringMem->ShmLength = static_cast<int32u>(nSize);
 
-	size_t nLen = 0;
+//	size_t nLen = 0;
 	pData += sizeof HEAD_STRING;
 
 	int nIndex = 0;

@@ -81,6 +81,8 @@ public:
 	virtual void Shutdown();
 
 public:
+	void InitKernelMailBox();
+
 	int32u GetNodeOccNoByHostName(const char *pszHostName);
 	int32u GetMyNodeOccNo() const;
 	
@@ -89,11 +91,16 @@ public:
 
 	int32u GetNodeState(int32u nOccNo)const;
 
-	size_t GetChannelCount()
+	size_t GetIoChannelCount() const
 	{
 		return m_arrChannels.size();
 	}
-	
+
+	size_t GetFtChannelCount() const
+	{
+		return m_arrFtChannels.size();
+	}
+		
 	//统一封装打开关闭邮箱系统（仅适用于驱动侧）
 	bool OpenChannelMailBox(int32u nChannelOccNo);
 	bool CloseChannelMailBox(int32u nChannelOcNo);
@@ -149,8 +156,6 @@ public:
 
 	char* GetAoutAddress(int32u nOccNo);
 	char* GetDoutAddress(int32u nOccNo);
-
-
 	
 	std::shared_ptr<CAinAlarm>GetAinAlarm(int32u nOccNo);
 	std::shared_ptr<CDinAlarm>GetDinAlarm(int32u nOccNo);
@@ -184,7 +189,8 @@ public:
 
 	void IoSetDeviceHeartBeat(int32u nOccNo);
 	void IoSetChannelHeartBeat(int32u nOccNo);
-	
+	void FtSetChannelHeartBeat(int32u nOccNo);
+
 	bool AppGetAinValue(int32u nOccNo, fp64* pValue, int8u *pQua);
 	bool AppGetDinValue(int32u nOccNo, int8u* pValue, int8u *pQua);
 	
@@ -200,27 +206,41 @@ public:
 	bool IoSetSysVarValue(int32u nOccNo, IO_VARIANT *pVariant, int8u nQuality);
 
 	// 设开出
-	bool AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource);
+	bool AppSetDoutValue(int32u nOccNo, int8u Value, const char * pszSrcAppTagName);
 	bool AppSetAoutValue(int32u nOccNo, fp64 Value, int8u nSource);
 
 	bool GetRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, IO_VARIANT &RetData);
 	bool PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, const IO_VARIANT &RetData,void *pExt);
-	bool PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData, 
-		const char * szOperatorName, const char * szMonitorName, void *pExt, bool bOpLog);
+
+	bool PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData, void *pExt,
+		const char * pszSrcAppTagName, struct OpLogData *pOpLog);
 
 	bool IsDBAlive(int nTimeout);
 
 	void IoDiagAlarm(int32u nChannleNo, int32u nDeviceNo, const char* pszAlarmTxt, TIMEPAK * pTm);
 	// 操作报警
 	void IoOperAlarm(int32u nChannleNo, int32u nDeviceNo, const char * pszAlarmTxt, TIMEPAK * pTm);
+
+	void IoOperAlarm(struct TAGITEM *pItem, struct OpLogData *pOpLog, TIMEPAK * pTm);
+	// 应用层的操作报警
+	void AppOperAlarm(const char * pszSrcAppTagName, struct TAGITEM *pItem,struct OpLogData *pOpLog, TIMEPAK * pTm);
 	// 保护的自诊断
 	void IoRelayDiagAlarm(int32u nChannleNo, int32u nDeviceNo, const char* pszAlarmTxt, TIMEPAK * pTm);
 	// 通用的告警
 	void IoAlarmMsg(int32u nChannleNo, int32u nAlarmType, const char* pszAlarmTxt, TIMEPAK * pTm);
 
-	int32s GetChannelMailBoxID(int32u nChannelNo);
-	bool ReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout);
+	// 获取测点的端口号
+	int32u GetPointChannelOccNo(const struct TAGITEM & item) const;
+	// 获取测点的装置排行号
+	int32u GetPointDeviceOccNo(const struct TAGITEM & item) const;
+
+	int32s GetIoChannelMailBoxID(int32u nChannelNo);
+	int32s GetFtChannelMailBoxID(int32u nOccNo);
+	bool IoDrvReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout);
+	bool FtDrvReadHostCmd(int32u nOccNo, BASE_MSG *pMsg, int32u nTimeOut);
 	bool SendIOCmd(int32u nOccNo, IO_VARIANT *pCmd, int32u nTimeout);
+	bool ReadFesMsg(int32u nOccNo, int32u nIddType, BASE_MSG *pMsg, int32u nTimeOut);
+
 private:
 	//  内存库
 	bool BuildMemDB(const char *szDBName);
@@ -276,8 +296,8 @@ private:
 	bool GetAinHighQua(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetAinLowQua(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetAinDesc(int32u nOccNo, IO_VARIANT &RetData) const;
-	bool GetAinPin(int32u nOccNo, IO_VARIANT &RetData) const;
-	bool GetAinUint(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetAinPinLabel(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetAinUnit(int32u nOccNo, IO_VARIANT &RetData) const;
 
 	//DIN
 	bool GetDinScanEnable(int32u nOccNo, IO_VARIANT &RetData) const;
@@ -288,32 +308,34 @@ private:
 	bool GetDinStart(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetDinDesc0(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetDinDesc1(int32u nOccNo, IO_VARIANT &RetData) const;
-	bool GetDinPin(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetDinPinLabel(int32u nOccNo, IO_VARIANT &RetData) const;
 
 	//AOUT
 	bool GetAoutScanEnable(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetAoutQua(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetAoutState(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetAoutOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
-	bool GetAoutPin(int32u nOccNo, IO_VARIANT &RetData) const;
-	bool GetAoutUint(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetAoutPinLabel(int32u nOccNo, IO_VARIANT &RetData) const;
+	bool GetAoutUnit(int32u nOccNo, IO_VARIANT &RetData) const;
 
 	//DOUT
 	bool GetDoutScanEnable(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetDoutQua(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetDoutState(int32u nOccNo, IO_VARIANT &RetData) const;
 	bool GetDoutOutPut(int32u nOccNo, IO_VARIANT &RetData) const;
-	bool GetDoutPin(int32u nOccNo, IO_VARIANT &RetData) const;
-
-	bool SetChannelAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+	bool GetDoutPinLabel(int32u nOccNo, IO_VARIANT &RetData) const;
+	// 判断是否是只读，true是只读 false是可读写
+	bool IsReadOnly(int32u nOccNo, int32u nIddType, int32u nFiledId)const;
+#if 0
 	bool SetNodeAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
-
+	bool SetChannelAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
 	bool SetDeviceAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
 	bool SetAinAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
 	bool SetDinAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
 
 	bool SetAoutAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
 	bool SetDoutAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal);
+#endif
 
 private:
 	QString  m_szRdbName;
@@ -401,6 +423,10 @@ private:
 	VARDATA*  m_pUserVariable;
 	unsigned int m_nUserVariableCount;
 	std::vector<VARDATA* >m_arrUserVariables;
+	// 转发通道
+	FT_CHANNEL  *m_pFtChannels;
+	unsigned int m_nFtChannelCount;
+	std::vector<FT_CHANNEL *> m_arrFtChannels;
 
 	 //using BaseObjectAttrFuncs = std::array<std::function<bool(int32u, IO_VARIANT&) >, ATT_MAX>;
 	// 获取各个基础对象的属性

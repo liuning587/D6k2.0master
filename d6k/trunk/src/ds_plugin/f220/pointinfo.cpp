@@ -16,6 +16,12 @@ void CPointInfo::SetBinaryMap(const QMap<unsigned int, RPT> & mapBinary)
     m_bBinaryFlag = true;
 }
 
+void CPointInfo::SetDoubleBinaryMap(const QMap<unsigned int, RPT> &mapDoubleBinary)
+{
+	m_mapDoubleBinary.clear();
+	m_mapDoubleBinary = mapDoubleBinary;
+}
+
 //设置遥测值
 void CPointInfo::SetAnalogMap(const QMap<unsigned int, RPT> & mapAnalog)
 {
@@ -43,6 +49,11 @@ void CPointInfo::SetControlMap(const QMap<unsigned int, RPT> & mapControl)
 const QMap<unsigned int, RPT>& CPointInfo::GetBinaryMap()
 {
 	return m_mapBinary;
+}
+
+const QMap<unsigned int, RPT>& CPointInfo::GetDoubleBinaryMap()
+{
+	return m_mapDoubleBinary;
 }
 
 //遥测

@@ -12,7 +12,8 @@ public:
 	~CPointInfo();
 	//设置值
 	void SetBinaryMap(const QMap<unsigned int, RPT> &mapBinary);
-    //
+    //双点
+	void SetDoubleBinaryMap(const QMap<unsigned int , RPT> &mapDoubleBinary);
 	//设置遥测值
 	void SetAnalogMap(const QMap<unsigned int, RPT> &mapAnalog);
 	//设置遥脉值
@@ -22,6 +23,8 @@ public:
 	//获取值
 	//遥信
 	const QMap<unsigned int, RPT>& GetBinaryMap();
+	//双点遥信
+	const QMap<unsigned int, RPT>& GetDoubleBinaryMap();
 	//遥测
 	const QMap<unsigned int, RPT>& GetAnalogMap();
 	//遥脉
@@ -46,6 +49,8 @@ private:
 	
 	//遥信map   装置序列号   说明
 	QMap<unsigned int, RPT> m_mapBinary;
+	//双点遥信
+	QMap<unsigned int, RPT> m_mapDoubleBinary;
 	//遥测
 	QMap<unsigned int, RPT> m_mapAnalog;
 	//遥脉

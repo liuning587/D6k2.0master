@@ -28,6 +28,7 @@
 #include "text_widget.h"
 #include "pushbtn_widget.h"
 #include "added_widget.h"
+#include "surface3D_wgt.h"
  
 #include <QDebug>
 
@@ -188,6 +189,13 @@ CBaseWidget * CWidgetFactory::CreateWidget(const QRectF & rcPos, unsigned int nW
 		//ÇúÏßÍ¼
 		pWidget = new CAddedWidget(rcPos, CAddedWidget::NORMAL_CURE_PLOT);
 		break;
+	}
+	case DRAW_3D_SURFACE:
+	{
+		//3d surface
+		pWidget = new CSurface3DWidget(rcPos, CSurface3DWidget::SURFACE_3D);
+		break;
+
 	}
 	default:
 		break;

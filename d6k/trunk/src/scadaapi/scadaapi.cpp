@@ -8,7 +8,8 @@
 #include "tagname_pool.h"
 #include "server_db.h"
 #include "client_db.h"
-#include <qglobal.h>
+
+#include <QtGlobal>
 #include <QString>
 
 CScadaApi::CScadaApi()
@@ -19,8 +20,8 @@ CScadaApi::CScadaApi()
 	m_pScdMem = std::make_shared<CShareMem>();
 	m_pTagAttr = std::make_shared<CTagAttMgr>();
 
-	m_arrGetSappRTDataFuncs[ATT_STATE] = std::bind(&CScadaApi::GetAppState, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-	m_arrGetSappRTDataFuncs[ATT_QUA] = std::bind(&CScadaApi::GetAppQuality, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+	m_arrGetSAppRTDataFuncs[ATT_STATE] = std::bind(&CScadaApi::GetAppState, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+	m_arrGetSAppRTDataFuncs[ATT_QUA] = std::bind(&CScadaApi::GetAppQuality, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 }
 CScadaApi::~CScadaApi()
 {
@@ -86,7 +87,6 @@ void CScadaApi::Shutdown()
 		}
 	}
 }
-
 /*! \fn bool CScadaApi::GetTagNameByOccNo(int32u nOccNo, std::string& tagName)
 *********************************************************************************************************
 ** \brief CScadaApi::GetTagNameByOccNo
@@ -116,7 +116,6 @@ bool CScadaApi::GetNodeTagNameByOccNo(int32u nOccNo, std::string& tagName)
 	}
 	return false;
 }
-
 /*! \fn int32u CScadaApi::GetNodeOccNoByTagName(const std::string& tagName)
 *********************************************************************************************************
 ** \brief CScadaApi::GetOccNoByTagName
@@ -127,7 +126,7 @@ bool CScadaApi::GetNodeTagNameByOccNo(int32u nOccNo, std::string& tagName)
 ** \date 2017年2月8日
 ** \note
 ********************************************************************************************************/
-int32u CScadaApi::GetNodeOccNoByTagName(const std::string& tagName)
+int32u CScadaApi::GetNodeOccNoByTagName(const std::string& tagName)const
 {
 	Q_ASSERT(!tagName.empty() && tagName.length() > 0);
 	if (tagName.empty() || tagName.length() <= 0)
@@ -146,10 +145,16 @@ int32u CScadaApi::GetNodeOccNoByTagName(const std::string& tagName)
 	}
 }
 
-bool CScadaApi::GetIOOccNoByTagName(int32u nNodeOccNo, const std::string& tagName, const std::string& szAttr, int32u* pOccNo, int32u* pIddType, int32u *pFiledID)
+bool CScadaApi::GetOccNoByTagName(int32u nNodeOccNo, const std::string& tagName, const std::string& szAttr, int32u* pOccNo, int32u* pIddType, int32u *pFiledID)const
 {
 	Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <= MAX_NODE_OCCNO);
 	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
+	{
+		return false;
+	}
+
+	Q_ASSERT(pOccNo && pIddType && pFiledID);
+	if (pOccNo == nullptr || pIddType == nullptr || pFiledID == nullptr)
 	{
 		return false;
 	}
@@ -159,11 +164,15 @@ bool CScadaApi::GetIOOccNoByTagName(int32u nNodeOccNo, const std::string& tagNam
 	{
 		return false;
 	}
+	// fixed by LiJin 2017.9.14, 考虑到部分TagName可能不需要属性
+#if 0
 	Q_ASSERT(!szAttr.empty() && szAttr.length() > 0);
 	if (szAttr.empty() || szAttr.length() == 0)
 	{
 		return false;
 	}
+#endif
+
 	std::shared_ptr<CTagNamePool> pTagNamePool = nullptr;
 
 	auto iter = m_MapTagName.find(nNodeOccNo);
@@ -184,13 +193,15 @@ bool CScadaApi::GetIOOccNoByTagName(int32u nNodeOccNo, const std::string& tagNam
 		//todo log
 		return false;
 	}
-
-	bRet = m_pTagAttr->GetAttIndex(*pIddType, szAttr.c_str(), *pFiledID);
-	if (!bRet)
+	if (szAttr.length())
 	{
-		//todo log
-		return false;
-	}
+		bRet = m_pTagAttr->GetAttIndex(*pIddType, szAttr.c_str(), *pFiledID);
+		if (!bRet)
+		{
+			//todo log
+			return false;
+		}
+	}	
 
 	return true;
 }
@@ -199,9 +210,36 @@ void CScadaApi::LogMsg(const char * pszText, int nLevel)
 {
 	::LogMsg("scddaapi", pszText, nLevel, nullptr);
 }
+/*! \fn bool CScadaApi::GetOccNoByTagName(const char *pszTagName, int32u nNodeOccNo, int32u &nIddType, int32u &nOccNo)const
+********************************************************************************************************* 
+** \brief CScadaApi::GetOccNoByTagName 
+** \details 根据tagname或者occno，最初的需求是根据app的tagname，获取他的occno
+** \param pszTagName 
+** \param nNodeOccNo 
+** \param nIddType 
+** \param nOccNo 
+** \return bool 
+** \author LiJin 
+** \date 2017年9月14日 
+** \note 没有推敲清楚...... 需要仔细再琢磨
+********************************************************************************************************/
+bool CScadaApi::GetOccNoByTagName(const char *pszTagName, int32u nNodeOccNo, int32u &nIddType, int32u &nOccNo)const
+{
+	Q_ASSERT(pszTagName && strlen(pszTagName) > 0);
+	if (pszTagName == nullptr || strlen(pszTagName) == 0)
+	{
+		return false;
+	}
+	int32u nFiledID = 0;
+	return GetOccNoByTagName(nNodeOccNo,
+		pszTagName,
+		"",
+		&nOccNo,
+		&nIddType,
+		&nFiledID); 
+}
 
-
-bool CScadaApi::GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int32u *pIddType, int32u *pOccNo, int32u *pFiledID)
+bool CScadaApi::GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int32u *pIddType, int32u *pOccNo, int32u *pFiledID)const
 {
 	Q_ASSERT(pszTagName && strlen(pszTagName) > 0);
 	if (!pszTagName || strlen(pszTagName) == 0)
@@ -229,7 +267,7 @@ bool CScadaApi::GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int
 	}
 	*pNodeOccNo = nNodeOccNo;
 
-	bool bRet = GetIOOccNoByTagName(nNodeOccNo,
+	bool bRet = GetOccNoByTagName(nNodeOccNo,
 		szTagNameList.at(1).toStdString().c_str(),
 		szTagNameList.at(2).toStdString().c_str(),
 		pOccNo,
@@ -269,7 +307,7 @@ bool CScadaApi::GetOccNoByTagName(const char*pszTagName, int32u *pNodeOccNo, int
 	return true;
 }
 
-bool CScadaApi::GetRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pRetData)
+bool CScadaApi::GetRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pRetData) 
 {
 	Q_ASSERT(nIddType != IDD_NULL  && nIddType <= MAX_IDD);
 	if (nIddType == IDD_NULL || nIddType > MAX_IDD)
@@ -289,93 +327,93 @@ bool CScadaApi::GetRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int
 
 	switch (nIddType)
 	{
-	case IDD_AIN:
-	case IDD_DIN:
-	case IDD_AOUT:
-	case IDD_DOUT:
-	case IDD_USERVAR:
-	case IDD_SYSVAR:
-	{
-		NODE_TYPE nType = GetNodeType(nNodeOccNo);
-
-		bool bRet = false;
-
-		switch (nType)
+		case IDD_AIN:
+		case IDD_DIN:
+		case IDD_AOUT:
+		case IDD_DOUT:
+		case IDD_USERVAR:
+		case IDD_SYSVAR:
 		{
-		case NODE_NULL:
-		{
-			return false;
-		}
-		case NODE_SVR:
-		{
-			CServerDB* pServer = GetScadaDbByOccNo(nNodeOccNo);
+			NODE_TYPE nType = GetNodeType(nNodeOccNo);
 
-			Q_ASSERT(pServer);
-			if (!pServer)
+			bool bRet = false;
+
+			switch (nType)
+			{
+				case NODE_NULL:
+				{
+					return false;
+				}
+				case NODE_SVR:
+				{
+					CServerDB* pServer = GetScadaDbByOccNo(nNodeOccNo);
+
+					Q_ASSERT(pServer);
+					if (!pServer)
+					{
+						return false;
+					}
+
+					bRet = pServer->GetRTData(nIddType, nOccNo, nFiledID, *pRetData);
+					break;
+				}
+				case NODE_FES:
+				{
+					CFesDB* pFes = GetFesDbByOccNo(nNodeOccNo);
+
+					Q_ASSERT(pFes);
+					if (!pFes)
+					{
+						return false;
+					}
+
+					bRet = pFes->GetRTData(nIddType, nOccNo, nFiledID, *pRetData);
+
+					break;
+				}
+				case NODE_CLIENT:
+				{
+					CClientDB* pClient = GetClientDbByOccNo(nNodeOccNo);
+
+					Q_ASSERT(pClient);
+					if (!pClient)
+					{
+						return false;
+					}
+
+					bRet = pClient->GetRTData(nIddType, nOccNo, nFiledID, *pRetData);
+					break;
+				}
+				default:
+				{
+					Q_ASSERT(false);
+					return false;
+				}
+			}
+
+			Q_ASSERT(bRet);
+			if (!bRet)
 			{
 				return false;
 			}
-
-			bRet = pServer->GetRTData(nIddType, nOccNo, nFiledID, *pRetData);
-			break;
+			return true;
 		}
-		case NODE_FES:
+		case IDD_FAPP:
+		case IDD_SAPP:
 		{
-			CFesDB* pFes = GetFesDBByOccNO(nNodeOccNo);
-
-			Q_ASSERT(pFes);
-			if (!pFes)
+			Q_ASSERT(m_arrGetSAppRTDataFuncs[nFiledID]);
+			if (m_arrGetSAppRTDataFuncs[nFiledID])
 			{
-				return false;
+				m_arrGetSAppRTDataFuncs[nFiledID](nNodeOccNo, nOccNo, *pRetData);
 			}
-
-			bRet = pFes->GetRTData(nIddType, nOccNo, nFiledID, *pRetData);
-
-			break;
-		}
-		case NODE_CLIENT:
-		{
-			CClientDB* pClient = GetClientDBByOccNo(nNodeOccNo);
-
-			Q_ASSERT(pClient);
-			if (!pClient)
-			{
-				return false;
-			}
-
-			bRet = pClient->GetRTData(nIddType, nOccNo, nFiledID, *pRetData);
-			break;
 		}
 		default:
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-		}
-
-		Q_ASSERT(bRet);
-		if (!bRet)
-		{
-			return false;
-		}
-		return true;
-	}
-	case IDD_FAPP:
-	case IDD_SAPP:
-	{
-		Q_ASSERT(m_arrGetSappRTDataFuncs[nFiledID]);
-		if (m_arrGetSappRTDataFuncs[nFiledID])
-		{
-			m_arrGetSappRTDataFuncs[nFiledID](nNodeOccNo,nOccNo,*pRetData);
-		}
-	}
-	default:
-		break;
+			break;
 	}
 	return true;
 }
 
-bool CScadaApi::PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, void *pExt, void *pSrc)
+bool CScadaApi::PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int32u nFiledID, IO_VARIANT *pData, const char * pszAppTagName, void *pExt)
 {
 	Q_ASSERT(nIddType != IDD_NULL  && nIddType <= MAX_IDD);
 	if (nIddType == IDD_NULL || nIddType > MAX_IDD)
@@ -392,61 +430,64 @@ bool CScadaApi::PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int
 	{
 		return false;
 	}
+
+	// 先找到是哪个节点，是什么节点类型
 	NODE_TYPE nType = GetNodeType(nNodeOccNo);
 
 	bool bRet = false;
 
 	switch (nType)
 	{
-	case NODE_NULL:
-	{
-		return false;
-	}
-	case NODE_SVR:
-	{
-		CServerDB* pServer = GetScadaDbByOccNo(nNodeOccNo);
-
-		Q_ASSERT(pServer);
-		if (!pServer)
+		case NODE_NULL:
 		{
+			Q_ASSERT(false);
 			return false;
 		}
-
-		bRet = pServer->PutRtData(nIddType, nOccNo, nFiledID, pData, pExt, pSrc);
-		break;
-	}
-	case NODE_FES:
-	{
-		CFesDB* pFes = GetFesDBByOccNO(nNodeOccNo);
-
-		Q_ASSERT(pFes);
-		if (!pFes)
+		case NODE_SVR:
 		{
+			CServerDB* pServer = GetScadaDbByOccNo(nNodeOccNo);
+
+			Q_ASSERT(pServer);
+			if (!pServer)
+			{
+				return false;
+			}
+
+			bRet = pServer->PutRtData(nIddType, nOccNo, nFiledID, pData, pszAppTagName,pExt);
+			break;
+		}
+		case NODE_FES:
+		{
+			CFesDB* pFes = GetFesDbByOccNo(nNodeOccNo);
+
+			Q_ASSERT(pFes);
+			if (!pFes)
+			{
+				return false;
+			}
+
+			bRet = pFes->PutRtData(nIddType, nOccNo, nFiledID, pData, pszAppTagName, pExt);
+
+			break;
+		}
+		case NODE_CLIENT:
+		{
+			CClientDB* pClient = GetClientDbByOccNo(nNodeOccNo);
+
+			Q_ASSERT(pClient);
+			if (!pClient)
+			{
+				return false;
+			}
+
+			bRet = pClient->PutRtData(nIddType, nOccNo, nFiledID, pData, pszAppTagName, pExt);
+			break;
+		}
+		default:
+		{
+			Q_ASSERT(false);
 			return false;
 		}
-
-		bRet = pFes->PutRtData(nIddType, nOccNo, nFiledID, pData, pExt, pSrc);
-
-		break;
-	}
-	case NODE_CLIENT:
-	{
-		CClientDB* pClient = GetClientDBByOccNo(nNodeOccNo);
-
-		Q_ASSERT(pClient);
-		if (!pClient)
-		{
-			return false;
-		}
-
-		bRet = pClient->PutRtData(nIddType, nOccNo, nFiledID, pData, pExt, pSrc);
-		break;
-	}
-	default:
-	{
-		Q_ASSERT(false);
-		return false;
-	}
 	}
 
 	Q_ASSERT(bRet);
@@ -457,7 +498,7 @@ bool CScadaApi::PutRTData(int32u nIddType, int32u nNodeOccNo, int32u nOccNo, int
 	return true;
 }
 
-NODE_TYPE CScadaApi::GetNodeType(int32u nNodeOccNo)
+NODE_TYPE CScadaApi::GetNodeType(int32u nNodeOccNo) const
 {
 	Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <= MAX_NODE_OCCNO);
 	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_OCCNO)
@@ -480,8 +521,43 @@ NODE_TYPE CScadaApi::GetNodeType(int32u nNodeOccNo)
 		return iter->second;
 	}
 }
+/*! \fn NODE_STATE  CScadaApi::GetNodeHostState(int32u nNodeOccNo) const
+*********************************************************************************************************
+** \brief CScadaApi::GetNodeHostState
+** \details 获取每个节点的工作状态
+** \param nNodeOccNo
+** \return NODE_STATE
+** \author LiJin
+** \date 2017年9月8日
+** \note
+********************************************************************************************************/
+NODE_STATE  CScadaApi::GetNodeHostState(int32u nNodeOccNo) const
+{
+	Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <= MAX_NODE_OCCNO);
+	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_OCCNO)
+	{
+		return STATE_UNKOWN;
+	}
 
-SAPP* CScadaApi::GetNodeAppInfoByName(int32u nNodeOccNo, char* pszAppName)
+	Q_ASSERT(m_pNodes);
+	if (m_pNodes == nullptr)
+		return STATE_UNKOWN;
+
+	if (m_pNodes[nNodeOccNo - 1].State == STATE_MAIN)
+	{
+		return STATE_MAIN;
+	}
+	else if (m_pNodes[nNodeOccNo - 1].State == STATE_SLAVE)
+	{
+		return STATE_SLAVE;
+	}
+	else
+	{
+		return STATE_UNKOWN;
+	}
+}
+
+SAPP* CScadaApi::GetNodeAppInfoByName(int32u nNodeOccNo, const char* pszAppName)
 {
 	Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <= MAX_NODE_OCCNO);
 	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
@@ -513,7 +589,7 @@ SAPP* CScadaApi::GetNodeAppInfoByName(int32u nNodeOccNo, char* pszAppName)
 bool CScadaApi::GetNodeAppInfoByOccNo(int32u nNodeOccNo, int32u nProOccNo, SAPP** pApp)  const
 {
 	Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <= MAX_NODE_OCCNO);
-  	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
+	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
 	{
 		return false;
 	}
@@ -543,18 +619,18 @@ bool CScadaApi::GetNodeAppInfoByOccNo(int32u nNodeOccNo, int32u nProOccNo, SAPP*
 
 bool CScadaApi::GetAppState(int32u nNodeOccNo, int32u nOccNo, IO_VARIANT& pData) const
 {
-	Q_ASSERT(nNodeOccNo!=INVALID_OCCNO && nNodeOccNo <=MAX_NODE_OCCNO);
-	if (nNodeOccNo==INVALID_OCCNO || nNodeOccNo>MAX_NODE_OCCNO)
+	Q_ASSERT(nNodeOccNo != INVALID_OCCNO && nNodeOccNo <= MAX_NODE_OCCNO);
+	if (nNodeOccNo == INVALID_OCCNO || nNodeOccNo > MAX_NODE_OCCNO)
 	{
 		return false;
 	}
-	Q_ASSERT(nOccNo !=INVALID_OCCNO && nOccNo <=MAX_OCCNO);
-	if (nOccNo==INVALID_OCCNO || nOccNo >MAX_OCCNO)
-	{ 
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
+	{
 		return false;
 	}
 	SAPP* pApp = nullptr;
-	bool bRet= GetNodeAppInfoByOccNo(nNodeOccNo, nOccNo, &pApp);
+	bool bRet = GetNodeAppInfoByOccNo(nNodeOccNo, nOccNo, &pApp);
 
 	Q_ASSERT(pApp);
 	if (!pApp)
@@ -688,7 +764,7 @@ bool CScadaApi::BuildTagNamePool(const char* pszFilePath)
 
 	m_pNodeTag = reinterpret_cast<TAG_OCCNO *>(pData);
 
-	for (int i = 0; i<m_nTotalNodeCount; ++i)
+	for (int i = 0; i < m_nTotalNodeCount; ++i)
 	{
 		Q_ASSERT(m_pNodeTag[i].OccNo != INVALID_OCCNO && m_pNodeTag[i].OccNo <= MAX_NODE_OCCNO);
 		if (m_pNodeTag[i].OccNo == INVALID_OCCNO || m_pNodeTag[i].OccNo > MAX_NODE_OCCNO)
@@ -831,7 +907,7 @@ size_t CScadaApi::CreateMemDB(unsigned char* pAddr)
 	{
 		Q_ASSERT(m_pNodeScdMemHead[i].OccNo != INVALID_OCCNO && m_pNodeScdMemHead[i].OccNo <= MAX_OCCNO);
 
-		if (m_pNodeScdMemHead[i].OccNo == INVALID_OCCNO || m_pNodeScdMemHead[i].OccNo>MAX_OCCNO)
+		if (m_pNodeScdMemHead[i].OccNo == INVALID_OCCNO || m_pNodeScdMemHead[i].OccNo > MAX_OCCNO)
 		{
 			szLog = QString(QObject::tr("[%1] node's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pNodeScdMemHead[i].OccNo);
 			LogMsg(szLog.toStdString().c_str(), 0);
@@ -842,12 +918,12 @@ size_t CScadaApi::CreateMemDB(unsigned char* pAddr)
 		m_arrScdMemDbs.push_back(&m_pNodeScdMemHead[i]);
 	}
 
-	m_pNodeClientMemHead = reinterpret_cast<NODE_MEM*>(pAddr + (m_nNodeScdCount* sizeof NODE_MEM));
+	m_pNodeClientMemHead = reinterpret_cast<NODE_MEM*>(pAddr + (m_nNodeScdCount * sizeof NODE_MEM));
 	for (int i = 0; i < m_nNodeClientCount; ++i)
 	{
 		Q_ASSERT(m_pNodeClientMemHead[i].OccNo != INVALID_OCCNO && m_pNodeClientMemHead[i].OccNo <= MAX_OCCNO);
 
-		if (m_pNodeClientMemHead[i].OccNo == INVALID_OCCNO || m_pNodeClientMemHead[i].OccNo>MAX_OCCNO)
+		if (m_pNodeClientMemHead[i].OccNo == INVALID_OCCNO || m_pNodeClientMemHead[i].OccNo > MAX_OCCNO)
 		{
 			szLog = QString(QObject::tr("[%1] node's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pNodeClientMemHead[i].OccNo);
 			LogMsg(szLog.toStdString().c_str(), 0);
@@ -875,7 +951,7 @@ size_t CScadaApi::CreateScadaDB(unsigned char* pAddr)
 	CServerDB* pServer = nullptr;
 	for (int i = 0; i < m_nNodeScdCount; ++i)
 	{
-		pServer = new CServerDB;
+		pServer = new CServerDB(this);
 
 		nRet = pServer->LoadMem(pAddr);
 		m_arrScdDBs.push_back(pServer);
@@ -907,7 +983,7 @@ size_t CScadaApi::CreateClientDB(unsigned char* pAddr)
 	CClientDB* pClient = nullptr;
 	for (int i = 0; i < m_nNodeClientCount; ++i)
 	{
-		pClient = new CClientDB;
+		pClient = new CClientDB(this);
 
 		nRet = pClient->LoadMem(pAddr);
 		m_arrClientDBs.push_back(pClient);
@@ -974,7 +1050,7 @@ size_t CScadaApi::CreateNodeAppDB(unsigned char* pAddr)
 
 	QString szLog;
 
-	SAPP* ppApp = NULL;
+	SAPP* ppApp = nullptr;
 
 	ppApp = reinterpret_cast<SAPP*>(pAddr);
 
@@ -983,7 +1059,7 @@ size_t CScadaApi::CreateNodeAppDB(unsigned char* pAddr)
 	for (int i = 0; i < nCount; ++i)
 	{
 		Q_ASSERT(ppApp[i].OccNo != INVALID_OCCNO && ppApp[i].OccNo <= MAX_OCCNO);
-		if (ppApp[i].OccNo == INVALID_OCCNO || ppApp[i].OccNo >MAX_OCCNO)
+		if (ppApp[i].OccNo == INVALID_OCCNO || ppApp[i].OccNo > MAX_OCCNO)
 		{
 			szLog = QString(QObject::tr("[%1] nodeapp's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(ppApp[i].OccNo);
 			LogMsg(szLog.toStdString().c_str(), 0);
@@ -1064,7 +1140,7 @@ size_t CScadaApi::CreateFesMem(unsigned char* pHead)
 
 	for (auto i : m_arrTempNodes)
 	{
-		pFesDB = new CFesDB;
+		pFesDB = new CFesDB(this);
 
 		if (pFesDB)
 		{
@@ -1077,7 +1153,7 @@ size_t CScadaApi::CreateFesMem(unsigned char* pHead)
 	return 0;
 }
 
-CFesDB* CScadaApi::GetFesDBByOccNO(int32u nOccNo)
+CFesDB* CScadaApi::GetFesDbByOccNo(int32u nOccNo)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_NODE_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_NODE_OCCNO)
@@ -1113,7 +1189,7 @@ CServerDB* CScadaApi::GetScadaDbByOccNo(int32u nOccNo)
 	}
 }
 
-CClientDB* CScadaApi::GetClientDBByOccNo(int32u nOccNo)
+CClientDB* CScadaApi::GetClientDbByOccNo(int32u nOccNo)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_NODE_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_NODE_OCCNO)

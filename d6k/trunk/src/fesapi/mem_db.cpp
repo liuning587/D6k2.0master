@@ -45,11 +45,10 @@ CMemDB::CMemDB()
 {
 	m_pMem = std::make_shared<CShareMem>();
 
-	//	m_ChannelMgr = std::make_shared<CChannelMgr>();
+//	m_ChannelMgr = std::make_shared<CChannelMgr>();
 	m_pTagAttrMgr = std::make_shared<CTagAttMgr>();
 
 	m_bInitialized = false;
-
 
 	m_nNodeCount = 0;
 	m_nChannelCount = 0;
@@ -75,7 +74,11 @@ CMemDB::CMemDB()
 	m_pAinAlarmLimit = nullptr;
 	m_pDinAlarm = nullptr;
 	m_pDinAlarmLimit = nullptr;
+
+	m_pFtChannels = nullptr;
+
 	m_nNBSvcMailBoxID = 0;
+	m_nDbSvcMailBoxID = 0;
 
 	InitFuncArrary();
 }
@@ -91,12 +94,23 @@ CMemDB::~CMemDB(void)
 	m_mapAouts.clear();
 	m_mapDouts.clear();
 
+	m_mapAinAlarms.clear();
+	m_mapAinAlarmLimits.clear();
+	m_mapDinAlarms.clear();
+	m_mapDinAlarmLimits.clear();
+
 	m_arrChannels.clear();
 	m_arrDevices.clear();
 	m_arrAins.clear();
 	m_arrDins.clear();
 	m_arrAouts.clear();
 	m_arrDouts.clear();
+
+	m_arrLinears.clear();
+	m_arrNonLinears.clear();
+	m_arrSystemVariables.clear();
+	m_arrUserVariables.clear();
+	m_arrFtChannels.clear();
 }
 /*! \fn bool CMemDB::Initialize(RUN_MODE mode)
 *********************************************************************************************************
@@ -117,10 +131,7 @@ bool CMemDB::Initialize(const char *pszDataPath, unsigned int nMode)
 		return false;
 	}
 
-	m_pDBAliveFlag = std::make_shared<ACE_Event>(1, 0, USYNC_PROCESS, pszDataPath);
-
-
-
+	m_pDBAliveFlag = std::make_shared<ACE_Event>(1, 0, USYNC_PROCESS, pszDataPath);	
 
 	return true;
 }
@@ -610,7 +621,7 @@ size_t CMemDB::CreateUserVariableTable(unsigned char* pHead)
 		Q_ASSERT(m_pUserVariable[i].OccNo != INVALID_OCCNO && m_pUserVariable[i].OccNo <= MAX_OCCNO);
 		if (m_pUserVariable[i].OccNo == INVALID_OCCNO || m_pUserVariable[i].OccNo > MAX_OCCNO)
 		{
-			szLog = QString(QObject::tr("[%1] uservariable's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pDouts[i].OccNo);
+			szLog = QString(QObject::tr("[%1] User Variable's occno [ %2 ] in memory db is wrong ")).arg(i + 1).arg(m_pDouts[i].OccNo);
 			LogMsg(szLog.toStdString().c_str(), 0);
 			m_arrUserVariables.push_back(&m_pUserVariable[i]);
 			continue;
@@ -899,6 +910,32 @@ int32u CMemDB::GetNodeOccNoByHostName(const char *pszHostName)
 
 	return nOccNo;
 }
+/*! \fn void CMemDB::InitKernelMailBox()
+********************************************************************************************************* 
+** \brief CMemDB::InitKernelMailBox 
+** \details 初始化系统内核的邮箱，获取ID
+** \return void 
+** \author LiJin 
+** \date 2017年9月28日 
+** \note 
+********************************************************************************************************/
+void CMemDB::InitKernelMailBox()
+{
+	bool bRet = false;
+
+	bRet = OpenPostOffice("FES");
+
+	Q_ASSERT(bRet);
+
+	if (bRet == false)
+		return;
+
+	m_nDbSvcMailBoxID = QueryMailBoxID("FES", "DB_SVC");
+	Q_ASSERT(m_nDbSvcMailBoxID != INVALID_MAILBOX_ID);
+
+	m_nNBSvcMailBoxID = QueryMailBoxID("FES", "NB_SVC");
+	Q_ASSERT(m_nNBSvcMailBoxID != INVALID_MAILBOX_ID);
+}
 /*! \fn bool CMemDB::OpenChannelMailBox(int32u nChannelOccNo)
 *********************************************************************************************************
 ** \brief CMemDB::OpenChannelMailBox
@@ -927,14 +964,14 @@ bool CMemDB::OpenChannelMailBox(int32u nChannelOccNo)
 
 	bool bRet = false;
 
-	bRet = OpenPostOffice("FES");
-
-	Q_ASSERT(bRet);
-
-	if (!bRet)
-	{
-		return false;
-	}
+// 	bRet = OpenPostOffice("FES");
+// 
+// 	Q_ASSERT(bRet);
+// 
+// 	if (!bRet)
+// 	{
+// 		return false;
+// 	}
 
 	bRet = OpenMailBoxByID("FES", nMailBoxID);
 
@@ -1857,8 +1894,6 @@ std::shared_ptr<CDinAlarm>CMemDB::GetDinAlarm(int32u nOccNo)
 	return nullptr;
 }
 
-
-
 TRANSFORM_LINEAR * CMemDB::GetTransformLinear(int32u nOccNo)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
@@ -1948,8 +1983,14 @@ void  CMemDB::CheckDoutBlockState(DOUT & dout)
 ** \date 2016年12月2日
 ** \note
 ********************************************************************************************************/
-bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
+bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, const char * pszSrcAppTagName)
 {
+	Q_ASSERT(pszSrcAppTagName);
+	Q_ASSERT(strlen(pszSrcAppTagName) > 0);
+
+	if (pszSrcAppTagName == nullptr || strlen(pszSrcAppTagName) == 0)
+		return false;
+
 	//! 判断 OccNo是否有效
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -1993,7 +2034,7 @@ bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
 		pFB->Init = INITED;
 		CheckDoutBlockState(*pFB);
 		return false;
-	}
+	}	
 
 	// 检查条件，如果控制闭锁没有通过，则告警
 	if (pFB->CheckOK == 0)
@@ -2009,6 +2050,10 @@ bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
 	{
 
 	}
+
+	int32u nSourceAppOccNo = 0;
+	int32u nSourceAppType = 0;
+	
 	//! 组织设值报文，并发送给 db_svc
 	std::shared_ptr<SETVAL_MSG>  pSetValeEvt = std::make_shared<SETVAL_MSG>();
 	std::memset(pSetValeEvt.get(), 0, sizeof(SETVAL_MSG));
@@ -2019,8 +2064,12 @@ bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
 	pSetValeEvt->Att = ATTW_DOUT;
 	pSetValeEvt->NodeOccNo = pFB->NodeOccNo;
 	pSetValeEvt->Occno = nOccNo;
-	pSetValeEvt->Source1 = nSource;
+//	pSetValeEvt->Source1 = nSource;
 	pSetValeEvt->Datatype = DT_BOOLEAN;
+
+	pSetValeEvt->SourcAppOccNo = nSourceAppOccNo;
+	pSetValeEvt->SourceAppIddType = nSourceAppType;
+
 
 	S_BOOL(&pSetValeEvt->Value[0], &Value);
 
@@ -2034,6 +2083,10 @@ bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
 	dmsg.Size = sizeof(SETVAL_MSG);
 	memcpy(dmsg.Buff, pSetValeEvt.get(), std::min<size_t>(static_cast <size_t> (dmsg.Size), static_cast <size_t>(MAIL_MAX_SIZE)));
 
+	Q_ASSERT(m_nDbSvcMailBoxID != 0);
+	dmsg.RecverID = m_nDbSvcMailBoxID;
+
+#if 0
 	//! 判断是否关联遥信，如果有关联遥信，则发送到db_svc，由db_svc去做处理，此处需要注意超时处理
 	if (pFB->FeedbackOccNo != INVALID_OCCNO && pFB->FeedbackOccNo <= MAX_OCCNO)
 	{
@@ -2041,7 +2094,7 @@ bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
 		dmsg.RecverID = m_nDbSvcMailBoxID;
 	}
 	else
-	{// 否则直接下发给通道驱动
+	{// 否则直接下发给通道驱动 
 		if (pFB->ChannelOccNo == INVALID_OCCNO || pFB->ChannelOccNo > MAX_CHANNEL_OCCNO)
 		{
 			szLog = QObject::tr("Set dout [OccNo=%1] failed. Channel OccNo is incorrect.").arg(nOccNo);
@@ -2059,16 +2112,12 @@ bool CMemDB::AppSetDoutValue(int32u nOccNo, int8u Value, int8u nSource)
 
 				return false;
 			}
-		}
+		} 
 	}
+#endif
+
 	bool bRet = SendMail("FES", &dmsg, 0);
-	//! 如果报文发送成功，则启动告警记录
-	if (bRet)
-	{// 调用告警接口
-
-
-	}
-	else
+	if (bRet == false)
 	{
 		szLog = QObject::tr("Set dout [OccNo=%1] failed. Send setvalmsg failed.").arg(nOccNo);
 		LogMsg(szLog.toStdString().c_str(), 1);
@@ -2146,7 +2195,7 @@ bool CMemDB::AppSetAoutValue(int32u nOccNo, fp64 Value, int8u nSource)
 	pSetValeEvt->Att = ATTW_AOUT;
 	pSetValeEvt->NodeOccNo = pFB->NodeOccNo;
 	pSetValeEvt->Occno = nOccNo;
-	pSetValeEvt->Source1 = nSource;
+//	pSetValeEvt->Source1 = nSource;
 	pSetValeEvt->Datatype = DT_DOUBLE;
 
 	S_DOUBLE(&pSetValeEvt->Value[0], &Value);
@@ -2169,7 +2218,7 @@ bool CMemDB::AppSetAoutValue(int32u nOccNo, fp64 Value, int8u nSource)
 	}
 	else
 	{
-		dmsg.RecverID = GetChannelMailBoxID(pFB->ChannelOccNo);
+		dmsg.RecverID = GetIoChannelMailBoxID(pFB->ChannelOccNo);
 		if (dmsg.RecverID == 0)
 		{
 			szLog = QObject::tr("Set aout [OccNo=%1] failed. Channel's MailBoxID is incorrect.").arg(nOccNo);
@@ -2181,12 +2230,7 @@ bool CMemDB::AppSetAoutValue(int32u nOccNo, fp64 Value, int8u nSource)
 
 	bool bRet = SendMail("FES", &dmsg, 0);
 	//! 如果报文发送成功，则启动告警记录
-	if (bRet)
-	{// 调用告警接口
-
-
-	}
-	else
+	if (bRet == false)
 	{
 		szLog = QObject::tr("Set aout [OccNo=%1] failed. Send setvalmsg failed.").arg(nOccNo);
 		LogMsg(szLog.toStdString().c_str(), 1);
@@ -2306,11 +2350,11 @@ bool  CMemDB::PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, const I
 
 	return true;
 }
-/*! \fn bool CMemDB::PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData,
-	const char * szOperatorName, const char * szMonitorName, void *pExt, bool bOpLog)
+/*! \fn bool CMemDB::PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData, void *pExt,
+		const char * pszSrcAppTagName, struct OpLogData *pOpLog)
 *********************************************************************************************************
 ** \brief CMemDB::PutRTData
-** \details
+** \details  通用的设值接口
 ** \param nIddType
 ** \param nOccNo
 ** \param nFiledID
@@ -2325,48 +2369,192 @@ bool  CMemDB::PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, const I
 ** \date 2017年2月21日
 ** \note
 ********************************************************************************************************/
-bool CMemDB::PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData,
-	const char * szOperatorName, const char * szMonitorName, void *pExt, bool bOpLog)
+bool CMemDB::PutRTData(int32u nIddType, int32u nOccNo, int32u nFiledID, int32u nParam, IO_VARIANT *pData, void *pExt,
+		const char * pszSrcAppTagName, struct OpLogData *pOpLog)
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
 		return false;
 
+	QString szLog;
+	// 如果本机状态是非主机状态，则不执行
+	if (GetMyHostState() != STATE_MAIN)
+	{
+		szLog = QObject::tr("PutRTData [OccNo=%1] failed.My node state is't master state.").arg(nOccNo);
+		LogMsg(szLog.toStdString().c_str(), 1);
+		return false;
+	}
+	// 如果本节点退出运行，则不执行
+	if (GetMyHostScanEnable() != SCAN_IN)
+	{
+		szLog = QObject::tr("PutRTData [OccNo=%1] failed.My node state is scan out.").arg(nOccNo);
+		LogMsg(szLog.toStdString().c_str(), 1);
+		return false;
+	}
+
 	bool bRet = false;
+	// 判断一下，有一些属性是不可写的，如果不可写，则直接返回，不做操作。
+	bRet = IsReadOnly(nOccNo, nIddType, nFiledID);
+	if (bRet == true)
+	{// log
+		szLog = QObject::tr("The point is readonly. [OccNo=%1,IddType=%2,Att=%3,Size=%4].").arg(nOccNo).arg(nIddType).arg(nFiledID);
+		LogMsg(szLog.toStdString().c_str(), 1);
+		return false;
+	}
+
+	int32u nSourceAppOccNo = 0;
+	int32u nSourceAppType = 0;
+	int32s nSrcAppMailBoxID = 0;
+
+	DMSG dmsg;
+	std::memset(&dmsg, 0, sizeof(DMSG));
+
+	//! 组织设值报文，并发送给 db_svc
+	SETVAL_MSG *pSetValeEvt = reinterpret_cast<SETVAL_MSG*>(dmsg.Buff);
+	
+	pSetValeEvt->MsgCode = MSG_SETVAL;
+	pSetValeEvt->Len = sizeof(SETVAL_MSG);
+	pSetValeEvt->IddType = nIddType;
+	pSetValeEvt->Att = nFiledID;
+	pSetValeEvt->NodeOccNo = GetMyNodeOccNo();
+	pSetValeEvt->Occno = nOccNo;
+	pSetValeEvt->Datatype = pData->Type;
+
+	pSetValeEvt->SourcAppOccNo = nSourceAppOccNo;
+	pSetValeEvt->SourceAppIddType = nSourceAppType;
+
+	pSetValeEvt->Value[0] = *pData;
+	pSetValeEvt->Value[1] = *pData;
+
+	//! 再次封装成邮件发送MSG_EVT_SETVAL
+	dmsg.Type = MSG_EVT_SETVAL;
+	dmsg.SenderID = nSrcAppMailBoxID;
+
+	dmsg.Size = sizeof(SETVAL_MSG);
+
+	Q_ASSERT(m_nDbSvcMailBoxID != 0);
+	dmsg.RecverID = m_nDbSvcMailBoxID;
+		
+	bRet = SendMail("FES", &dmsg, 0); 
+	if (bRet)
+	{
+		if (pOpLog)
+		{// 告警
+
+		}
+	}
+	
+	return bRet;
+}
+/*! \fn bool CMemDB::IsReadOnly(int32u nOccNo, int32u nIddType, int32u nFiledId)const
+********************************************************************************************************* 
+** \brief CMemDB::IsReadOnly 
+** \details 判断某个点的属性是可读写
+** \param nOccNo 
+** \param nIddType 
+** \param nFiledId 
+** \return bool 
+** \author LiJin 
+** \date 2017年9月28日 
+** \note 
+********************************************************************************************************/
+bool CMemDB::IsReadOnly(int32u nOccNo, int32u nIddType, int32u nFiledId)const
+{
+	if (nFiledId > ATT_MAX)
+	{
+		Q_ASSERT(false);
+		return true;
+	}
+
+	Q_ASSERT(m_pTagAttrMgr);
+	if (m_pTagAttrMgr == nullptr)
+		return true;
+
 	switch (nIddType)
 	{
 		case IDD_NODE:
-			bRet = SetNodeAttrValue(nOccNo, nFiledID, *pData);
+			if (m_pTagAttrMgr->GetNodeAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetNodeAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				return false;
+			}
 			break;
 		case IDD_CHANNEL:
-			bRet = SetChannelAttrValue(nOccNo, nFiledID, *pData);
+			if (m_pTagAttrMgr->GetChannelAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetChannelAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				return false;
+			}		 
 			break;
 		case IDD_DEVICE:
-			bRet = SetDeviceAttrValue(nOccNo, nFiledID, *pData);
+			if (m_pTagAttrMgr->GetDeviceAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetDeviceAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				return false;
+			}
 			break;
 		case IDD_AIN:
-			bRet = SetAinAttrValue(nOccNo, nFiledID, *pData);
+			if (m_pTagAttrMgr->GetAinAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetAinAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				return false;
+			}
 			break;
 		case IDD_DIN:
-			bRet = SetDinAttrValue(nOccNo, nFiledID, *pData);
+			if (m_pTagAttrMgr->GetDinAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetDinAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				return false;
+			}
 			break;
 		case IDD_AOUT:
-			bRet = SetAoutAttrValue(nOccNo, nFiledID, *pData);
+			if (m_pTagAttrMgr->GetAoutAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetAoutAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				return false;
+			}
 			break;
 		case IDD_DOUT:
-			bRet = SetDoutAttrValue(nOccNo, nFiledID, *pData);
+			if (m_pTagAttrMgr->GetDoutAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetDoutAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				return false;
+			}
 			break;
 		case IDD_USERVAR:
+			if (m_pTagAttrMgr->GetUserVariableAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetUserVariableAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{//  
+				if (nFiledId == ATTW_VALUE)
+				{// 还要判断这点是可读的，还是可写的。
+					if (nOccNo <= m_nUserVariableCount && nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO)
+					{
+						VARDATA *pFB =& m_pUserVariable[nOccNo - 1];
+						if (pFB->IsReadOnly == FES_YES)
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
 			break;
 		case IDD_SYSVAR:
+			if (m_pTagAttrMgr->GetSysVariableAttrs()[nFiledId].Att != CTagAttMgr::ATT_NO || m_pTagAttrMgr->GetSysVariableAttrs()[nFiledId].RW == CTagAttMgr::ATT_RW)
+			{// 没有意义的属性，或者是只读的属性
+				if (nFiledId == ATTW_VALUE)
+				{// 还要判断这点是可读的，还是可写的。
+					if (nOccNo <= m_nSystemVariableCount && nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO)
+					{
+						VARDATA *pFB = &m_pSystemVariable[nOccNo - 1];
+						if (pFB->IsReadOnly == FES_YES)
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
 			break;
-
 		default:
 			break;
 	}
-
-	return bRet;
+	return true;
 }
+
+#if 0
 /*! \fn bool CMemDB::SetNodeAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT & varVal)
 *********************************************************************************************************
 ** \brief CMemDB::SetNodeAttrValue
@@ -2542,6 +2730,8 @@ bool CMemDB::SetDoutAttrValue(int32u nOccNo, int32u nFiledId, const IO_VARIANT &
 
 	return true;
 }
+#endif
+
 /*! \fn void CMemDB::InitFuncArrary()
 *********************************************************************************************************
 ** \brief CMemDB::InitFuncArrary
@@ -2577,8 +2767,8 @@ void CMemDB::InitFuncArrary()
 	m_arrGetAinRTDataFuncs[ATT_HIQUA] = std::bind(&CMemDB::GetAinHighQua, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAinRTDataFuncs[ATT_LOQUA] = std::bind(&CMemDB::GetAinLowQua, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAinRTDataFuncs[ATT_DESCRIPTION] = std::bind(&CMemDB::GetAinDesc, this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetAinRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetAinPin, this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetAinRTDataFuncs[ATT_UNIT] = std::bind(&CMemDB::GetAinUint, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetAinRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetAinPinLabel, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetAinRTDataFuncs[ATT_UNIT] = std::bind(&CMemDB::GetAinUnit, this, std::placeholders::_1, std::placeholders::_2);
 	//DIN
 	m_arrGetDinRTDataFuncs[ATT_IN_OUT] = std::bind(&CMemDB::GetDinScanEnable, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetDinRTDataFuncs[ATT_QUA] = std::bind(&CMemDB::GetDinQua, this, std::placeholders::_1, std::placeholders::_2);
@@ -2589,22 +2779,22 @@ void CMemDB::InitFuncArrary()
 	m_arrGetDinRTDataFuncs[ATT_START] = std::bind(&CMemDB::GetDinStart, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetDinRTDataFuncs[ATT_STATE0] = std::bind(&CMemDB::GetDinDesc0, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetDinRTDataFuncs[ATT_STATE1] = std::bind(&CMemDB::GetDinDesc1, this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetDinRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetDinPin, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetDinRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetDinPinLabel, this, std::placeholders::_1, std::placeholders::_2);
 
 	//AOUT
 	m_arrGetAoutRTDataFuncs[ATT_IN_OUT] = std::bind(&CMemDB::GetAoutScanEnable, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAoutRTDataFuncs[ATT_QUA] = std::bind(&CMemDB::GetAoutQua, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAoutRTDataFuncs[ATT_STATE] = std::bind(&CMemDB::GetAoutState, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetAoutRTDataFuncs[ATT_AOUT] = std::bind(&CMemDB::GetAoutOutPut, this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetAoutRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetAoutPin, this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetAoutRTDataFuncs[ATT_UNIT] = std::bind(&CMemDB::GetAoutUint, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetAoutRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetAoutPinLabel, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetAoutRTDataFuncs[ATT_UNIT] = std::bind(&CMemDB::GetAoutUnit, this, std::placeholders::_1, std::placeholders::_2);
 
 	//DOUT
 	m_arrGetDoutRTDataFuncs[ATT_IN_OUT] = std::bind(&CMemDB::GetDinScanEnable, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetDoutRTDataFuncs[ATT_QUA] = std::bind(&CMemDB::GetDinQua, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetDoutRTDataFuncs[ATT_STATE] = std::bind(&CMemDB::GetDinState, this, std::placeholders::_1, std::placeholders::_2);
 	m_arrGetDoutRTDataFuncs[ATT_DOUT] = std::bind(&CMemDB::GetDoutOutPut, this, std::placeholders::_1, std::placeholders::_2);
-	m_arrGetDoutRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetDoutPin, this, std::placeholders::_1, std::placeholders::_2);
+	m_arrGetDoutRTDataFuncs[ATT_PINLABEL] = std::bind(&CMemDB::GetDoutPinLabel, this, std::placeholders::_1, std::placeholders::_2);
 }
 /*! \fn bool CMemDB::GetNodeScanEnable(int32u nOccNo, IO_VARIANT &RetData) const
 *********************************************************************************************************
@@ -2976,7 +3166,7 @@ bool CMemDB::GetAinDesc(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CMemDB::GetAinPin(int32u nOccNo, IO_VARIANT &RetData) const
+bool CMemDB::GetAinPinLabel(int32u nOccNo, IO_VARIANT &RetData) const
 {
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
 		return false;
@@ -2993,7 +3183,7 @@ bool CMemDB::GetAinPin(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CMemDB::GetAinUint(int32u nOccNo, IO_VARIANT &RetData) const
+bool CMemDB::GetAinUnit(int32u nOccNo, IO_VARIANT &RetData) const
 {
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
 		return false;
@@ -3155,7 +3345,7 @@ bool CMemDB::GetDinDesc1(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CMemDB::GetDinPin(int32u nOccNo, IO_VARIANT &RetData) const
+bool CMemDB::GetDinPinLabel(int32u nOccNo, IO_VARIANT &RetData) const
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -3246,7 +3436,7 @@ bool CMemDB::GetAoutOutPut(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CMemDB::GetAoutPin(int32u nOccNo, IO_VARIANT &RetData) const
+bool CMemDB::GetAoutPinLabel(int32u nOccNo, IO_VARIANT &RetData) const
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -3264,7 +3454,7 @@ bool CMemDB::GetAoutPin(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CMemDB::GetAoutUint(int32u nOccNo, IO_VARIANT &RetData) const
+bool CMemDB::GetAoutUnit(int32u nOccNo, IO_VARIANT &RetData) const
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -3354,7 +3544,7 @@ bool CMemDB::GetDoutOutPut(int32u nOccNo, IO_VARIANT &RetData) const
 	return true;
 }
 
-bool CMemDB::GetDoutPin(int32u nOccNo, IO_VARIANT &RetData) const
+bool CMemDB::GetDoutPinLabel(int32u nOccNo, IO_VARIANT &RetData) const
 {
 	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_OCCNO);
 	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_OCCNO)
@@ -3560,6 +3750,16 @@ void CMemDB::IoSetChannelHeartBeat(int32u nOccNo)
 		return it_find->second->SetHeartBeat();
 	}
 }
+
+void CMemDB::FtSetChannelHeartBeat(int32u nOccNo)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_CHANNEL_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_CHANNEL_OCCNO)
+	{
+		return;
+	}
+	 
+}
 /*! \fn void CMemDB::IoDiagAlarm(int32u nChannleOccNo, int32u nDeviceOccNo, const char* pszAlarmTxt)
 *********************************************************************************************************
 ** \brief CMemDB::IoDiagAlarm
@@ -3590,6 +3790,7 @@ void CMemDB::IoDiagAlarm(int32u nChannleOccNo, int32u nDeviceOccNo, const char* 
 	if (nDeviceOccNo == INVALID_OCCNO || nDeviceOccNo > MAX_DEVICE_OCCNO)
 		return;
 
+	// 多线程访问，存在隐患
 	if (m_nNBSvcMailBoxID == INVALID_MAILBOX_ID)
 	{
 		m_nNBSvcMailBoxID = QueryMailBoxID("FES", "NB_SVC");
@@ -3697,6 +3898,220 @@ void  CMemDB::IoAlarmMsg(int32u nChannleOccNo, int32u nAlarmType, const char* ps
 	strncpy(reinterpret_cast<char*> (pMsg->ExtraData), pszAlarmTxt, nLen);
 	SendMail("FES", &dmsg, 50);
 }
+
+/*! \fn void CMemDB::IoOperAlarm(struct TAGITEM *pItem, struct OpLogData *pOpLog, TIMEPAK * pTm)
+********************************************************************************************************* 
+** \brief CMemDB::IoOperAlarm 
+** \details IO操作告警-------注意，该接口一般是在驱动里面使用
+** \param pItem 
+** \param pOpLog 
+** \param pTm 
+** \return void 
+** \author LiJin 
+** \date 2017年10月1日 
+** \note 
+********************************************************************************************************/
+void CMemDB::IoOperAlarm(struct TAGITEM *pItem, struct OpLogData *pOpLog, TIMEPAK * pTm)
+{
+	Q_ASSERT(pItem);
+	if (pItem == nullptr)
+		return;
+
+	int32u nChannleOccNo = GetPointChannelOccNo(*pItem);
+
+	Q_ASSERT(nChannleOccNo != INVALID_OCCNO && nChannleOccNo <= MAX_CHANNEL_OCCNO);
+	if (nChannleOccNo == INVALID_OCCNO || nChannleOccNo > MAX_CHANNEL_OCCNO)
+		return;
+
+	Q_ASSERT(nChannleOccNo <= m_nChannelCount);
+	if (nChannleOccNo > m_nChannelCount)
+		return;
+	
+	DMSG dmsg;
+	std::memset(&dmsg, 0, sizeof(DMSG));
+
+//	dmsg.Type = nAlarmType;
+	Q_ASSERT(m_pChannels[nChannleOccNo - 1].MailBoxID != INVALID_MAILBOX_ID);
+
+	dmsg.SenderID = m_pChannels[nChannleOccNo - 1].MailBoxID;
+
+	dmsg.RecverID = m_nNBSvcMailBoxID;
+	dmsg.Size = sizeof(OPER_MSG);
+
+	OPER_MSG *pMsg = reinterpret_cast<OPER_MSG*>(dmsg.Buff);
+	pMsg->NodeOccNo = GetMyNodeOccNo();
+
+ 	pMsg->ChannelOccNo = nChannleOccNo;
+ 	pMsg->DeviceOccNo =  GetPointDeviceOccNo(*pItem);
+
+	if (pTm == nullptr)
+	{
+		// 时标
+		QDateTime dtNow = QDateTime::currentDateTime();
+		pMsg->Tm.Year = dtNow.date().year();
+		pMsg->Tm.Month = dtNow.date().month();
+		pMsg->Tm.Day = dtNow.date().day();
+		pMsg->Tm.DayOfWeek = dtNow.date().dayOfWeek();
+
+		pMsg->Tm.Hour = dtNow.time().hour();
+		pMsg->Tm.Minute = dtNow.time().minute();
+		pMsg->Tm.Second = dtNow.time().second();
+		pMsg->Tm.Milliseconds = dtNow.time().msec();
+	}
+	else
+	{
+		std::memcpy(&pMsg->Tm, pTm, sizeof(TIMEPAK));
+	}
+
+// 	size_t nLen = std::min<size_t>(strlen(pszAlarmTxt), _countof(pMsg->ExtraData));
+// 	strncpy(reinterpret_cast<char*> (pMsg->ExtraData), pszAlarmTxt, nLen);
+	SendMail("FES", &dmsg, 50);
+}
+/*! \fn void CMemDB::AppOperAlarm(const char * pszSrcAppTagName, struct TAGITEM *pItem, struct OpLogData *pOpLog, TIMEPAK * pTm)
+********************************************************************************************************* 
+** \brief CMemDB::AppOperAlarm 
+** \details 应用层对遥控、遥调等操作的告警
+** \param pszSrcAppTagName 
+** \param pItem 
+** \param pOpLog 
+** \param pTm 
+** \return void 
+** \author LiJin 
+** \date 2017年10月1日 
+** \note 比如：对某测点进行遥控合操作，遥控分操作
+********************************************************************************************************/
+void CMemDB::AppOperAlarm(const char * pszSrcAppTagName, struct TAGITEM *pItem, struct OpLogData *pOpLog, TIMEPAK * pTm)
+{
+
+
+}
+
+/*! \fn int32u  CMemDB::GetChannelOccNo(const struct TAGITEM & item) const
+********************************************************************************************************* 
+** \brief CMemDB::GetChannelOccNo 
+** \details 获取某个测点或者变量的通道号
+** \param item 
+** \return int32u 
+** \author LiJin 
+** \date 2017年10月1日 
+** \note 虚拟变量之类没有通道
+********************************************************************************************************/
+int32u  CMemDB::GetPointChannelOccNo(const struct TAGITEM & item) const
+{
+	int32u nChannelOccNo = INVALID_OCCNO;
+
+	switch (item.IddType)
+	{
+		case IDD_AIN:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nAinCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nAinCount)
+			{
+				return INVALID_OCCNO;
+			}
+			AIN *pFB = &m_pAins[item.TagOccNo - 1];
+			nChannelOccNo = pFB->ChannelOccNo;
+
+		}
+		break;
+		case IDD_DIN:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nDinCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nDinCount)
+			{
+				return INVALID_OCCNO;
+			}
+			DIN *pFB = &m_pDins[item.TagOccNo - 1];
+			nChannelOccNo = pFB->ChannelOccNo;
+
+		}
+		break;
+		case IDD_AOUT:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nAoutCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nAoutCount)
+			{
+				return INVALID_OCCNO;
+			}
+			AOUT *pFB = &m_pAouts[item.TagOccNo - 1];
+			nChannelOccNo = pFB->ChannelOccNo;
+		}
+		break;
+		case IDD_DOUT:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nDoutCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nDoutCount)
+			{
+				return INVALID_OCCNO;
+			}
+			DOUT *pFB = &m_pDouts[item.TagOccNo - 1];
+			nChannelOccNo = pFB->ChannelOccNo;
+		}
+		break;
+		default:
+			nChannelOccNo = INVALID_OCCNO;
+			break;
+	}
+	return nChannelOccNo;
+}
+int32u CMemDB::GetPointDeviceOccNo(const struct TAGITEM & item) const
+{
+	int32u nDeviceOccNo = INVALID_OCCNO;
+
+	switch (item.IddType)
+	{
+		case IDD_AIN:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nAinCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nAinCount)
+			{
+				return INVALID_OCCNO;
+			}
+			AIN *pFB = &m_pAins[item.TagOccNo - 1];
+			nDeviceOccNo = pFB->DeviceOccNo;
+
+		}
+		break;
+		case IDD_DIN:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nDinCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nDinCount)
+			{
+				return INVALID_OCCNO;
+			}
+			DIN *pFB = &m_pDins[item.TagOccNo - 1];
+			nDeviceOccNo = pFB->DeviceOccNo;
+
+		}
+		break;
+		case IDD_AOUT:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nAoutCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nAoutCount)
+			{
+				return INVALID_OCCNO;
+			}
+			AOUT *pFB = &m_pAouts[item.TagOccNo - 1];
+			nDeviceOccNo = pFB->DeviceOccNo;
+		}
+		break;
+		case IDD_DOUT:
+		{
+			Q_ASSERT(item.TagOccNo != INVALID_OCCNO && item.TagOccNo <= MAX_OCCNO && item.TagOccNo <= m_nDoutCount);
+			if (item.TagOccNo == INVALID_OCCNO || item.TagOccNo > MAX_OCCNO || item.TagOccNo > m_nDoutCount)
+			{
+				return INVALID_OCCNO;
+			}
+			DOUT *pFB = &m_pDouts[item.TagOccNo - 1];
+			nDeviceOccNo = pFB->DeviceOccNo;
+		}
+		break;
+		default:
+			nDeviceOccNo = INVALID_OCCNO;
+			break;
+	}
+	return nDeviceOccNo;
+}
 /*! \fn int32s CMemDB::GetChannelMailBoxID(int32u nChannelOccNo)
 *********************************************************************************************************
 ** \brief CMemDB::GetChannelMailBoxID
@@ -3707,7 +4122,7 @@ void  CMemDB::IoAlarmMsg(int32u nChannleOccNo, int32u nAlarmType, const char* ps
 ** \date 2016年12月12日
 ** \note
 ********************************************************************************************************/
-int32s CMemDB::GetChannelMailBoxID(int32u nChannelOccNo)
+int32s CMemDB::GetIoChannelMailBoxID(int32u nChannelOccNo)
 {
 	Q_ASSERT(nChannelOccNo != INVALID_OCCNO && nChannelOccNo <= MAX_CHANNEL_OCCNO);
 	if (nChannelOccNo == INVALID_OCCNO || nChannelOccNo > MAX_CHANNEL_OCCNO)
@@ -3721,9 +4136,33 @@ int32s CMemDB::GetChannelMailBoxID(int32u nChannelOccNo)
 	Q_ASSERT(m_pChannels[nChannelOccNo - 1].MailBoxID);
 	return m_pChannels[nChannelOccNo - 1].MailBoxID;
 }
-/*! \fn bool  CMemDB::ReadHostCmd(int32u nChannleNo, FES_CMD *pCmd, int32u nTimeout)
+/*! \fn int32s CMemDB::GetFtChannelMailBoxID(int32u nOccNo)
+********************************************************************************************************* 
+** \brief CMemDB::GetFtChannelMailBoxID 
+** \details 获取转发通道的邮箱ID
+** \param nOccNo 
+** \return int32s 
+** \author LiJin 
+** \date 2017年10月5日 
+** \note 
+********************************************************************************************************/
+int32s CMemDB::GetFtChannelMailBoxID(int32u nOccNo)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_CHANNEL_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_CHANNEL_OCCNO)
+		return 0;
+
+	if (nOccNo > m_nFtChannelCount)
+	{
+		return 0;
+	}
+
+	Q_ASSERT(m_pFtChannels[nOccNo - 1].MailBoxID);
+	return m_pFtChannels[nOccNo - 1].MailBoxID;
+}
+/*! \fn bool  CMemDB::IoDrvReadHostCmd(int32u nChannleNo, FES_CMD *pCmd, int32u nTimeout)
 *********************************************************************************************************
-** \brief CMemDB::ReadHostCmd
+** \brief CMemDB::IoDrvReadHostCmd
 ** \details 读取引擎下发的遥控、遥调命令，其他的命令忽略
 ** \param nChannleNo
 ** \param pCmd
@@ -3733,7 +4172,7 @@ int32s CMemDB::GetChannelMailBoxID(int32u nChannelOccNo)
 ** \date 2017年2月15日
 ** \note
 ********************************************************************************************************/
-bool  CMemDB::ReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout)
+bool  CMemDB::IoDrvReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout)
 {
 	Q_ASSERT(nChannleNo != INVALID_OCCNO && nChannleNo <= MAX_CHANNEL_OCCNO);
 	if (nChannleNo == INVALID_OCCNO || nChannleNo > MAX_CHANNEL_OCCNO)
@@ -3743,7 +4182,7 @@ bool  CMemDB::ReadHostCmd(int32u nChannleNo, SETVAL_MSG *pCmd, int32u nTimeout)
 	if (pCmd == nullptr)
 		return false;
 
-	int32s nMailBoxID = GetChannelMailBoxID(nChannleNo);
+	int32s nMailBoxID = GetIoChannelMailBoxID(nChannleNo);
 	Q_ASSERT(nMailBoxID);
 	if (nMailBoxID == 0)
 		return false;
@@ -3789,7 +4228,7 @@ bool CMemDB::SendIOCmd(int32u nOccNo, IO_VARIANT *nVal, int32u nTimeout)
 	if (nVal == nullptr)
 		return false;
 
-	int32u nChannleNo;
+	int32u nChannleNo = 0;
 	DOUT* pDout = &m_pDouts[nOccNo - 1];
 	Q_ASSERT(pDout);
 	if (!pDout)
@@ -3797,13 +4236,15 @@ bool CMemDB::SendIOCmd(int32u nOccNo, IO_VARIANT *nVal, int32u nTimeout)
 		return false;
 	}
 
+	nChannleNo = pDout->ChannelOccNo;
+
 	if (m_nNBSvcMailBoxID == INVALID_MAILBOX_ID)
 	{
 		m_nNBSvcMailBoxID = QueryMailBoxID("FES", "NB_SVC");
 	}
 	Q_ASSERT(m_nNBSvcMailBoxID != INVALID_MAILBOX_ID);
 
-	int32s nMailBoxID = GetChannelMailBoxID(nChannleNo);
+	int32s nMailBoxID = GetIoChannelMailBoxID(nChannleNo);
 
 	Q_ASSERT(nMailBoxID);
 	if (nMailBoxID == 0)
@@ -3842,7 +4283,90 @@ bool CMemDB::SendIOCmd(int32u nOccNo, IO_VARIANT *nVal, int32u nTimeout)
 
 	return true;
 }
+/*! \fn bool  CMemDB::FtDrvReadHostCmd(int32u nOccNo, BASE_MSG *pMsg, int32u nTimeOut)
+********************************************************************************************************* 
+** \brief CMemDB::FtDrvReadHostCmd 
+** \details 前置转发收取前置发过来的消息
+** \param nOccNo 
+** \param pMsg 
+** \param nTimeOut 
+** \return bool 
+** \author LiJin 
+** \date 2017年10月5日 
+** \note 
+********************************************************************************************************/
+bool  CMemDB::FtDrvReadHostCmd(int32u nOccNo, BASE_MSG *pMsg, int32u nTimeOut)
+{
+	Q_ASSERT(nOccNo != INVALID_OCCNO && nOccNo <= MAX_CHANNEL_OCCNO);
+	if (nOccNo == INVALID_OCCNO || nOccNo > MAX_CHANNEL_OCCNO)
+		return false;
 
+	Q_ASSERT(pMsg);
+	if (pMsg == nullptr)
+		return false;
+
+	int32s nMailBoxID = GetFtChannelMailBoxID(nOccNo);
+	Q_ASSERT(nMailBoxID);
+	if (nMailBoxID == 0)
+		return false;
+
+	DMSG dmsg;
+	std::memset(&dmsg, 0, sizeof(DMSG));
+	dmsg.RecverID = nMailBoxID;
+
+	QString szLog;
+
+	bool bRet = RecvMail("FES", &dmsg, nTimeOut);
+	if (bRet)
+	{
+		if (dmsg.Type != MSG_EVT_SETVAL)
+		{
+			szLog = QObject::tr("Discard the msg.[SenderID=%1,ReciverID=%2,Type=%3,Size=%4].").arg(dmsg.SenderID).arg(dmsg.RecverID).arg(dmsg.Type).arg(dmsg.Size);
+			LogMsg(szLog.toStdString().c_str(), 1);
+			return false;
+		}
+		std::memcpy(pMsg, dmsg.Buff, std::min<size_t>(sizeof(BASE_MSG), MAIL_MAX_SIZE));
+
+		szLog = QObject::tr("receive the base msg.[SenderID=%1,ReciverID=%2,Type=%3,Size=%4].").arg(dmsg.SenderID).arg(dmsg.RecverID).arg(dmsg.Type).arg(dmsg.Size);
+		LogMsg(szLog.toStdString().c_str(), 1);
+
+		return true;
+	}
+	return false;
+}
+/*! \fn bool CMemDB::ReadFesMsg(int32u nOccNo, int32u nIddType, BASE_MSG *pMsg, int32u nTimeOut)
+********************************************************************************************************* 
+** \brief CMemDB::ReadFesMsg 
+** \details 读取前置的消息
+** \param nOccNo 
+** \param nIddType 
+** \param pMsg 
+** \param nTimeOut 
+** \return bool 
+** \author LiJin 
+** \date 2017年10月5日 
+** \note 
+********************************************************************************************************/
+bool CMemDB::ReadFesMsg(int32u nOccNo, int32u nIddType, BASE_MSG *pMsg, int32u nTimeOut)
+{
+	if (nIddType == IDD_CHANNEL)
+	{
+		SETVAL_MSG *pSetValueMsg = reinterpret_cast<struct SETVAL_MSG*>(pMsg);
+		Q_ASSERT(pSetValueMsg);
+		if (pSetValueMsg == nullptr)
+			return false;
+		return IoDrvReadHostCmd(nOccNo, pSetValueMsg, nTimeOut);
+	}
+	else if (nIddType == IDD_FTCHANNEL)
+	{
+		return FtDrvReadHostCmd(nOccNo, pMsg, nTimeOut);
+	}
+	else
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+}
 /*! \fn bool CMemDB::AppGetAinValue(int32u nOccNo, fp64* pValue, int8u *pQua)
 *********************************************************************************************************
 ** \brief CMemDB::AppGetAinValue

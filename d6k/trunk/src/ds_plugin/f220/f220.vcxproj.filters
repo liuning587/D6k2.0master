@@ -433,6 +433,9 @@
     <ClCompile Include="deviec_configwgt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="secconfigwgt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="f220_global.h">
@@ -492,9 +495,6 @@
     <ClInclude Include="GeneratedFiles\ui_recorddowndlg.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="qurlinfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_sycsconfigdlg.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -509,6 +509,12 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_deviec_configwgt.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_secconfigwgt.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TZhuZhanDll.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -626,9 +632,6 @@
     <CustomBuild Include="recorddowndlg.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="qftp.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="analyse104msg.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -678,6 +681,12 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="deviec_configwgt.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="secconfigwgt.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="secconfigwgt.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -125,8 +125,12 @@ void CGraphToolsWgt::CreateBasicControlItems(QTreeWidgetItem *pControlItem)
 
 void CGraphToolsWgt::CreateChartItems(QTreeWidgetItem *pControlItem)
 {
+	//曲线图
 	QTreeWidgetItem *pCurePlotItem = new QTreeWidgetItem(pControlItem, QStringList(tr("CurePlot")));
 	pCurePlotItem->setData(0, Qt::UserRole, DRAW_ADDR_CURE_PLOT);
+	//3dsurface
+	QTreeWidgetItem *p3dSurfaceItem = new QTreeWidgetItem(pControlItem, QStringList(tr("3dSurface")));
+	p3dSurfaceItem->setData(0, Qt::UserRole, DRAW_3D_SURFACE);
 }
 
 //增加模板子节点

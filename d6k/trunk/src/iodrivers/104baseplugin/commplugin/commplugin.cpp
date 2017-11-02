@@ -334,6 +334,7 @@ void CCommPlugin::Slot_sockeConnectSuccess(QString strLocalInfo)
     //qDebug()<<"连接成功";
 	m_pTimerOut0->stop();
     m_bIsRunning = true;
+	m_pApduSender->SetOperatorFlag(0);
     //当连接成功时发送激活帧
     m_pApduSender->Send_U(STARTDT_ACT);
 	emit Signal_SocketConnectSuccess(strLocalInfo);
@@ -918,8 +919,12 @@ void CCommPlugin::Slot_DisConnect()
 void CCommPlugin::Slot_AllCallRespond()
 {
 	emit Signal_AllCallRespond();
-	m_pTimerSyncTimeMsg->start();
-	Slot_SendSyncRequestMsg();
+
+	if (!m_pTimerSyncTimeMsg->isActive())
+	{
+		m_pTimerSyncTimeMsg->start();
+		Slot_SendSyncRequestMsg();
+	}
 }
 
 //切换定值区
@@ -974,7 +979,7 @@ void CCommPlugin::Slot_SendGeneralResquestMsg()
 	{
 		return;
 	}
-
+	m_pTimerSyncTimeMsg->stop();
 	//召唤全电度
 // 	telectrl.m_nCtrlType = TELECTRL_REQUEST_SYNCTIME;
 // 	IsOK = OnCommand(&telectrl);

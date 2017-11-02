@@ -15,7 +15,7 @@ INCLUDEPATH += . \
     ./../../include/alarmfes \
     ./../../thirdparty/ACE_wrappers \
     ./GeneratedFiles/debug \
-    $(QTDIR)/mkspecs/win32-msvc2015 \
+    $(QTDIR)/mkspecs/win32-msvc \
     ./GeneratedFiles \
     $(NOINHERIT)
 LIBS += -L"./../../lib" \
@@ -48,6 +48,8 @@ HEADERS += ./base_module.h \
     ./netmsg_packer.h \
     ./rtnet_msg_packer.h \
     ../fespub/sharemem.h \
+    ../fespub/data_size.h \
+    ../fespub/tag_att.h \
     ./singleton.h \
     ./stl_util-inl.h \
     ./sys_var.h \
@@ -57,6 +59,11 @@ HEADERS += ./base_module.h \
     ./doutoperdialog.h \
     ./aoutoperdialog.h \
     ./ft_channel.h \
+    ./message_pump.h \
+    ./message_executer.h \
+    ./base_task.h \
+    ./red_task.h \
+
 SOURCES += ./base_module.cpp \
     ./datamodel.cpp \
     ./dataview.cpp \
@@ -74,10 +81,17 @@ SOURCES += ./base_module.cpp \
     ./netmsg_packer.cpp \
     ./parseproj.cpp \
     ../fespub/sharemem.cpp \
+    ../fespub/data_size.cpp \
     ./sys_var.cpp \
     ../fespub/tag_att.cpp \
     ./aoutoperdialog.cpp \
     ./ft_channel.cpp \
+    ./message_pump.cpp \
+    ./message_executer.cpp \
+    ./base_task.cpp \
+    ./red_task.cpp \
+
+
 FORMS += ./dataview.ui \
     ./doutoperdialog.ui \
     ./aoutoperdialog.ui

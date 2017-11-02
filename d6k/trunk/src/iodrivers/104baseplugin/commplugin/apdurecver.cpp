@@ -585,6 +585,8 @@ void CApduRecver::OnRecvReadFileRespond(char *pBuff, int nLength)
 			m_pComm104Pln->getSender()->OnSendReadFileAction(m_arrCatalogRespond.first());
 		}
 
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
+
 		QString strlog = tr("File Download Success!");
 
 		QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
@@ -675,6 +677,7 @@ void CApduRecver::OnRecvWriteConform(char *pBuff, int nLength)
 
 	if (pbase->m_cEndFlag == 0)
 	{
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 		strlog = tr("File Send Success!");
 		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
 	}
@@ -700,23 +703,66 @@ void CApduRecver::OnRecvUpdateActionAck(char * pBuff, int nLength)
 	QString strlog;
 	QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
 
+// 	if (pbase->cot.GetCot() == 7)
+// 	{
+// 		//updatflag    升级开始
+// 		if (pbase->m_qds.IV == 1 && m_pComm104Pln->getSender()->GetUpdateFlag() == 0)
+// 		{
+// 			strlog = tr("Update Action Success!");
+// 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+// 			emit Signal_UpdateConform(pbase->cot.GetCot());
+// 			m_nUpdateFlag = 1;
+// 
+// 		}
+// 		else if (pbase->m_qds.IV == 1 && m_pComm104Pln->getSender()->GetUpdateFlag() == 1)
+// 		{
+// 			strlog = tr("Update  Success!");
+// 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+// 
+// 		}
+// 		
+// 	}
+// 	else
+// 	{
+// 		if (pbase->cot.GetCot() != 10)
+// 		{
+// 			strlog = tr("Update Action Error,error Code%1").arg(pbase->cot.GetCot());;
+// 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+// 
+// 		}
+// 	}
+
 	if (pbase->cot.GetCot() == 7)
 	{
-		if (pbase->m_qds.OV == 1)
+		//updatflag    升级开始
+		if (pbase->m_qds.IV == 1 && m_pComm104Pln->getSender()->GetUpdateFlag() == 0)
 		{
 			strlog = tr("Update Action Success!");
 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
-			emit Signal_UpdateConform(pbase->cot.GetCot());
-			m_nUpdateFlag = 1;
+
+			ASDU211_UPDATE pUpateInfo;
+			pUpateInfo.asduAddr.SetAddr(m_pComm104Pln->GetFtpModule()->GetDeviceAddr());
+			pUpateInfo.m_qds.OV = 0;
+			m_pComm104Pln->getSender()->SetUpdateFlag(2);
+			m_pComm104Pln->getSender()->OnSendUpdateRequest(pUpateInfo);;
+
 
 		}
-		else if (pbase->m_qds.OV == 0)
+		else if (pbase->m_qds.IV == 0 && m_pComm104Pln->getSender()->GetUpdateFlag() == 2)
+		{
+
+			strlog = tr("Update Exec Success!");
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+			emit Signal_UpdateConform(pbase->cot.GetCot());
+			m_nUpdateFlag = 1;
+		}
+		else if (pbase->m_qds.IV == 0 && m_pComm104Pln->getSender()->GetUpdateFlag() == 1)
 		{
 			strlog = tr("Update  Success!");
 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
 
 		}
-		
+
 	}
 	else
 	{
@@ -972,6 +1018,8 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 	int nPagLength = sizeof(ASDU_BASE) + sizeof(ASDUADDR2) + sizeof(unsigned char);
 
 	int nItemCount = pAsdudz->vsq & 0x7f;
+
+	m_pComm104Pln->getSender()->SetOperatorFlag(0);
 	
 	for (int i = 0; i < nItemCount; i++)
 	{
@@ -1060,6 +1108,8 @@ void CApduRecver::OnRecvDevWriteRequestAck(char *pBuff, int nLength)
 	{
 		//固化报文
 		ASDU_BASE* pAsdudz = (ASDU_BASE*)pBuff;
+
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 
 		emit Signal_devWriteBack(pAsdudz->type, pAsdudz->cot.GetCot(), 0);
 
@@ -2554,7 +2604,7 @@ void CApduRecver::OnRecvFileAnalyseInfo(char *pBuff, int nLength)
 			ASDU211_UPDATE pUpateInfo;
 			pUpateInfo.asduAddr.SetAddr(m_pComm104Pln->GetFtpModule()->GetDeviceAddr());
 			pUpateInfo.m_qds.OV = 0;
-
+			m_pComm104Pln->getSender()->SetUpdateFlag(1);
 			m_pComm104Pln->getSender()->OnSendUpdateRequest(pUpateInfo);;
 
 			m_nUpdateFlag = 0;

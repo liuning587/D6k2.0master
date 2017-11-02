@@ -34,7 +34,7 @@ struct HEAD_STRING
 	int32u MagicHead1;
 	int32u MagicHead2;
 	int32u ShmLength;
-	int TotalCount;
+	int32u TotalCount;
 
 };
 

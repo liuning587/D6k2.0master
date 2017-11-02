@@ -160,6 +160,7 @@
     </ClCompile>
     <ClCompile Include="loadfile.cpp" />
     <ClCompile Include="mem_db.cpp" />
+    <ClCompile Include="message.cpp" />
     <ClCompile Include="meta_object.cpp" />
     <ClCompile Include="meta_object_pool.cpp" />
     <ClCompile Include="meta_object_property.cpp" />
@@ -177,11 +178,13 @@
     <ClCompile Include="subscription_list.cpp" />
     <ClCompile Include="sub_svc.cpp" />
     <ClCompile Include="sysvar_db.cpp" />
+    <ClCompile Include="user.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\scadaapi\scdapp_def.h" />
     <ClInclude Include="..\scdpub\variant_data.h" />
     <ClInclude Include="audiodataunit.h" />
+    <ClInclude Include="user.h" />
     <CustomBuild Include="audio_alarm_svc.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing audio_alarm_svc.h...</Message>
@@ -201,6 +204,7 @@
     <ClInclude Include="fesconfig.h" />
     <ClInclude Include="fes_db.h" />
     <ClInclude Include="mem_db.h" />
+    <ClInclude Include="message.h" />
     <ClInclude Include="meta_object.h" />
     <ClInclude Include="meta_object_pool.h" />
     <ClInclude Include="meta_object_property.h" />

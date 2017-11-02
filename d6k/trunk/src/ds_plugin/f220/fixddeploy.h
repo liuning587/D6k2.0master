@@ -9,7 +9,7 @@
 struct s_DevItems
 {
 	QString valueType;
-	int defalutVlaue;
+	QString defalutVlaue;
 	QString ItemName;
 	QString ItemDesc;
 	QString rangeFt;
