@@ -247,8 +247,9 @@
     </message>
     <message>
         <location filename="main_frame.cpp" line="155"/>
-        <source>File(&amp;F)</source>
-        <translation type="unfinished">文件(&amp;F)</translation>
+        <source>Function(&amp;F)</source>
+        <oldsource>File(&amp;F)</oldsource>
+        <translation type="unfinished">功能(&amp;F)</translation>
     </message>
     <message>
         <location filename="main_frame.cpp" line="156"/>
@@ -393,8 +394,9 @@
     <name>CPluginLoadWgt</name>
     <message>
         <location filename="pluginloadwgt.cpp" line="19"/>
-        <source>LoadingDevice</source>
-        <translation type="unfinished">设备加载</translation>
+        <source>Load plugin</source>
+        <oldsource>LoadingDevice</oldsource>
+        <translation type="unfinished">插件加载</translation>
     </message>
     <message>
         <location filename="pluginloadwgt.cpp" line="20"/>

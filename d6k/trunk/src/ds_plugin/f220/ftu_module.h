@@ -73,6 +73,16 @@ public:
 	virtual void UnInit() ;
 	//设置加载的插件的名称
 	virtual void SetLoadDeviceName(const QString &strDeviceName);
+
+	CInfoConfigWgt *GetConfigwgt()
+	{
+		return m_pConfigWgt;
+	}
+
+	CCommThread * GetCommThread()
+	{
+		return m_pCommThread;
+	}
 public slots:
 	void Slot_ClickLeftTreeItem(const QModelIndex &mIndex);
 	void Slot_CloseOneTabWidget(int iIndex);

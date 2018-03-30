@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CUartPara</class>
+ <widget class="QWidget" name="CUartPara">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1004</width>
+    <height>674</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CUartPara</string>
+  </property>
+  <widget class="QTableWidget" name="m_UartTab">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>981</width>
+     <height>361</height>
+    </rect>
+   </property>
+   <property name="showGrid">
+    <bool>true</bool>
+   </property>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>序号</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>串口号</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>使用类型</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>波特率</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>校验位</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>数据位</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>停止位</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>规约号</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>510</y>
+     <width>395</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="m_HorLayout">
+    <item>
+     <widget class="QPushButton" name="m_BtnAdd">
+      <property name="text">
+       <string>增加</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="m_BtnDel">
+      <property name="text">
+       <string>删除</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="m_BtnOk">
+      <property name="text">
+       <string>确认</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="m_BtnCancel">
+      <property name="text">
+       <string>取消</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

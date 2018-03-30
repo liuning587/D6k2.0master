@@ -57,6 +57,8 @@ public:
 	void SendUpdateRequest(ASDU211_UPDATE &updateData);
 	//time0  time1  time2  time3
 	void SetTimer(int nTime0, int nTime1, int nTime2, int nTime3);
+	//
+	void SetTimeFlag(bool bFlag);
 signals:
 	//连接
 	void Signal_ConnectSocket();
@@ -155,17 +157,21 @@ signals:
 	//读取文件  激活
 	void Signal_ReadActionRequest(FILE_ATTR_INFO &readAction);
 	//定值读取
-	void Signal_ReadFixData(DEV_BASE &);
+	void Signal_ReadFixData(DEV_BASE &);	
 	//更新程序
 	void Singal_updateProcess(ASDU211_UPDATE &);
 	//文件目录
 	void Signal_FIleCatalogINfo(QList<Catalog_Info>& lstFileInfo);
 	//升级确认
 	void Signal_UpdateConform(int);
+	//
+	void Singal_QuitThread();
 public slots:
     void Slot_ConnectSuccess(QString strLocalInfo);
 
 	void Solt_Connect();
+	//
+	void Slot_StartConnecting();
 
 private:
 	//开启线程
@@ -196,6 +202,10 @@ private:
 	int m_nTime3;
 	//imte
 	QTimer *m_nTimerConnect;
+	//是否对时
+	bool m_bTimeFlag;
+	//socket标识
+	bool m_bSocketFlag;
 };
 
 #endif // COMMTHREAD_H

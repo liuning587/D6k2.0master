@@ -94,7 +94,7 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
     ui.tableWidget->setItem(nRow, 3, item3);
 
     QTableWidgetItem *item4 = new QTableWidgetItem;
-	if (gzData.m_BinaryType !=3)
+	if (gzData.m_BinaryType !=3 && gzData.m_BinaryType != 31)
 	{
 		//µ¥µã
 		if (gzData.m_BinaryValue == 1)
@@ -123,6 +123,8 @@ void CFaultEventWgt::Slot_MalFuction(ASDUGZ gzData)
 		{
 			item4->setText(tr("ON"));
 		}
+
+		item2->setText(tr("Double"));
 
 		nPointID = nPointID - m_pConfgWgt->GetDoubleBinaryStartAddr();
 		item3->setText(mapPoint[nPointID].Destriber);

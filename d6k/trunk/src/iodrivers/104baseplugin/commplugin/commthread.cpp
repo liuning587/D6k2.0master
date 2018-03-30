@@ -1,14 +1,22 @@
 ﻿#include "commthread.h"
 #include "commplugin.h"
 #include "apdusender.h"
+#include "socketthread.h"
+#include "devicestudio/main_module.h"
 #include <QDateTime>
 #include <QTimer>
 #include <windows.h>
+#include <QMessageBox>
+#include <QEventLoop>
 
 CCommThread::CCommThread(QObject *parent)
 	: QThread(parent)
 {
     m_pModule = qobject_cast<CFtuModule*>(parent);
+
+	m_bTimeFlag = true;
+
+	m_bSocketFlag = false;
 
     Q_ASSERT(m_pModule);
     if (m_pModule == nullptr)
@@ -45,115 +53,133 @@ void CCommThread::Solt_Connect()
 	emit Signal_ConnectSocket();
 }
 
+void CCommThread::Slot_StartConnecting()
+{
+	m_bSocketFlag = true;
+	QByteArray byDestr = tr("正在连接装置中......").toLocal8Bit();
+	m_pModule->GetMainModule()->LogString(m_pModule->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
+
+}
+
 //开启线程
 void CCommThread::run()
 {
-    CCommPlugin commPlugin(m_pModule);
-    commPlugin.SetGeneralTime(m_nGeneranTime, m_nSyncGeneralTime, m_nKwhCallTime);
-	commPlugin.SetTimerx(m_nTime0,m_nTime1,m_nTime2,m_nTime3);
-	commPlugin.StartRun(m_strIP, m_iPort);
+	m_bSocketFlag = false;
+    CCommPlugin * pCommPlugin = new CCommPlugin(m_pModule);
+	pCommPlugin->SetGeneralTime(m_nGeneranTime, m_nSyncGeneralTime, m_nKwhCallTime);
+	pCommPlugin->SetTimerx(m_nTime0,m_nTime1,m_nTime2,m_nTime3);
+	pCommPlugin->StartRun(m_strIP, m_iPort);
+	pCommPlugin->SetTimeFlag(m_bTimeFlag);
+
+	connect(pCommPlugin->GetSocket(),SIGNAL(Singal_BeginConnecting()),this,SLOT(Slot_StartConnecting()));
 
 	//发出信号
-	connect(&commPlugin, SIGNAL(Signal_SocketError(QString)), this, SIGNAL(Signal_SocketError(QString)));
+	connect(pCommPlugin, SIGNAL(Signal_SocketError(QString)), this, SIGNAL(Signal_SocketError(QString)));
 	//连接成功
-	connect(&commPlugin, SIGNAL(Signal_SocketConnectSuccess(QString)), this, SLOT(Slot_ConnectSuccess(QString)));
+	connect(pCommPlugin, SIGNAL(Signal_SocketConnectSuccess(QString)), this, SLOT(Slot_ConnectSuccess(QString)));
 	//总召唤确认
-	connect(&commPlugin, SIGNAL(Signal_AllCallRespond()), this, SIGNAL(Signal_AllCallRespond()));
-	connect(&commPlugin, SIGNAL(Signal_onePointDisRemote(int, int, int)), this, SIGNAL(Signal_onePointDisRemote(int, int, int)));
-	connect(&commPlugin, SIGNAL(Signal_OnePointRemote(int, int, int)), this, SIGNAL(Signal_OnePointRemote(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_AllCallRespond()), this, SIGNAL(Signal_AllCallRespond()));
+	connect(pCommPlugin, SIGNAL(Signal_onePointDisRemote(int, int, int)), this, SIGNAL(Signal_onePointDisRemote(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_OnePointRemote(int, int, int)), this, SIGNAL(Signal_OnePointRemote(int, int, int)));
 
-	connect(&commPlugin, SIGNAL(Signal_DoublePointRemote(int, int, int)), this, SIGNAL(Signal_DoublePointRemote(int, int, int)));
-	connect(&commPlugin, SIGNAL(Signal_DoublePointDisRemote(int, int, int)), this, SIGNAL(Signal_DoublePointDisRemote(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_DoublePointRemote(int, int, int)), this, SIGNAL(Signal_DoublePointRemote(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_DoublePointDisRemote(int, int, int)), this, SIGNAL(Signal_DoublePointDisRemote(int, int, int)));
 
-	connect(&commPlugin, SIGNAL(Signal_BinaryGroupPoint(int, int, int)), this, SIGNAL(Signal_BinaryGroupPoint(int, int, int)));
-	connect(&commPlugin, SIGNAL(Signal_BinaryGroupDisPoint(int, int, int)), this, SIGNAL(Signal_BinaryGroupDisPoint(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_BinaryGroupPoint(int, int, int)), this, SIGNAL(Signal_BinaryGroupPoint(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_BinaryGroupDisPoint(int, int, int)), this, SIGNAL(Signal_BinaryGroupDisPoint(int, int, int)));
 
 
 	//SOE
-    connect(&commPlugin, SIGNAL(Signal_BinarySignalPointShortTime(int, int, int, int, QString)), this, SIGNAL(Signal_BinarySignalPointShortTime(int, int, int, int, QString)));
-    connect(&commPlugin, SIGNAL(Signal_SoeBinarySinglePointTime(int, int, int, int, QString)), this, SIGNAL(Signal_SoeBinarySinglePointTime(int, int, int, int, QString)));
-    connect(&commPlugin, SIGNAL(Signal_BinaryDoublePointShortTime(int, int, int, int, QString)), this, SIGNAL(Signal_BinaryDoublePointShortTime(int, int, int, int, QString)));
-    connect(&commPlugin, SIGNAL(Signal_BinaryDoublePoint(int, int, int, int, QString)), this, SIGNAL(Signal_BinaryDoublePoint(int, int, int, int, QString)));
+    connect(pCommPlugin, SIGNAL(Signal_BinarySignalPointShortTime(int, int, int, int, QString)), this, SIGNAL(Signal_BinarySignalPointShortTime(int, int, int, int, QString)));
+    connect(pCommPlugin, SIGNAL(Signal_SoeBinarySinglePointTime(int, int, int, int, QString)), this, SIGNAL(Signal_SoeBinarySinglePointTime(int, int, int, int, QString)));
+    connect(pCommPlugin, SIGNAL(Signal_BinaryDoublePointShortTime(int, int, int, int, QString)), this, SIGNAL(Signal_BinaryDoublePointShortTime(int, int, int, int, QString)));
+    connect(pCommPlugin, SIGNAL(Signal_BinaryDoublePoint(int, int, int, int, QString)), this, SIGNAL(Signal_BinaryDoublePoint(int, int, int, int, QString)));
 
 	//kwh
-	connect(&commPlugin, SIGNAL(Signal_KwhNormal(int, int, int)), this, SIGNAL(Signal_KwhNormal(int, int, int)));
-	connect(&commPlugin, SIGNAL(Signal_KwhDisNormal(int, int, int)), this, SIGNAL(Signal_KwhDisNormal(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_KwhNormal(int, int, int)), this, SIGNAL(Signal_KwhNormal(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_KwhDisNormal(int, int, int)), this, SIGNAL(Signal_KwhDisNormal(int, int, int)));
 
-	connect(&commPlugin, SIGNAL(Signal_KwhShortTimeNormal(int, int, float)), this, SIGNAL(Signal_KwhShortTimeNormal(int, int, float)));
-	connect(&commPlugin, SIGNAL(Signal_KwhLongTimeNormal(int, int, float)), this, SIGNAL(Signal_KwhShortTimeNormal(int, int, float)));
+	connect(pCommPlugin, SIGNAL(Signal_KwhShortTimeNormal(int, int, float)), this, SIGNAL(Signal_KwhShortTimeNormal(int, int, float)));
+	connect(pCommPlugin, SIGNAL(Signal_KwhLongTimeNormal(int, int, float)), this, SIGNAL(Signal_KwhShortTimeNormal(int, int, float)));
 
 	//遥测
-	connect(&commPlugin, SIGNAL(Signal_AnalogNormal(int, int, float, int)), this, SIGNAL(Signal_AnalogNormal(int, int, float, int)));
-	connect(&commPlugin, SIGNAL(Signal_ScaledAnalogNormal(int, int, float, int)), this, SIGNAL(Signal_ScaledAnalogNormal(int, int, float, int)));
+	connect(pCommPlugin, SIGNAL(Signal_AnalogNormal(int, int, float, int)), this, SIGNAL(Signal_AnalogNormal(int, int, float, int)));
+	connect(pCommPlugin, SIGNAL(Signal_ScaledAnalogNormal(int, int, float, int)), this, SIGNAL(Signal_ScaledAnalogNormal(int, int, float, int)));
 
-	connect(&commPlugin, SIGNAL(Signal_AnalogShortFloat(int, int, float, int)), this, SIGNAL(Signal_AnalogNormal(int, int, float, int)));
-	connect(&commPlugin, SIGNAL(Signal_DisAnalogShortFloat(int, int, float, int)), this, SIGNAL(Signal_ScaledAnalogNormal(int, int, float, int)));
-	connect(&commPlugin, SIGNAL(Signal_AnalogNormalShortTime(int, int, float, int)), this, SIGNAL(Signal_AnalogNormalShortTime(int, int, float, int)));
+	connect(pCommPlugin, SIGNAL(Signal_AnalogShortFloat(int, int, float, int)), this, SIGNAL(Signal_AnalogNormal(int, int, float, int)));
+	connect(pCommPlugin, SIGNAL(Signal_DisAnalogShortFloat(int, int, float, int)), this, SIGNAL(Signal_ScaledAnalogNormal(int, int, float, int)));
+	connect(pCommPlugin, SIGNAL(Signal_AnalogNormalShortTime(int, int, float, int)), this, SIGNAL(Signal_AnalogNormalShortTime(int, int, float, int)));
     //故障
-    connect(&commPlugin, SIGNAL(Signal_MalFuction(ASDUGZ)), this, SIGNAL(Signal_MalFuction(ASDUGZ)));
+    connect(pCommPlugin, SIGNAL(Signal_MalFuction(ASDUGZ)), this, SIGNAL(Signal_MalFuction(ASDUGZ)));
 
 	//发送和接收到的数据
-	connect(&commPlugin, SIGNAL(Signal_Write16Data(QByteArray)), this, SIGNAL(Signal_Write16Data(QByteArray)));
-    connect(&commPlugin, SIGNAL(Signal_recv16Data(QByteArray, int)), this, SIGNAL(Signal_recv16Data(QByteArray, int)));
+	connect(pCommPlugin, SIGNAL(Signal_Write16Data(QByteArray)), this, SIGNAL(Signal_Write16Data(QByteArray)));
+    connect(pCommPlugin, SIGNAL(Signal_recv16Data(QByteArray, int)), this, SIGNAL(Signal_recv16Data(QByteArray, int)));
 	//遥控指令
-	connect(this, SIGNAL(Signal_Control(int, int, int,int)), &commPlugin, SLOT(Slot_SetControlCommand(int, int, int,int)));
+	connect(this, SIGNAL(Signal_Control(int, int, int,int)), pCommPlugin, SLOT(Slot_SetControlCommand(int, int, int,int)));
 	//定值指令
-	connect(this, SIGNAL(Signal_DevSendInfo(DEV_BASE &)), &commPlugin, SLOT(Slot_setDevOrder(DEV_BASE &)));
+	connect(this, SIGNAL(Signal_DevSendInfo(DEV_BASE &)), pCommPlugin, SLOT(Slot_setDevOrder(DEV_BASE &)));
 	//
-	connect(this, SIGNAL(Signal_IecSendInfo(IEC_BASE &)), &commPlugin, SLOT(Slot_SetIecOrder(IEC_BASE &)));
+	connect(this, SIGNAL(Signal_IecSendInfo(IEC_BASE &)), pCommPlugin, SLOT(Slot_SetIecOrder(IEC_BASE &)));
     //死区设置
-    connect(this, SIGNAL(Signal_ZoomArea(ZOOM_BASE &)), &commPlugin, SLOT(Slot_SetZoomArea(ZOOM_BASE &)));
+    connect(this, SIGNAL(Signal_ZoomArea(ZOOM_BASE &)), pCommPlugin, SLOT(Slot_SetZoomArea(ZOOM_BASE &)));
 
 	//遥控反馈
-	connect(&commPlugin, SIGNAL(Signal_ControlFeedBack(int, int, int, QString)), this, SIGNAL(Signal_ControlFeedBack(int, int, int, QString)));
+	connect(pCommPlugin, SIGNAL(Signal_ControlFeedBack(int, int, int, QString)), this, SIGNAL(Signal_ControlFeedBack(int, int, int, QString)));
 	//定值
-	connect(&commPlugin, SIGNAL(Signal_DevReadBack(QMap<int, float>)), this, SIGNAL(Signal_DevReadBack(QMap<int, float>)));
+	connect(pCommPlugin, SIGNAL(Signal_DevReadBack(QMap<int, float>)), this, SIGNAL(Signal_DevReadBack(QMap<int, float>)));
     //死区
-    connect(&commPlugin, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)), this, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)));
+    connect(pCommPlugin, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)), this, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)));
 	//定值
-	connect(&commPlugin, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)), this, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)), this, SIGNAL(Signal_ZoneFeedBack(int, float, int, int)));
 
 	//定值设定
-	connect(&commPlugin, SIGNAL(Signal_devWriteBack(int, int, int)), this, SIGNAL(Signal_devWriteBack(int, int, int)));
+	connect(pCommPlugin, SIGNAL(Signal_devWriteBack(int, int, int)), this, SIGNAL(Signal_devWriteBack(int, int, int)));
     //录波文件获取
-    connect(this, SIGNAL(Signal_RecordSendInfo(QList<LB_DATA> &)), &commPlugin, SLOT(Slot_SetRecordOrder(QList<LB_DATA> &)));
+    connect(this, SIGNAL(Signal_RecordSendInfo(QList<LB_DATA> &)), pCommPlugin, SLOT(Slot_SetRecordOrder(QList<LB_DATA> &)));
     //手动总召
-    connect(this, SIGNAL(Signal_GeneralCall()), &commPlugin, SLOT(Slot_SendGeneralResquestMsg()));
+    connect(this, SIGNAL(Signal_GeneralCall()), pCommPlugin, SLOT(Slot_SendGeneralResquestMsg()));
     //电度召唤
-    connect(this, SIGNAL(Signal_KwhCall()), &commPlugin, SLOT(Slot_SendKwhTimeRequestMsg()));
+    connect(this, SIGNAL(Signal_KwhCall()), pCommPlugin, SLOT(Slot_SendKwhTimeRequestMsg()));
     //对时
-    connect(this, SIGNAL(Signal_SycsTime(QDateTime)), &commPlugin, SLOT(Slot_SetSycsTime(QDateTime)));
+    connect(this, SIGNAL(Signal_SycsTime(QDateTime)), pCommPlugin, SLOT(Slot_SetSycsTime(QDateTime)));
     //复位进程
-    connect(this, SIGNAL(Signal_ResetProcess()), &commPlugin, SLOT(Slot_ResetProcess()));
+    connect(this, SIGNAL(Signal_ResetProcess()), pCommPlugin, SLOT(Slot_ResetProcess()));
 
 	//切换定制区
-	connect(this,SIGNAL(Signal_SwitchFixArea(unsigned short)),&commPlugin,SLOT(Slot_SwitchFixArea(unsigned short)));
+	connect(this,SIGNAL(Signal_SwitchFixArea(unsigned short)), pCommPlugin,SLOT(Slot_SwitchFixArea(unsigned short)));
 	//读取当前定值区号
-	connect(this,SIGNAL(Signal_ReadFixArea()), &commPlugin, SLOT(Slot_ReadCurrentFixArea()));
+	connect(this,SIGNAL(Signal_ReadFixArea()), pCommPlugin, SLOT(Slot_ReadCurrentFixArea()));
 
 	//目录召唤
-	connect(this,SIGNAL(Signal_ReadCatalogRequest(FILE_CATALOG_REQUEST_1 &)),&commPlugin,SLOT(Slot_ReadCatalogRequest(FILE_CATALOG_REQUEST_1 &)));
+	connect(this,SIGNAL(Signal_ReadCatalogRequest(FILE_CATALOG_REQUEST_1 &)), pCommPlugin,SLOT(Slot_ReadCatalogRequest(FILE_CATALOG_REQUEST_1 &)));
 
 	//写入激活
-	connect(this,SIGNAL(SIGNAL_WriteActionRequest(FILE_ATTR_INFO &)),&commPlugin,SLOT(Slot_WriteAction(FILE_ATTR_INFO &)));
+	connect(this,SIGNAL(SIGNAL_WriteActionRequest(FILE_ATTR_INFO &)), pCommPlugin,SLOT(Slot_WriteAction(FILE_ATTR_INFO &)));
 	//读取激活
-	connect(this, SIGNAL(Signal_ReadActionRequest(FILE_ATTR_INFO &)), &commPlugin, SLOT(Slot_ReadAction(FILE_ATTR_INFO &)));
+	connect(this, SIGNAL(Signal_ReadActionRequest(FILE_ATTR_INFO &)), pCommPlugin, SLOT(Slot_ReadAction(FILE_ATTR_INFO &)));
 	//定值读取
-	connect(&commPlugin,SIGNAL(Signal_ReadFixData(DEV_BASE &)),this,SIGNAL(Signal_ReadFixData(DEV_BASE &)));
+	connect(pCommPlugin,SIGNAL(Signal_ReadFixData(DEV_BASE &)),this,SIGNAL(Signal_ReadFixData(DEV_BASE &)));
 	//iec config
 
 	//文件目录
-	connect(commPlugin.GetRecver(),SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)),this,SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)));
+	connect(pCommPlugin->GetRecver(),SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)),this,SIGNAL(Signal_FIleCatalogINfo(QList<Catalog_Info>&)));
 
 	//连接
-	connect(this,SIGNAL(Signal_ConnectSocket()),&commPlugin,SLOT(Slot_TimeOutT1()));
+	connect(this,SIGNAL(Signal_ConnectSocket()), pCommPlugin,SLOT(Slot_TimeOutT1()));
 	//断连
-	connect(this, SIGNAL(Signal_DisConnectSocket()), &commPlugin, SLOT(Slot_DisConnect()));
+	connect(this, SIGNAL(Signal_DisConnectSocket()), pCommPlugin, SLOT(Slot_DisConnect()));
 	//更新程序
-	connect(this, SIGNAL(Singal_updateProcess(ASDU211_UPDATE &)), commPlugin.getSender(), SLOT(OnSendUpdateRequest(ASDU211_UPDATE &)));
+	connect(this, SIGNAL(Singal_updateProcess(ASDU211_UPDATE &)), pCommPlugin->getSender(), SLOT(OnSendUpdateRequest(ASDU211_UPDATE &)));
 
-	connect(commPlugin.GetRecver(),SIGNAL(Signal_UpdateConform(int)),this,SIGNAL(Signal_UpdateConform(int)));
+	connect(pCommPlugin->GetRecver(),SIGNAL(Signal_UpdateConform(int)),this,SIGNAL(Signal_UpdateConform(int)));
 	this->exec();
+
+	//QEventLoop loop;
+	//connect(this, &CCommThread::Singal_QuitThread, &loop, &QEventLoop::quit);
+	
+	//loop.exec();
+	pCommPlugin->deleteLater();
 }
 
 //获取发送方信息
@@ -231,9 +257,17 @@ void CCommThread::SendReadActionRequest(FILE_ATTR_INFO &ReadAction)
 void CCommThread::SendConnectRequest()
 {
 	//
+	if (!m_bSocketFlag)
+	{
+		QMessageBox::warning(0, tr("告警"), tr("网络连接错误,请重启软件!"));
+		return;
+	}
+
 	if (this->isRunning())
 	{
-		this->quit();
+		//this->quit();
+		//this->terminate();
+		this->exit();
 		this->wait();
 	}
 	this->start();
@@ -243,9 +277,19 @@ void CCommThread::SendConnectRequest()
 
 void CCommThread::SendDisConnectRequest()
 {
+	//emit Singal_QuitThread();
+	//return;
+	if (!m_bSocketFlag)
+	{
+		QMessageBox::warning(0, tr("告警"), tr("网络连接错误,请重启软件!"));
+		return;
+	}
+
 	if (this->isRunning())
 	{
-		this->quit();
+		//this->quit();
+		//this->terminate();
+		this->exit();
 		this->wait();
 	}
 	//emit Signal_DisConnectSocket();
@@ -265,12 +309,19 @@ void CCommThread::SetTimer(int nTime0, int nTime1, int nTime2, int nTime3)
 	m_nTime3 = nTime3;
 }
 
+void CCommThread::SetTimeFlag(bool bFlag)
+{
+	m_bTimeFlag = bFlag;
+}
+
 //开始运行
 void CCommThread::StartRun(const char* strIP, int iPort)
 {
 	if (this->isRunning())
 	{
-		this->quit();
+		//this->quit();
+		//this->terminate();
+		this->exit();
 		this->wait();
 	}
 	m_strIP = strIP;

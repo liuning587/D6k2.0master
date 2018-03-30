@@ -1,0 +1,47 @@
+#ifndef MB_TREE_ITEM_DEFINE_H
+#define MB_TREE_ITEM_DEFINE_H
+
+// 总共用32 位表示
+// 最高 2位 表示 插件序号
+
+ 
+enum DS_TREEITEM
+{
+	TREE_LEVEL_DEF = Qt::UserRole + 100,
+	TREE_PLUGIN_ROOT = 100,  //<! 插件的根菜单
+
+	TREE_PLUGIN_1 = 0x01000000,
+	TREE_PLUGIN_1_LEAF1_M1 = 0x01010000,  //!< 插件1的1级子菜单1
+
+	TREE_PLUGIN_1_LEAF1_M2 = 0x01020000,  //!< 插件1的1级子菜单2
+	TREE_PLUGIN_1_LEAF1_M3 = 0x01030000,  //!< 插件1的1级子菜单3
+	TREE_PLUGIN_1_LEAF1_M4 = 0x01040000,  //!< 插件1的1级子菜单4
+
+
+	//	TREE_PLUGIN_CHILD_2  = 300,
+	//	TREE_PLUGIN_CHILD_3  = 400,
+
+
+};
+ 
+
+//左边树结构 
+enum OSC_DS_TREEDEF
+{
+	// 
+	TI_COIL = TREE_PLUGIN_1_LEAF1_M1,
+	TI_INPUT = TREE_PLUGIN_1_LEAF1_M2,
+	TI_HR = TREE_PLUGIN_1_LEAF1_M3,
+	TI_IR = TREE_PLUGIN_1_LEAF1_M4,
+
+	 
+};
+
+
+
+
+ 
+
+
+
+#endif

@@ -126,15 +126,15 @@ public:
 	void ClearDataInfo();
 
 	//
-	int GetUpdateFlag()
-	{
-		return m_nUpdateFlag;
-	}
+//	int GetUpdateFlag()
+//	{
+	//	return m_nUpdateFlag;
+	//}
 
-	void SetUpdateFlag(int nFlag)
-	{
-		m_nUpdateFlag = nFlag;
-	}
+//	void SetUpdateFlag(int nFlag)
+//	{
+//		m_nUpdateFlag = nFlag;
+	//}
 
 	void SetOperatorFlag(int nFlag)
 	{
@@ -144,6 +144,15 @@ public:
 	int GetOperatorFlag()
 	{
 		return m_nCurrentOperFlag;
+	}
+	int GetGhFlag()
+	{
+		return m_nGhFlag;
+	}
+
+	void SetGhFlag(int nFlag)
+	{
+		m_nGhFlag = nFlag;
 	}
 
 public slots:
@@ -185,9 +194,11 @@ public:
 	int m_nStartNode;
 	
 	//0  升级开始   1 升级结束   2  升级执行
-	int m_nUpdateFlag;
+	//int m_nUpdateFlag;
 	//当前 所处的状态  0可以操作  1不可以操作
 	int m_nCurrentOperFlag;
+	//开始发送标识
+	int m_nGhFlag;
 };
 
 #endif // CAPDUSENDER_H

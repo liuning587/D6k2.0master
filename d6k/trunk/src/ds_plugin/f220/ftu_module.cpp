@@ -158,7 +158,7 @@ void CFtuModule::Init(IMainModule *pMainModule)
 		return;
 	}
 
-	((QDockWidget*)m_pMainWindow->GetOutputTableView()->parent()->parent()->parent())->setHidden(true);
+	((QDockWidget*)m_pMainWindow->GetOutputTableView()->parent()->parent()->parent())->setHidden(false);
 
 
 	m_pMainWindow->installEventFilter(this);
@@ -207,9 +207,8 @@ void CFtuModule::Init(IMainModule *pMainModule)
 
     m_pCommThread->SetGeneralTimes(m_pConfigWgt->GetGereralTime(),m_pConfigWgt->GetSyncGenertalTime(),m_pConfigWgt->GetKwhCallTime());
 	m_pCommThread->SetTimer(m_pConfigWgt->GetTime0(), m_pConfigWgt->GetTime1(), m_pConfigWgt->GetTime2(), m_pConfigWgt->GetTime3());
+	m_pCommThread->SetTimeFlag(m_pConfigWgt->GetSyscTimeFlag());
 
-
-	m_pCommThread->StartRun(strIP.toStdString().c_str(), iPort);
 	connect(m_pCommThread, SIGNAL(Signal_SocketError(QString)), this, SLOT(Slot_SocketError(QString)));
 	connect(m_pCommThread, SIGNAL(Signal_SocketConnectSuccess()), this, SLOT(Slot_SocketSuccess()));
 	connect(m_pCommThread, SIGNAL(Signal_AllCallRespond()), this, SLOT(Slot_TotalCallResponseSuccess()));
@@ -234,7 +233,7 @@ void CFtuModule::Init(IMainModule *pMainModule)
 
     m_pChoosePointWgt->SetProjectPath(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName());
 
-	m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + "prot_list.ini");
+	m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + m_pConfigWgt->GetPointTable() + "_prot_list.ini");
 
 	m_pChoosePointWgt->Slot_UpdateBinaryPointData();
 	m_pChoosePointWgt->Slot_UpdateKwhPointData();
@@ -267,7 +266,7 @@ void CFtuModule::Init(IMainModule *pMainModule)
     m_pLcdWgt = new CLcdoperatorWgt;
 
     //维护调试功能
-    m_pMaintencanceWgt = new CMaintecanceWgt(m_pCommThread,m_pConfigWgt, m_pLcdWgt, strRunPath + REMOTETABLE + "prot_list.ini");
+    m_pMaintencanceWgt = new CMaintecanceWgt(m_pCommThread,m_pConfigWgt, m_pLcdWgt, strRunPath + REMOTETABLE + m_pConfigWgt->GetPointTable() + "_prot_list.ini");
     m_pMaintencanceWgt->SetRecordConifgName(strRunPath + RECORDPATH + strPointTableName + ".xml");
 
 	//文件传输
@@ -322,6 +321,9 @@ void CFtuModule::Init(IMainModule *pMainModule)
 
 	//展开
 	m_pMainWindow->GetLeftTree()->expandAll();
+
+	m_pCommThread->StartRun(strIP.toStdString().c_str(), iPort);
+
 }
 
 CFtuModule::~CFtuModule()
@@ -460,6 +462,10 @@ void CFtuModule::Slot_ContextMenuRequest(const QPoint &cPoint)
 
 	pLeftMenu->addAction(pProgramConfigAct);
 
+	//升级
+	QAction *pUpdatAct = new QAction(tr("Update"), m_pMainWindow->GetLeftTree());
+	connect(pUpdatAct, SIGNAL(triggered()), this, SLOT(Slot_UpdateProcess()));
+	pLeftMenu->addAction(pUpdatAct);
 
 	pLeftMenu->exec(QCursor::pos());
 	pLeftMenu->deleteLater();
@@ -489,7 +495,7 @@ void CFtuModule::Slot_SetConfigAct()
             m_pChoosePointWgt->SetProjectPath(strRunPath + PROJECTPATH + m_pConfigWgt->GetProjectName());
 
 
-			m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + "prot_list.ini");
+			m_pChoosePointWgt->Slot_UpdateAllChoosePoints(strRunPath + REMOTETABLE + m_pConfigWgt->GetPointTable() + "_prot_list.ini");
 
 			m_pChoosePointWgt->Slot_UpdateBinaryPointData();
 			m_pChoosePointWgt->Slot_UpdateKwhPointData();
@@ -537,7 +543,7 @@ void CFtuModule::CreateTreeItem()
 		}
 	}
 
-	QString strDeviceName = "FTU_" + QString::number(iDevice_num);
+	QString strDeviceName = m_pConfigWgt->GetPointTable()/*"FTU_" + QString::number(iDevice_num)*/;
 	
 	QStandardItem *pFtuItem = new QStandardItem(strDeviceName);
 	m_pPluginTopItem = pFtuItem;
@@ -962,7 +968,7 @@ void CFtuModule::InitCallZt()
     //调用对时
     QAction *pSycsAct = new QAction(tr("Sycs Time(T)"),pPlcMenu);
     pPlcMenu->addAction(pSycsAct);
-
+	pPlcMenu->addSeparator();
     //调用电度召唤
     QAction *pKwhAct = new QAction(tr("Kwh Call(K)"),pPlcMenu);
     pPlcMenu->addAction(pKwhAct);
@@ -973,8 +979,9 @@ void CFtuModule::InitCallZt()
 
     //保存测点
     QAction *pSavePoint = new QAction(tr("Save Point"),pPlcMenu);
+	pPlcMenu->addSeparator();
     pPlcMenu->addAction(pSavePoint);
-
+	pPlcMenu->addSeparator();
 	//切换定值区号
 	QAction *pFixSwitch = new QAction(tr("Switch Fix Area"),pPlcMenu);
 	pPlcMenu->addAction(pFixSwitch);
@@ -984,17 +991,18 @@ void CFtuModule::InitCallZt()
 	pPlcMenu->addAction(pFixReadArea);
 
 	//升级
-	QAction *pUpdatAct = new QAction(tr("Update"), pPlcMenu);
-	pPlcMenu->addAction(pUpdatAct);
+	//QAction *pUpdatAct = new QAction(tr("Update"), pPlcMenu);
+	//pPlcMenu->addAction(pUpdatAct);
 
 	//连接
 	QAction *pConnect = new QAction(tr("Connect"), pPlcMenu);
+	pPlcMenu->addSeparator();
 	pPlcMenu->addAction(pConnect);
 	//断链
 	QAction *pDisConnect = new QAction(tr("DisConnect"), pPlcMenu);
 	pPlcMenu->addAction(pDisConnect);
 
-	connect(pUpdatAct, SIGNAL(triggered()), this, SLOT(Slot_UpdateProcess()));
+	//connect(pUpdatAct, SIGNAL(triggered()), this, SLOT(Slot_UpdateProcess()));
 
     connect(pCommAct, SIGNAL(triggered()), this, SLOT(Slot_CallCommConfig()));
     connect(pGeneralAct, SIGNAL(triggered()), this, SLOT(Slot_GeneralCall()));
@@ -1010,6 +1018,10 @@ void CFtuModule::InitCallZt()
 
 	connect(pConnect, SIGNAL(triggered()), this, SLOT(Slot_ConnectDevice()));
 	connect(pDisConnect, SIGNAL(triggered()), this, SLOT(Slot_DisConnect()));
+
+	//升级
+	//QMenu *pUpdateMenu = m_pMainWindow->menuBar()->addMenu(tr("升级(U)"));
+	//pUpdateMenu->addAction(pUpdatAct);
 	//布局
 	QMenu *pLayoutMenu = m_pMainWindow->menuBar()->addMenu(tr("布局(L)"));
 
@@ -1106,6 +1118,8 @@ void CFtuModule::Slot_DisConnect()
 //升级
 void CFtuModule::Slot_UpdateProcess()
 {
+
+	/*
 	ASDU211_UPDATE pUpateInfo;
 	pUpateInfo.asduAddr.SetAddr(m_pConfigWgt->GetDeviceAddr());
 	pUpateInfo.m_qds.IV = 1;
@@ -1115,7 +1129,8 @@ void CFtuModule::Slot_UpdateProcess()
 	QByteArray byDestr = tr("Send Update Request").toLocal8Bit();
 
 	m_pMainModule->LogString(m_strDeviceName.toLocal8Bit().data(), byDestr.data(), 1);
-
+	*/
+	m_pFileTransWgt->SetUpdateFile();
 }
 
 void CFtuModule::Slot_HiddenLog()
@@ -1168,5 +1183,5 @@ void CFtuModule::AnalyseSycsTime(const QByteArray &btData, int nLength, int nDFl
 void CFtuModule::Slot_SavePoints()
 {
     QString strRunPath = qApp->applicationDirPath();
-    m_pChoosePointWgt->SaveChooseBinFile(strRunPath + REMOTETABLE + "prot_list.ini");
+    m_pChoosePointWgt->SaveChooseBinFile(strRunPath + REMOTETABLE + m_pConfigWgt->GetPointTable() + "_prot_list.ini");
 }

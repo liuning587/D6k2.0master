@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CProtocolPara</class>
+ <widget class="QWidget" name="CProtocolPara">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>874</width>
+    <height>656</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CProtocolPara</string>
+  </property>
+  <widget class="QTableWidget" name="m_ProtocolTab">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>60</y>
+     <width>771</width>
+     <height>261</height>
+    </rect>
+   </property>
+   <column>
+    <property name="text">
+     <string>序号</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>名称</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>链路地址长度</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>公共地址长度</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>信息体地址长度</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>传送原因长度</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>链路地址</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>公共地址</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>重发次数</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>T1</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>T2</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>T3</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>T4</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QPushButton" name="m_BtnDel">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>450</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>删除</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="m_BtnOk">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>450</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>确认</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="m_BtnCancel">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>450</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>取消</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="m_BtnAdd">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>450</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>增加</string>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

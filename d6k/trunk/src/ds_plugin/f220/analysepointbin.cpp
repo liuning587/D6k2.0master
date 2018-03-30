@@ -97,6 +97,15 @@ void CAnalysePointBin::InitData(const QString &strFileName)
 						strData.remove(" ");
 
 						m_lstAnalog.append(strData.split(",")[1].toInt());
+
+						RPT tvalue;
+						tvalue.fBanalog = strData.split(",")[2].toFloat();
+						tvalue.fKanalog = strData.split(",")[3].toFloat();
+						tvalue.fUpperLimit = strData.split(",")[4].toFloat();
+						tvalue.fDownLimit = strData.split(",")[5].toFloat();
+						tvalue.fThreshold = strData.split(",")[6].toFloat();
+
+						m_mapAnalogChooseInfo.insert(strData.split(",")[1].toInt(), tvalue);
 					}
 				}
 				else if (strLineInfo.contains("YX") && !strLineInfo.contains("DYX"))

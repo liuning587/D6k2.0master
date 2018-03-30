@@ -959,19 +959,37 @@ void CChoosePointsWgt::UpdateAnalogToDesTables(RPT rptInfo, CAnalogDragTableWgt 
 	item4->setText(rptInfo.Unit);
 
 	QTableWidgetItem *item5 = new QTableWidgetItem;
-	item5->setText(QString::number(rptInfo.fBanalog));
+	
 
 	QTableWidgetItem *item6 = new QTableWidgetItem;
-	item6->setText(QString::number(rptInfo.fKanalog));
+	
 
 	QTableWidgetItem *item7 = new QTableWidgetItem;
-	item7->setText(QString::number(rptInfo.fUpperLimit));
+	
 
 	QTableWidgetItem *item8 = new QTableWidgetItem;
-	item8->setText(QString::number(rptInfo.fDownLimit));
+	
 
 	QTableWidgetItem *item9 = new QTableWidgetItem;
-	item9->setText(QString::number(rptInfo.fThreshold));
+	
+
+	if (m_pCurrentPoints->GetDoorDatas().contains(rptInfo.NUM2))
+	{
+		item5->setText(QString::number(m_pCurrentPoints->GetDoorDatas()[rptInfo.NUM2].fBanalog));
+		item6->setText(QString::number(m_pCurrentPoints->GetDoorDatas()[rptInfo.NUM2].fKanalog));
+		item7->setText(QString::number(m_pCurrentPoints->GetDoorDatas()[rptInfo.NUM2].fUpperLimit));
+		item8->setText(QString::number(m_pCurrentPoints->GetDoorDatas()[rptInfo.NUM2].fDownLimit));
+		item9->setText(QString::number(m_pCurrentPoints->GetDoorDatas()[rptInfo.NUM2].fThreshold));
+	}
+	else
+	{
+		item5->setText(QString::number(rptInfo.fBanalog));
+		item6->setText(QString::number(rptInfo.fKanalog));
+		item7->setText(QString::number(rptInfo.fUpperLimit));
+		item8->setText(QString::number(rptInfo.fDownLimit));
+		item9->setText(QString::number(rptInfo.fThreshold));
+
+	}
 
 	pDesTableWgt->insertRow(nRowCount);
 	pDesTableWgt->setItem(nRowCount, 0, item0);

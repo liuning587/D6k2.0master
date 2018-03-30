@@ -55,6 +55,8 @@ public:
 		return m_pApduRecver;
 	}
 
+	CSocketThread *GetSocket();
+
     bool OnCommand(NBM_TELECTRL* pTelectrl);
 	// 遥控命令
 	void SetControlBckCommand(int iControlType, int ipointNum, int OperateType);
@@ -64,6 +66,8 @@ public:
     void SetGeneralTime(int nGeneralTime, int nSynTime, int nKwhTime);
     //
 	void SetTimerx(int nTime0, int nTime1, int nTime2, int nTime3);
+	//
+	void SetTimeFlag(bool bFlag);
 
 public:
         bool OnTimerSend(int nFrameType,int nUtype);
@@ -166,6 +170,8 @@ private:
 	QTimer *m_pTimerOut1;
 	QTimer *m_pTimerOut2;
 	QTimer *m_pTimerOut3;
+	//是否对时
+	bool m_bCheckTimeFlag;
 	//定时发送总召
 	QTimer *m_pTimeGeneralSendMsg;
     //定时发送时间同步

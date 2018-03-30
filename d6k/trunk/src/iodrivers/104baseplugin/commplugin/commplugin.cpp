@@ -342,6 +342,7 @@ void CCommPlugin::Slot_sockeConnectSuccess(QString strLocalInfo)
     //m_pTimerSyncTimeMsg->start();
     //m_pTimerKwhMsg->start();
 	m_pApduSender->ClearDataInfo();
+
 }
 
 /*********************************************************************************************************
@@ -665,6 +666,11 @@ bool CCommPlugin::OnRecvFrame(int nFrameType, int nSendNum, int nRecvNum)
     return true;
 }
 
+CSocketThread * CCommPlugin::GetSocket()
+{
+	return m_pSocketThread;
+}
+
 /*********************************************************************************************************
 ** \brief OnCommand(NBM_TELECTRL* pTelectrl)
 ** \details 发送召唤信息
@@ -922,8 +928,11 @@ void CCommPlugin::Slot_AllCallRespond()
 
 	if (!m_pTimerSyncTimeMsg->isActive())
 	{
-		m_pTimerSyncTimeMsg->start();
-		Slot_SendSyncRequestMsg();
+		if (m_bCheckTimeFlag)
+		{
+			m_pTimerSyncTimeMsg->start();
+			Slot_SendSyncRequestMsg();
+		}
 	}
 }
 
@@ -1059,6 +1068,11 @@ void CCommPlugin::SetTimerx(int nTime0, int nTime1, int nTime2, int nTime3)
 	m_pTimerOut1->setInterval(nTime1);
 	m_pTimerOut2->setInterval(nTime2);
 	m_pTimerOut3->setInterval(nTime3);
+}
+
+void CCommPlugin::SetTimeFlag(bool bFlag)
+{
+	m_bCheckTimeFlag = bFlag;
 }
 
 void CCommPlugin::Slot_SetSycsTime(QDateTime tSycsTime)

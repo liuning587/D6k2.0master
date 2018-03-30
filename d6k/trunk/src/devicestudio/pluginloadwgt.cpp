@@ -16,7 +16,7 @@ CPluginLoadWgt::CPluginLoadWgt(QWidget *parent)
 	: QWidget(parent),
 	m_pTableWgt(new QTableWidget(this))
 {
-	setWindowTitle(tr("LoadingDevice"));
+	setWindowTitle(tr("Load plugin"));
 	QPushButton *pBtnConform = new QPushButton(tr("Conform"),this);
 	QPushButton *pBtnCancel = new QPushButton(tr("Cancel"),this);
 

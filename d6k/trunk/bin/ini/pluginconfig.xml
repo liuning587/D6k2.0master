@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <config>
   <deviceitem number="1" devicename="FTU220" common="二遥FTU维护模块" dllname="device" version="V1.0"/>
-  <deviceitem number="2" devicename="F:/work/trunk/project/scadastudio/scadastudio.proj" common="scd_view" dllname="scdview" version="V1.0"/>
+  <deviceitem number="2" devicename="DTU225" common="DTU维护模块" dllname="d225device" version="V1.0"/>
+  <deviceitem number="3" devicename="FCI" common="故障指示器维护模块" dllname="fcidev" version="V1.0"/>
 </config> 

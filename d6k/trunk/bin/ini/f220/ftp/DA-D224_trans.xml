@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conifg>
+    <mantanceIP></mantanceIP>
+    <mantancePort>5000</mantancePort>
+    <download>
+        <ftpip>192.168.116.19</ftpip>
+        <ftpport>21</ftpport>
+        <username>wj</username>
+        <password>wj</password>
+        <filename>dbBase.bin</filename>
+    </download>
+    <upload>
+        <ftpip></ftpip>
+        <ftpport>21</ftpport>
+        <username></username>
+        <password></password>
+        <upPath></upPath>
+    </upload>
+</conifg>

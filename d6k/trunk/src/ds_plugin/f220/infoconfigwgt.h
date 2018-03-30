@@ -105,6 +105,11 @@ public:
 		return m_pLineEdTime3->text().toInt();
 	}
 
+
+	bool GetSyscTimeFlag();
+
+
+
 signals:
     void Signal_UpdateFtpConfig(const QString &strFilename);
 public slots:
@@ -116,6 +121,8 @@ public slots:
     void Slot_ClickListItem(QListWidgetItem *pItem);
 	//list double
 	void Slot_lstDoubleClick(QListWidgetItem *pItem);
+	//是否对时
+	//void Slot_CheckTime();
 
 private:
     //工程名称
@@ -124,6 +131,7 @@ private:
 	QLineEdit *m_pLinEdIP;
 	//port
 	QLineEdit *m_pLinePort;
+
 	//点表
 	QComboBox *m_pComBoxDebiceType;
     //ftp
@@ -156,6 +164,8 @@ private:
 	QLineEdit *m_pLineEdTime2;
 	//time3
 	QLineEdit *m_pLineEdTime3;
+	//总召后是否对时
+	QComboBox *m_pComBoxCheckTime;
 	
 };
 

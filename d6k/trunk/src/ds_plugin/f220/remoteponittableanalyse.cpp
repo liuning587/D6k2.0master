@@ -15,6 +15,7 @@ CRemotePonitTableAnalyse::~CRemotePonitTableAnalyse()
 
 }
 
+
 //打开文件
 bool CRemotePonitTableAnalyse::OpenPointTableFile(const QString &strFileName)
 {

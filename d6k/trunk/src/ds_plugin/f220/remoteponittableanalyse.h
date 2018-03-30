@@ -123,6 +123,7 @@ private:
     //遥控  设备号 组
     QMap<int, RPT> m_mapControlDeviceIdGroup;
 
+
 };
 
 #endif // REMOTEPONITTABLEANALYSE_H

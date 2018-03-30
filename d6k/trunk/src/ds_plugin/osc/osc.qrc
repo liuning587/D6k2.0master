@@ -1,0 +1,47 @@
+<RCC>
+    <qresource prefix="/">    
+    <file>images/new.png</file>
+    <file>images/print.png</file>
+    <file>images/save.png</file>
+    <file>images/undo.png</file>
+    <file>images/copy.png</file>
+    <file>images/cut.png</file>
+    <file>images/paste.png</file>
+    <file>images/open.png</file>
+    <file>images/open2.png</file>
+    <file>images/close.png</file>
+    <file>images/printpreview.png</file>    
+    <file>images/channel.png</file>
+    <file>images/exchange.png</file>
+    <file>images/cascade.png</file>
+    <file>images/printset.png</file>
+    <file>images/zoomout.png</file>
+    <file>images/zoomin.png</file>
+    <file>images/recover.png</file>
+    <file>images/color.png</file>
+    <file>images/amplitude.png</file>
+    <file>images/vector.png</file>
+    <file>images/harmonic.png</file>
+    <file>images/sequence.png</file>
+    <file>images/measurement.png</file>
+    <file>images/curve.png</file>
+    <file>images/attribute.png</file>
+    <file>images/communication.png</file>
+    <file>images/help.png</file>
+    <file>images/usermanage.png</file>
+    <file>images/stretch.png</file>
+    <file>images/zoom.png</file>
+    <file>images/shellfile.png</file>
+    <file>images/2level.png</file>
+    <file>images/viewzoomin.png</file>
+    <file>images/viewzoomout.png</file>
+    <file>images/1leftarrow.png</file>
+    <file>images/1rightarrow.png</file>
+    <file>images/configure.png</file>
+    <file>images/fileprint.png</file>
+    <file>images/button_cancel.png</file>
+    <file>images/fileopen.png</file>
+    <file>images/preview.png</file> 
+    <file>images/pdfprint.png</file>  
+    </qresource>
+</RCC>

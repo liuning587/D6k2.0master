@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="GB2312" ?>
+<device_drivers>
+	<reader name="PCSC读卡器" nad="0:主卡座" description="PCSC读卡器" dll="sgcPCSC.dll" />
+	<reader name="DKQ-01读卡器" nad="0:主卡座" description="DKQ-01读卡器" dll="sgcDKQ01.dll" />
+	<reader name="DKQ-02读卡器" nad="0:主卡座|1:附卡座" description="DKQ-02读卡器" dll="sgcDKQ02.dll" />
+	<reader name="DKQ-03读卡器" nad="0:主卡座|1:附卡座" description="DKQ-03读卡器" dll="sgcDKQ03.dll" />
+	<reader name="DKQ-05读卡器" nad="0:主卡座|1:附卡座" description="DKQ-05读卡器" dll="sgcDKQ05.dll" />
+	<reader name="DKQ-07读卡器" nad="0:非接卡座|1:附卡座|2:SAM1座" description="DKQ-07读卡器" dll="sgcDKQ07.dll" />
+	<reader name="DKQ-08-B读卡器" nad="0:主卡座" description="DKQ-08-B读卡器" dll="sgcDKQ08.dll" />
+	<reader name="DKQ-16读卡器" nad="0:主卡座|1:附卡座|2:SAM1座|3:SAM2座" description="DKQ-16读卡器" dll="sgcDKQ16.dll" />
+	<reader name="SmartWare读卡器" nad="0:非接卡座|1:接触卡座" description="SmartWare读卡器" dll="sgcDKQSW.dll" />
+	<reader name="黑盒读卡器" nad="0:7816座|1:SPI座" description="黑盒读卡器" dll="sgcDKQJL.dll" />
+</device_drivers>

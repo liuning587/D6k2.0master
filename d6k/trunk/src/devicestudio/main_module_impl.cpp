@@ -62,13 +62,14 @@ void CMainModule::Slot_RelodePlugin(const QString &strPluginName, const QString 
 #endif
 
 	
+	
 	if (LoadModule(strPlugin, strDeviceName))
 	{
 	//	QMessageBox::information(0, tr("成功"), tr("装置加载成功!"));
 	}
 	else
 	{
-		QMessageBox::warning(0, tr("Warning"), tr("Device Load Failed,Please Check Config:% file").arg(strPlugin));
+		QMessageBox::warning(0, tr("Warning"), tr("Device Load Failed,Please Check Config:%1 file").arg(strPlugin));
 	}
 
 }

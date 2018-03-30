@@ -1,6 +1,8 @@
 ﻿#include <QTcpSocket>
 #include <QMutex>
 #include <QHostAddress>
+#include <QNetworkProxy>
+#include <QTimer>
 #include "socketthread.h"
 #include "apdurecver.h"
 #include "define_104.h"
@@ -34,6 +36,10 @@ CSocketThread::CSocketThread(QObject *parent):
     //接收新数据
     connect (m_pTcpScoket,SIGNAL(readyRead()),this,SLOT(Slot_recvNewData()));
 
+	m_pConnectingTimer = new QTimer(this);
+	m_pConnectingTimer->setSingleShot(true);
+	
+	connect(m_pConnectingTimer,SIGNAL(timeout()),this,SLOT(Slot_Connecting()));
 }
 
 CSocketThread::~CSocketThread()
@@ -56,12 +62,21 @@ CSocketThread::~CSocketThread()
 ********************************************************************************************************/
 void CSocketThread::ConnectSocket(const QString &strIP, int iPort)
 {
-	m_pMutex->lock();
+	//m_pMutex->lock();
     m_pTcpScoket->abort();
     m_BtayRecvData.clear();
-    m_pTcpScoket->connectToHost(strIP,iPort);
+
+	qDebug() << "before................";
+	m_pTcpScoket->setProxy(QNetworkProxy::NoProxy);
+	if (m_pTcpScoket->state() == QAbstractSocket::UnconnectedState)
+	{
+		m_pTcpScoket->connectToHost(strIP, iPort);
+		m_pConnectingTimer->start();
+	}
+
+	qDebug() << "end.....................";
 	//qDebug() << m_pTcpScoket->localAddress().toString() + ":" + QString::number(m_pTcpScoket->localPort());
-	m_pMutex->unlock();
+	//m_pMutex->unlock();
 }
 
 /*********************************************************************************************************
@@ -198,4 +213,9 @@ void CSocketThread::Slot_ConnectSuccess()
 {
 	QString strLocalInfo = m_pTcpScoket->localAddress().toString() + ":" + QString::number(m_pTcpScoket->localPort());
 	emit Signal_ConnectSuccess(strLocalInfo);
+}
+
+void CSocketThread::Slot_Connecting()
+{
+	emit Singal_BeginConnecting();
 }

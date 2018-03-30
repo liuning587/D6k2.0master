@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QMap>
 
+#include "remoteponittableanalyse.h"
+
 class CAnalysePointBin : public QObject
 {
     Q_OBJECT
@@ -40,6 +42,11 @@ public:
 	{
 		return m_lstControl;
 	}
+
+	const QMap<int, RPT> &GetDoorDatas()
+	{
+		return m_mapAnalogChooseInfo;
+	}
     
 private:
     //需要测的点   类型标识  该类型下需要测的点
@@ -54,6 +61,9 @@ private:
 	QList<int> m_lstControl;
 	//遥脉
 	QList<int> m_lstKwh;
+	// 遥测 选点 门槛等信息
+	QMap<int, RPT> m_mapAnalogChooseInfo;
+
 };
 
 #endif // ANALYSEPOINTBIN_H

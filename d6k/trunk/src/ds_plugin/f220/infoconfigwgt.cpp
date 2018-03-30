@@ -28,6 +28,7 @@ CInfoConfigWgt::CInfoConfigWgt(QWidget *parent)
     m_pDeviceAddress = new QLineEdit(this);
     m_pDeviceAddress->setText("1");
 
+
     m_pBinaryStartAddr = new QLineEdit(this);
     m_pBinaryStartAddr->setText("0");
 
@@ -53,6 +54,9 @@ CInfoConfigWgt::CInfoConfigWgt(QWidget *parent)
     m_pLstProject = new QListWidget(this);
 
 	//setFixedSize(500, 350);
+	m_pComBoxCheckTime = new QComboBox(this);
+	m_pComBoxCheckTime->addItem(QStringLiteral("是"));
+	m_pComBoxCheckTime->addItem(QStringLiteral("否"));
 
 	InitWgt();
 	if (!InitCurrentPointTable())
@@ -83,6 +87,10 @@ void  CInfoConfigWgt::InitWgt()
 	QLabel *pLableDevice = new QLabel(tr("Device Type"), this);
     QLabel *pLabelDeviceAddr = new QLabel(QStringLiteral("装置地址        "),this);
 
+
+
+	QLabel *pCheckTime = new QLabel(QStringLiteral("是否对时   "));
+
     QHBoxLayout *pProjectlayout = new QHBoxLayout;
     pProjectlayout->addWidget(pLableProject);
     pProjectlayout->addWidget(m_pLineProjectName);
@@ -110,6 +118,16 @@ void  CInfoConfigWgt::InitWgt()
     m_pDeviceAddress->setFixedWidth(240);
 
 
+	//是否对时
+	QHBoxLayout *pCheckTimeLayout = new QHBoxLayout;
+	pCheckTimeLayout->addWidget(pCheckTime);
+	pCheckTimeLayout->addWidget(m_pComBoxCheckTime);
+	pCheckTimeLayout->addStretch();
+	m_pComBoxCheckTime->setFixedWidth(240);
+
+
+
+	//
 	QHBoxLayout * pDeviceLayout = new QHBoxLayout;
 	pDeviceLayout->addWidget(pLableDevice);
 	pDeviceLayout->addWidget(m_pComBoxDebiceType);
@@ -174,7 +192,7 @@ void  CInfoConfigWgt::InitWgt()
     pGrop5->addWidget(pLabelSyncTime);
     pGrop5->addWidget(m_pLineEdCheckTimeCall);
     pGrop5->addStretch();
-    m_pLineEdCheckTimeCall->setFixedWidth(240);
+	m_pLineEdCheckTimeCall->setFixedWidth(240);
     //遥脉召唤
     
     QHBoxLayout *pGrop6 = new QHBoxLayout;
@@ -193,6 +211,10 @@ void  CInfoConfigWgt::InitWgt()
 	pPage1Layout->addLayout(pPortLayout);
     //pPage1Layout->addLayout(pDeviceAddrLayout);
 	pPage1Layout->addLayout(pDeviceLayout);
+	//对时
+	pPage1Layout->addLayout(pCheckTimeLayout);
+
+
     pPage1Layout->addStretch();
 
     //pPage1Layout->addLayout(pGrop1);
@@ -283,6 +305,7 @@ void  CInfoConfigWgt::InitWgt()
     //更新FTP配置信息
     connect(m_pComBoxDebiceType, SIGNAL(activated(const QString &)), this, SLOT(Slot_UpdateFtpConfig(const QString &)));
     //connect(this, SIGNAL(Signal_UpdateFtpConfig(const QString &)), m_pRemotePonitTable, SLOT(Slot_ReadXmlConfig(const QString &)));
+
 }
 
 //加载点表
@@ -294,6 +317,7 @@ bool CInfoConfigWgt::InitCurrentPointTable()
 	QDir directory;
 
 	directory.setPath(strRunPath + POINTTABLEPATH);
+
 	files = directory.entryList(QDir::Files, QDir::Time);
 	if (files.isEmpty())
 	{
@@ -323,6 +347,18 @@ void CInfoConfigWgt::Slot_Comform()
     WriteXmlFile(strRunPath + PROJECTPATH + m_pLineProjectName->text() + ".prg");
 
 	this->accept();
+}
+
+bool CInfoConfigWgt::GetSyscTimeFlag()
+{
+	{
+		if (m_pComBoxCheckTime->currentIndex() == 0)
+		{
+			return true;
+		}
+
+		return false;
+	}
 }
 
 void CInfoConfigWgt::Slot_Cancel()

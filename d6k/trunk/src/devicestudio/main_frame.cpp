@@ -57,7 +57,7 @@ CMainFrm::CMainFrm( )
 	CreateTab();
 
 	CreateDock();
-
+	this->resize(1600, 850);
 	setWindowState(Qt::WindowMaximized);
 	connect(m_pPluginWgt, SIGNAL(Signal_NeedLoadInfo(QString,QString)),this,SLOT(Slot_LoadPlugin(QString,QString)));
 	//m_pUi->setParent(this);
@@ -140,19 +140,19 @@ void CMainFrm::CreateDock()
 
 QTableView *CMainFrm::GetOutputTableView()
 {
-	if (m_pOutDock != NULL)
+	if (m_pOutDock != nullptr)
 	{
 		return m_pOutDock->GetTableView();
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
 void  CMainFrm::CreateMenus()
 {
-  	QMenu *pFileMenu = menuBar()->addMenu(tr("File(&F)"));
+  	QMenu *pFileMenu = menuBar()->addMenu(tr("Function(&F)"));
 	QAction *pOpenAct = new QAction(tr("Open(&O)"), this);
 	pOpenAct->setIcon(QIcon(":/icons/Open.png"));
 	pFileMenu->addAction(pOpenAct);

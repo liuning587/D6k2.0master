@@ -5,6 +5,18 @@
 enum DS_TREEDEF
 {
     TREE_FTU_ITEM = 30,
+	//系统参数
+	TREE_SYSPARA=31,
+	//UART
+	TREE_UART=32,
+	//GPRS
+	TREE_GPRS=33,
+	//GPS
+	TREE_GPS=34,
+	//SMS
+	TREE_SMS=35,
+	//PROTOCOL
+	TREE_PROTOCOL=36,
     //选择测点
     TREE_CHOOSE_OBSERVE_POINTS = 300,
     //遥信

@@ -445,7 +445,7 @@ COutputDock::COutputDock(QWidget *parent)
 
 	m_pLogView->setModel(m_pLogModel);
 	m_pLogView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	
+	m_pLogView->horizontalHeader()->setStretchLastSection(QHeaderView::Stretch);
 
 	m_pTabWnd->addTab(m_pLogView, tr("Out"));
 

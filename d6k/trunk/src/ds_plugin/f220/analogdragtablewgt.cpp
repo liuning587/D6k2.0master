@@ -442,7 +442,7 @@ void CAnalogDragTableWgt::fromCsv(const QString &csvText)
             }
             else
             {
-                rowCount = nCurrentRow++;
+                rowCount = ++nCurrentRow;
             }
 			//int rowCount = this->rowCount();
 

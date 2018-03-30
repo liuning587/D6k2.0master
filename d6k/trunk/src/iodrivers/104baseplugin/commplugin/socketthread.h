@@ -19,7 +19,7 @@
 class QTcpSocket;
 class QMutex;
 class CApduRecver;
-
+class QTimer;
 class CSocketThread : public QObject
 {
     Q_OBJECT
@@ -43,12 +43,16 @@ signals:
     void Signal_ConnectSuccess(QString strLocalInfo);
 	//发送出去的数据
 	void Signal_Write16Data(QByteArray btbuff);
+	//开始连接
+	void Singal_BeginConnecting();
 
 private slots:
     void Slot_recvNewData();
     void Slot_SocketError(QAbstractSocket::SocketError error);
 	//连接成功
 	void Slot_ConnectSuccess();
+	//
+	void Slot_Connecting();
 
 private:
     QTcpSocket *m_pTcpScoket;
@@ -58,6 +62,8 @@ private:
     QMutex *m_pMutex;
 	//处理类
 	CApduRecver *m_pApduRecver;
+	//
+	QTimer *m_pConnectingTimer;
 };
 
 #endif // CSOCKETTHREAD_H

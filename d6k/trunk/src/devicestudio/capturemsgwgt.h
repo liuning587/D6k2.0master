@@ -46,6 +46,10 @@ public slots:
 	void Slot_StartCapturing();
 	//点击停止
 	void Slot_StopCapturing();
+	//
+	//双击选中
+	void Slot_DoubleClickChoose(QTreeWidgetItem *pItem, int iIndex);
+
 signals:
 	void Signal_ChoosingInterfaces(QStringList strChoose);
 	void Singal_CloseCapturing();

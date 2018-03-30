@@ -579,7 +579,7 @@ public:
 	{
 		int nMilliSec = MYMAKE16(msL, msH);
 		char buf[128];
-		sprintf(buf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d", year + 2000, month, day, hour, minute, nMilliSec / 1000, nMilliSec % 1000);
+		sprintf(buf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %.3d", year + 2000, month, day, hour, minute, nMilliSec / 1000, nMilliSec % 1000);
 		return buf;
 	}
 	void Initialize(int cyear, int cmonth, int cday, int chour, int cminute, int csecond, int cmillisec)
@@ -1930,7 +1930,7 @@ public:
 
 	};
 
-	enum { MAX_DATA_PER_ASDUDZ_RD = (MAX_ASDU_SIZE - sizeof(ASDU_BASE) - sizeof(INFOADDR3)) / sizeof(ASDUDZ_DATA), };
+	enum { MAX_DATA_PER_ASDUDZ_RD = (MAX_ASDU_SIZE - sizeof(ASDU_BASE) - sizeof(INFOADDR3)) / sizeof(ASDUDZ_DATA)-1, };
 public:
 	int GetAsduDzLength();
 
@@ -2191,7 +2191,9 @@ public:
 	int m_FileSize;
 	//文件名称长度
 	unsigned char m_cFileNameLength;
-
+	//
+	//文件时间
+	QString m_strTimeFile;
 };
 
 //文件属性信息

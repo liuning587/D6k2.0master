@@ -25,6 +25,7 @@ CChooseInterfaceWgt::CChooseInterfaceWgt(QWidget *parent)
 	m_pTreeWgtChoose->setHeaderLabel(tr("Capturing Interfaces"));
 
 	connect(m_pTreeWgtChoose, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(Slot_SelectTreeTopLevelItem(QTreeWidgetItem *, int)));
+	connect(m_pTreeWgtChoose, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(Slot_DoubleClickChoose(QTreeWidgetItem *, int)));
 	connect(m_pBtnStart, SIGNAL(clicked()), this, SLOT(Slot_StartCapturing()));
 	connect(m_pBtnStop, SIGNAL(clicked()), this, SLOT(Slot_StopCapturing()));
 	connect(m_pBtnClose, SIGNAL(clicked()), this, SLOT(close()));
@@ -92,6 +93,13 @@ void CChooseInterfaceWgt::Slot_StopCapturing()
 {
 	emit Singal_CloseCapturing();
 	this->close();
+}
+
+void CChooseInterfaceWgt::Slot_DoubleClickChoose(QTreeWidgetItem *pItem, int iIndex)
+{
+	Q_UNUSED(iIndex);
+	pItem->setCheckState(0,Qt::Checked);
+	Slot_StartCapturing();
 }
 
 CChooseInterfaceWgt::~CChooseInterfaceWgt()
@@ -617,13 +625,13 @@ void CCaptureMsgWgt::InitCapTureWgt()
 	ui.tableWidgetNum->setColumnCount(1);
 	ui.tableWidgetNum->horizontalHeader()->setHidden(true);
 	ui.tableWidgetNum->verticalHeader()->setHidden(true);
-	ui.tableWidgetNum->setColumnWidth(0, 50);
-	ui.tableWidgetNum->setFixedWidth(50);
+	ui.tableWidgetNum->setColumnWidth(0, 80);
+	ui.tableWidgetNum->setFixedWidth(80);
 	ui.tableWidgetNum->setStyleSheet("border-style: solid;gridline-color: rgb(255, 255, 255);");
 	ui.tableWidgetNum->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	ui.tableWidgetNum->setFocusPolicy(Qt::NoFocus);
 
-	ui.tableWidget16Info->setFixedWidth(425);
+	ui.tableWidget16Info->setFixedWidth(680);
 	ui.tableWidget16Info->setColumnCount(17);
 	ui.tableWidget16Info->horizontalHeader()->setHidden(true);
 	ui.tableWidget16Info->verticalHeader()->setHidden(true);
@@ -633,7 +641,7 @@ void CCaptureMsgWgt::InitCapTureWgt()
 
 	for (int i = 0; i < 17; i++)
 	{
-		ui.tableWidget16Info->setColumnWidth(i,25);
+		ui.tableWidget16Info->setColumnWidth(i,40);
 	}
 
 

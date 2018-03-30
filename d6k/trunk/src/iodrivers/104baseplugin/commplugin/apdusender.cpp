@@ -36,9 +36,9 @@ CApduSender::CApduSender(QObject *parent):
 	m_pFileTransfor->setInterval(10);
 	m_nDevIndex = 0;
 	m_pDevTimer = new QTimer(this);
-	m_pDevTimer->setInterval(1000);
+	m_pDevTimer->setInterval(1);
 
-	m_nUpdateFlag = 0;
+	//m_nUpdateFlag = 0;
 
 	connect(m_pDevTimer, SIGNAL(timeout()), this, SLOT(Slot_OnSendMidDevData()));
 }
@@ -645,7 +645,7 @@ void CApduSender::OnSendUpdateRequest(ASDU211_UPDATE & pUpdate)
 
 	if (pAsdu211->m_qds.IV == 1)
 	{
-		m_nUpdateFlag = 0;
+		//m_nUpdateFlag = 0;
 	}
 
 	int nResult = Send_I(buf, sizeof(ASDU211_UPDATE));
@@ -656,7 +656,7 @@ void CApduSender::OnSendUpdateRequest(ASDU211_UPDATE & pUpdate)
 //定值获取
 bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 {
-	m_nCurrentOperFlag = 1;
+	//m_nCurrentOperFlag = 1;
 
 	if (pRequestDz->m_nCommandType == D_FIX_READ)         //定值读取
 	{
@@ -717,6 +717,9 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 	}
 	else if (pRequestDz->m_nCommandType == D_FIX_WRITE)
 	{
+
+		m_nGhFlag = 0;
+
 		m_nDevIndex = 0;
 		m_WriteDevInfo.m_lstData.clear();
 		m_WriteDevInfo = *pRequestDz;
@@ -758,6 +761,7 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 			if (nPagLength + nSetIndex + sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength >= 255)
 			{
 				m_nDevIndex = nNumbers;
+				m_nGhFlag++;
 				Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
 				//memset(buf, 0, 255);
 				nSetIndex = 0;
@@ -832,6 +836,7 @@ bool CApduSender::OnSendDevDataRequest(DEV_BASE *pRequestDz)
 		m_nDevIndex = pRequestDz->m_lstData.count();
 		int nResult = Send_I(buf, nSetIndex + nPagLength  - sizeof(APCI)) ;
 
+		m_nGhFlag++;
 		if (nResult != SEND_OK)
 		{
 			return false;
@@ -887,7 +892,9 @@ bool CApduSender::OnSendIecDataRequest(IEC_BASE *pRequestDz)
 			{
 				//当达到最大数时  发送数据包
 				pAsdudz->SetItemCount(nSetIndex + 1);
-				int nResult = Send_I(buf, sizeof(ASDU_IEC));
+
+				buf[sizeof(APCI) + sizeof(ASDU_IEC)] = 0;
+				int nResult = Send_I(buf, sizeof(ASDU_IEC)+1);
 				if (nResult != SEND_OK)
 				{
 					return false;
@@ -907,7 +914,8 @@ bool CApduSender::OnSendIecDataRequest(IEC_BASE *pRequestDz)
 		if (nSetIndex != pAsdudz->MAX_DATA_PER_ASDUDZ_RD && nSetIndex != 0)
 		{
 			pAsdudz->SetItemCount(nSetIndex);
-			int nResult = Send_I(buf, pAsdudz->GetAsduDzLength());
+			buf[sizeof(APCI) + pAsdudz->GetAsduDzLength()] = 0;
+			int nResult = Send_I(buf, pAsdudz->GetAsduDzLength()+1);
 
 			if (nResult != SEND_OK)
 			{
@@ -1309,17 +1317,30 @@ bool CApduSender::OnSendGetCatalogRequest(const FILE_CATALOG_REQUEST_1 &lbCatalo
 	//
 	m_pComm104Pln->GetRecver()->SetFileInfo(lbCatalog.m_fileInfo);
 
-	int nResult = Send_I(buf, pAsduCatalog->GetAsduLength()+sizeof(FILE_CATALOG_REQUEST_2));
-
-	QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
-	if (nResult != SEND_OK)
+	if (lbCatalog.m_fileInfo.m_cFileAttr == 9)
 	{
-		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("Send Catalog Request Failed").toLocal8Bit().data(), 1);
+		//文件传输不刷新目录
+		m_pComm104Pln->getSender()->OnSendReadFileAction(lbCatalog.m_fileInfo);
+		//m_arrCatalogRespond.removeFirst();
+		//文件下载结束
+		m_pComm104Pln->getSender()->ClearFilepath();
+	}
+	else
+	{
+		int nResult = Send_I(buf, pAsduCatalog->GetAsduLength() + sizeof(FILE_CATALOG_REQUEST_2));
 
-		return false;
+		QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
+		if (nResult != SEND_OK)
+		{
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("Send Catalog Request Failed").toLocal8Bit().data(), 1);
+
+			return false;
+		}
+
+		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("Send Search Catalog Request  Success").toLocal8Bit().data(), 1);
+
 	}
 
-	m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), tr("Send Search Catalog Request  Success").toLocal8Bit().data(), 1);
 
 	return true;
 
@@ -1602,6 +1623,7 @@ void CApduSender::Slot_OnSendMidDevData()
 
 	if (m_nDevIndex == m_WriteDevInfo.m_lstData.count())
 	{
+		//m_nGhFlag = 1;
 		m_pDevTimer->stop();
 		return;
 	}
@@ -1644,10 +1666,11 @@ void CApduSender::Slot_OnSendMidDevData()
 	{
 		if (nPagLength + nSetIndex + sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength >= 255)
 		{
+			m_nGhFlag++;
 			Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
 			//memset(buf, 0, 255);
 			nSetIndex = 0;
-			m_nDevIndex = nNumbers;
+			m_nDevIndex += nNumbers;
 			return;
 		}
 
@@ -1715,6 +1738,7 @@ void CApduSender::Slot_OnSendMidDevData()
 		nSetIndex += sizeof(INFOADDR3) + 2 + pRequestDz->m_lstData.at(i).nLength;
 	}
 
+	m_nGhFlag++;
 	Send_I(buf, nSetIndex + nPagLength - sizeof(APCI));
 	m_nDevIndex = m_WriteDevInfo.m_lstData.count();
 

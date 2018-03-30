@@ -560,20 +560,20 @@ void CApduRecver::OnRecvReadFileRespond(char *pBuff, int nLength)
 
 	if (uNextFlag == 0)
 	{
-		if (m_arrCatalogRespond.isEmpty())
-		{
-			m_pComm104Pln->getSender()->ClearFilepath();
-		}
+		//if (m_arrCatalogRespond.isEmpty())
+		//{
+		m_pComm104Pln->getSender()->ClearFilepath();
+		//}
 		//没有后续文件，开始组装数据
-		QString strAbsFilename = m_pComm104Pln->getSender()->GetFilePath() + "/" + m_arrCatalogRespond.first().m_strFileName;
+		QString strAbsFilename = m_pComm104Pln->getSender()->GetFilePath() + "/" + m_fileAttrInfo.m_strFileName;
 
 
 		emit Signal_RecvFileData(strAbsFilename, m_AbyFileData);
 		
 		
-
+		
 		m_AbyFileData.clear();
-
+		/*
 		m_arrCatalogRespond.removeFirst();
 
 		if (m_arrCatalogRespond.isEmpty())
@@ -584,7 +584,7 @@ void CApduRecver::OnRecvReadFileRespond(char *pBuff, int nLength)
 		{
 			m_pComm104Pln->getSender()->OnSendReadFileAction(m_arrCatalogRespond.first());
 		}
-
+		*/
 		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 
 		QString strlog = tr("File Download Success!");
@@ -648,14 +648,17 @@ void CApduRecver::OnRecvWriteAction(char *pBuff, int nLength)
 	else if (cResultFlag == 1)
 	{
 		strlog = tr("Unknown Error");
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 	}
 	else if (cResultFlag == 2)
 	{
 		strlog = tr("FileName Error");
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 	}
 	else if (cResultFlag == 3)
 	{
 		strlog = tr("Size overflow");
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 	}
 
 	m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
@@ -703,35 +706,36 @@ void CApduRecver::OnRecvUpdateActionAck(char * pBuff, int nLength)
 	QString strlog;
 	QString strDeviceName = m_pComm104Pln->GetFtpModule()->GetDeviceName();
 
-// 	if (pbase->cot.GetCot() == 7)
-// 	{
-// 		//updatflag    升级开始
-// 		if (pbase->m_qds.IV == 1 && m_pComm104Pln->getSender()->GetUpdateFlag() == 0)
-// 		{
-// 			strlog = tr("Update Action Success!");
-// 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
-// 			emit Signal_UpdateConform(pbase->cot.GetCot());
-// 			m_nUpdateFlag = 1;
-// 
-// 		}
-// 		else if (pbase->m_qds.IV == 1 && m_pComm104Pln->getSender()->GetUpdateFlag() == 1)
-// 		{
-// 			strlog = tr("Update  Success!");
-// 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
-// 
-// 		}
-// 		
-// 	}
-// 	else
-// 	{
-// 		if (pbase->cot.GetCot() != 10)
-// 		{
-// 			strlog = tr("Update Action Error,error Code%1").arg(pbase->cot.GetCot());;
-// 			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
-// 
-// 		}
-// 	}
+ 	if (pbase->cot.GetCot() == 7)
+ 	{
+ 		//updatflag    升级开始
+		if (pbase->m_qds.IV == 1 /*&& m_pComm104Pln->getSender()->GetUpdateFlag() == 0*/)
+		{
+			strlog = tr("Update Action Success!");
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+			emit Signal_UpdateConform(pbase->cot.GetCot());
+ 			m_nUpdateFlag = 1;
 
+ 		}
+		else if (pbase->m_qds.IV == 0 /*&& m_pComm104Pln->getSender()->GetUpdateFlag() == 1*/)
+ 		{
+ 			strlog = tr("Update  Success!");
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+ 
+		}
+ 		
+	}
+ 	else
+	{
+ 		if (pbase->cot.GetCot() != 10)
+		{
+ 			strlog = tr("Update Action Error,error Code%1").arg(pbase->cot.GetCot());;
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(strDeviceName.toLocal8Bit().data(), strlog.toLocal8Bit().data(), 1);
+
+ 		}
+ 	}
+
+	/*
 	if (pbase->cot.GetCot() == 7)
 	{
 		//updatflag    升级开始
@@ -773,6 +777,7 @@ void CApduRecver::OnRecvUpdateActionAck(char * pBuff, int nLength)
 
 		}
 	}
+	*/
 }
 
 //收到单点命令确认
@@ -798,6 +803,24 @@ void CApduRecver::OnRecvSetBinarySPAck(char* pBuff, int nLength)
 		if (nRecvAckCot == COT_DEACTCON)
 		{
 			telectrl.m_nCtrlType = TELECTRL_ACK_UNSELECT;
+			int ionFloag = 0;
+
+			if (telectrl.m_fValue>0.99999 && telectrl.m_fValue<1.00001)
+			{
+				//on
+				ionFloag = 0;
+			}
+			else if (telectrl.m_fValue>-0.000001 && telectrl.m_fValue<0.00001)
+			{
+				//on
+				ionFloag = 1;
+			}
+			else
+			{
+				//error
+				ionFloag = -1;
+			}
+			emit Signal_ControlFeedBack(0, telectrl.m_nDataID, ionFloag, QString::number(nRecvAckCot));
 		}
         else if (nRecvAckType == 0 && nRecvAckCot == COT_ACTCON) //执行
 		{
@@ -899,6 +922,26 @@ void CApduRecver::OnRecvSetBinaryDPAck(char* pBuff, int nLength)
 		if (nRecvAckCot == COT_DEACTCON)
 		{
 			telectrl.m_nCtrlType = TELECTRL_ACK_UNSELECT;
+
+			int ionFloag = 0;
+
+			if (telectrl.m_fValue > 0.99999 && telectrl.m_fValue < 1.00001)
+			{
+				//on
+				ionFloag = 0;
+			}
+			else if (telectrl.m_fValue > -0.000001 && telectrl.m_fValue < 0.00001)
+			{
+				//off
+				ionFloag = 1;
+			}
+			else
+			{
+				//error
+				ionFloag = -1;
+			}
+			emit Signal_ControlFeedBack(1, telectrl.m_nDataID, ionFloag, QString::number(nRecvAckCot));
+
 		}
         else if (nRecvAckType == 0 && nRecvAckCot == COT_ACTCON) //执行
 		{
@@ -1019,7 +1062,7 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 
 	int nItemCount = pAsdudz->vsq & 0x7f;
 
-	m_pComm104Pln->getSender()->SetOperatorFlag(0);
+	//m_pComm104Pln->getSender()->SetOperatorFlag(0);
 	
 	for (int i = 0; i < nItemCount; i++)
 	{
@@ -1048,7 +1091,20 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 
 			if (tDevData.nAddress == 32774)
 			{
-				tDevData.strValue = "0x" + QString::number(*puShort,16);
+				QString tStrValue = QString::number(*puShort, 16);
+				if (tStrValue.length() == 1)
+				{
+					tStrValue = "000" + tStrValue;
+				}
+				else if (tStrValue.length() == 2)
+				{
+					tStrValue = "00" + tStrValue;
+				}
+				else if (tStrValue.length() == 3)
+				{
+					tStrValue = "0" + tStrValue;
+				}
+				tDevData.strValue = "0x" + tStrValue;
 			}
 		}
 		else if (tDevData.nTagType == 38)
@@ -1067,6 +1123,7 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 			
 			tDevData.strValue = QString::fromLocal8Bit(pBuff + nPagLength + nSetIndex + sizeof(INFOADDR3) + 2,tDevData.nLength);
 
+			/*
 			if (tDevData.nAddress == 32779 || tDevData.nAddress == 32778)
 			{
 				tDevData.strValue = QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 2],2,16, QLatin1Char('0')).toUpper() + "-"
@@ -1076,6 +1133,7 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 					+ QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 6], 2, 16, QLatin1Char('0')).toUpper() + "-"
 					+ QString("%1").arg((unsigned char)pBuff[nPagLength + nSetIndex + sizeof(INFOADDR3) + 7], 2, 16, QLatin1Char('0')).toUpper();
 			}
+			*/
 
 		}
 		else if (tDevData.nTagType == 1)
@@ -1093,6 +1151,10 @@ void CApduRecver::OnRecvDevReadRequestAck(char* pBuff, int nLength)
 
 	//发送信号 
 	emit Signal_ReadFixData(pDevData);
+
+	QByteArray byDestr = tr("定值读取成功!").toLocal8Bit();
+	m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
+
 }
 
 //参数写入
@@ -1106,10 +1168,11 @@ void CApduRecver::OnRecvDevWriteRequestAck(char *pBuff, int nLength)
 
 	if (nLength == 9)
 	{
+
 		//固化报文
 		ASDU_BASE* pAsdudz = (ASDU_BASE*)pBuff;
 
-		m_pComm104Pln->getSender()->SetOperatorFlag(0);
+		//m_pComm104Pln->getSender()->SetOperatorFlag(0);
 
 		emit Signal_devWriteBack(pAsdudz->type, pAsdudz->cot.GetCot(), 0);
 
@@ -1120,7 +1183,22 @@ void CApduRecver::OnRecvDevWriteRequestAck(char *pBuff, int nLength)
 		ASDU_BASE* pAsdudz = (ASDU_BASE*)pBuff;
 		if (pAsdudz->cot.GetCot() == 7)
 		{
-			m_pComm104Pln->getSender()->OnSendDevWriteConform();
+			m_pComm104Pln->getSender()->SetGhFlag(m_pComm104Pln->getSender()->GetGhFlag()-1);
+
+			if (m_pComm104Pln->getSender()->GetGhFlag() == 0)
+			{
+				//m_pComm104Pln->getSender()->SetGhFlag(0);
+
+				m_pComm104Pln->getSender()->OnSendDevWriteConform();
+			}
+
+		}
+		else
+		{
+			m_pComm104Pln->getSender()->SetGhFlag(0);
+			QByteArray byDestr = tr("定值设置失败,错误码%1!").arg(pAsdudz->cot.GetCot()).toLocal8Bit();
+			m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
+
 		}
 	}
 }
@@ -1136,7 +1214,7 @@ void CApduRecver::OnRecvIecWriteRequestAck(char *pBuff, int nLength)
 	ASDU_BASE* pAsdudz = (ASDU_BASE*)pBuff;
 	if (pAsdudz->cot.GetCot() == 7)
 	{
-		QByteArray byDestr = tr("Write Scuess!").toLocal8Bit();
+		QByteArray byDestr = tr("写入成功!").toLocal8Bit();
 		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
 
 	}
@@ -2056,6 +2134,10 @@ void CApduRecver::OnRecvReadIecData(char* pBuff, int nLength)
 	{
 		emit Signal_DevReadBack(mapPointValue);
 	}
+
+	QByteArray byDestr = tr("读取成功!").toLocal8Bit();
+	m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
+
 }
 
 //带短时标的短浮点数测量值
@@ -2597,6 +2679,9 @@ void CApduRecver::OnRecvFileAnalyseInfo(char *pBuff, int nLength)
 	{
 		// 写入传输确认
 		QByteArray byDestr = tr("Write Success!").toLocal8Bit();
+
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
+
 		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
 
 		if (m_nUpdateFlag == 1)
@@ -2604,7 +2689,7 @@ void CApduRecver::OnRecvFileAnalyseInfo(char *pBuff, int nLength)
 			ASDU211_UPDATE pUpateInfo;
 			pUpateInfo.asduAddr.SetAddr(m_pComm104Pln->GetFtpModule()->GetDeviceAddr());
 			pUpateInfo.m_qds.OV = 0;
-			m_pComm104Pln->getSender()->SetUpdateFlag(1);
+			//m_pComm104Pln->getSender()->SetUpdateFlag(1);
 			m_pComm104Pln->getSender()->OnSendUpdateRequest(pUpateInfo);;
 
 			m_nUpdateFlag = 0;
@@ -2632,7 +2717,7 @@ void CApduRecver::OnRecvCatalogRespond(char *pBuff, int nLength)
 		QByteArray byDestr = tr("Dir Respond Reject").toLocal8Bit();
 		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
 		m_pComm104Pln->getSender()->ClearFilepath();
-		
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 		return;
 	}
 
@@ -2660,6 +2745,8 @@ void CApduRecver::OnRecvCatalogRespond(char *pBuff, int nLength)
 			unsigned char uFileAttr = pBuff[nBagLength + 1 + nFileNameLength + nFileLengths];
 			//文件大小
 			INFOADDR4 *infoSize = (INFOADDR4*)(pBuff + nBagLength + 2 + nFileNameLength + nFileLengths);
+			//时间
+			CP56Time2a *catalogTime = (CP56Time2a *)(pBuff + nBagLength + 2 + nFileNameLength + nFileLengths + sizeof(INFOADDR4));
 
 			nFileLengths += 2 + nFileNameLength + sizeof(INFOADDR4) + 7;
 
@@ -2672,6 +2759,7 @@ void CApduRecver::OnRecvCatalogRespond(char *pBuff, int nLength)
 			tFileAttr.m_strFileName = strFilename;
 			tFileAttr.m_FileSize = nFileSize;
 			tFileAttr.m_cFileAttr = uFileAttr;
+			tFileAttr.m_strTimeFile = catalogTime->Dump();
 
 			m_lstFiles.append(tFileAttr);
 
@@ -2680,10 +2768,10 @@ void CApduRecver::OnRecvCatalogRespond(char *pBuff, int nLength)
 		if (pCatalogRespond->m_uNextFlag == 0)
 		{
 			//开始读取文件 
-			if (m_lstFiles.count() != 0)
-			{
+			//if (m_lstFiles.count() != 0)
+			//{
 				emit Signal_FIleCatalogINfo(m_lstFiles);
-			}
+			//}
 		}
 
 
@@ -2691,6 +2779,7 @@ void CApduRecver::OnRecvCatalogRespond(char *pBuff, int nLength)
 		return;
 	}
 
+	/*
 	//报文长度
 	int nBagLength = pCatalogRespond->GetLength();
 	//现有文件长度
@@ -2751,7 +2840,7 @@ void CApduRecver::OnRecvCatalogRespond(char *pBuff, int nLength)
 		}
 	}
 
-
+	*/
 }
 
 //读文件激活确认
@@ -2770,7 +2859,7 @@ void CApduRecver::OnRecvFileAction(char *pBuff, int nLength)
 		QByteArray byDestr = tr("Action ").toLocal8Bit();
 		m_pComm104Pln->GetFtpModule()->GetMainModule()->LogString(m_pComm104Pln->GetFtpModule()->GetDeviceName().toStdString().c_str(), byDestr.data(), 1);
 		m_pComm104Pln->getSender()->ClearFilepath();
-
+		m_pComm104Pln->getSender()->SetOperatorFlag(0);
 		return;
 	}
 
